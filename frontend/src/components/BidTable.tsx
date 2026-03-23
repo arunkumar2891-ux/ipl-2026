@@ -1,0 +1,227 @@
+import { useEffect, useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { api } from "@/api/api";
+import { aggregateBids } from "@/lib/utils";
+import EmailGate from "@/components/EmailGate";
+import { ArrowUpDown } from "lucide-react";
+
+type SortKey = "Name" | "selectedValue";
+
+const BidTable = () => {
+  const { data: bids = [], isLoading, isError } = useQuery({
+  queryKey: ["bids"],
+  queryFn: api.getBids,
+  staleTime: 0,
+  refetchOnWindowFocus: true
+  });
+  
+  const [userGroups, setUserGroups] = useState<string[]>(
+  JSON.parse(localStorage.getItem("userGroups") || "[]")
+  );
+  console.log(userGroups);
+  //const analytics = useMemo(() => aggregateBids(bids), [bids]);
+  
+  const [sortKey, setSortKey] = useState<SortKey>("Name");
+  const [sortAsc, setSortAsc] = useState(false);
+
+  
+  const filteredBids = useMemo(() => {
+  return bids.filter((b) =>
+    userGroups.includes(b.group)
+  );
+  }, [bids, userGroups]);
+  
+  const sorted = useMemo(() => {
+  return [...filteredBids].sort((a, b) => {
+    const aVal = a[sortKey];
+    const bVal = b[sortKey];
+
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return sortAsc
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+
+    return 0;
+  });
+  }, [filteredBids, sortKey, sortAsc]);
+  
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortAsc(!sortAsc);
+    else {
+      setSortKey(key);
+      setSortAsc(false);
+    }
+  };
+  
+  const groupedByMatch = useMemo(() => {
+  const map: Record<number, any[]> = {};
+
+  sorted.forEach((bid) => {
+    const match = bid.matchNumber ?? bid.MatchNumber;
+
+    if (!map[match]) map[match] = [];
+    map[match].push(bid);
+  });
+
+  return Object.entries(map).map(([matchNumber, data]) => ({
+    matchNumber,
+    data,
+  }));
+  }, [sorted]);
+  
+  const groupedVisible = userGroups.map((group) => ({
+  group,
+  data: sorted.filter((x) => x.group === group),
+  }));
+  
+  const analytics = useMemo(
+  () => aggregateBids(filteredBids),
+  [filteredBids]
+  );
+  console.log("User groups:", userGroups);
+  console.log("Filtered bids:", filteredBids);
+
+  const filteredAnalytics = useMemo(() => {
+  return analytics.filter((a) =>
+    userGroups.includes(a.group)
+  );
+  }, [analytics, userGroups]);
+  
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+      </div>
+    );
+  }
+
+  //if (isError) return <div className="text-center py-20 text-destructive text-sm">{error}</div>;
+  if (isError)
+  return (
+    <div className="text-center py-20 text-destructive text-sm">
+      Fetch Error. Please try again.
+    </div>
+  );
+  
+  if (userGroups.length === 0) {
+		return <EmailGate onGroupDetected={setUserGroups} />;
+  }
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Raw Bid Log */}
+	  {groupedByMatch.map((match) => (
+      <div className="card-surface overflow-hidden">
+        <div className="px-4 py-3 border-b border-border">
+          <h3 className="font-display font-semibold text-sm text-foreground">Match {match.matchNumber} Bids</h3>
+          <p className="text-xs text-muted-foreground mt-1">Individual bid records</p>
+        </div>
+        <div className="overflow-auto max-h-[500px]">
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 backdrop-blur-md bg-card/80">
+              <tr className="border-b border-border">
+  <th className="px-4 py-3 text-left text-xs uppercase text-muted-foreground">
+    S.No
+  </th>
+
+  <th
+    onClick={() => toggleSort("Name")}
+    className="px-4 py-3 text-left text-xs uppercase text-muted-foreground cursor-pointer"
+  >
+    Name <ArrowUpDown className="h-3 w-3" />
+  </th>
+
+  <th className="px-4 py-3 text-left text-xs uppercase text-muted-foreground">
+    Match #
+  </th>
+
+  <th
+    onClick={() => toggleSort("selectedValue")}
+    className="px-4 py-3 text-left text-xs uppercase text-muted-foreground cursor-pointer"
+  >
+    Team Bid <ArrowUpDown className="h-3 w-3" />
+  </th>
+
+  <th className="px-4 py-3 text-left text-xs uppercase text-muted-foreground">
+    Group
+  </th>
+</tr>
+            </thead>
+            <tbody>
+              {filteredBids.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground text-sm">
+                    Hold on to your wickets… loading the magic!
+                  </td>
+                </tr>
+              ) : (
+                match.data.map((bid: any, i: number) => (
+                  <tr key={i} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                    <td className="px-4 py-2 font-mono-data">{i + 1}</td>
+                    <td className="px-4 py-2">{bid.Name ?? bid.name}</td>
+                    <td className="px-4 py-2 font-mono-data">{bid.matchNumber ?? bid.MatchNumber}</td>
+                    <td className="px-4 py-2">{bid.selectedValue ?? bid.TeamBid}</td>
+                    <td className="px-4 py-2 text-muted-foreground">{bid.group ?? bid.Group}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+	  ))}
+      {/* Bid Analytics */}
+      <div className="card-surface overflow-hidden lg:sticky lg:top-6 self-start">
+        <div className="px-4 py-3 border-b border-border">
+          <h3 className="font-display font-semibold text-sm text-foreground">Bid Analytics</h3>
+          <p className="text-xs text-muted-foreground mt-1">Aggregated by group &amp; team</p>
+        </div>
+        <div className="overflow-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                {["Group", "Team", "Count"].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredAnalytics.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="px-4 py-12 text-center text-muted-foreground text-sm">
+                    Hold your horses, captain! Data incoming…
+                  </td>
+                </tr>
+              ) : (
+                filteredAnalytics.map((item, i) => (
+                  <tr key={i} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                    <td className="px-4 py-2">{item.group}</td>
+                    <td className="px-4 py-2">{item.team}</td>
+                    <td className="px-4 py-2 font-mono-data">{item.customMetric}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+	  <div className="text-center mt-6">
+		<button
+		  onClick={() => {
+			localStorage.removeItem("userGroups");
+			setUserGroups([]);
+		  }}
+		  className="text-sm text-muted-foreground underline"
+		>
+		  Change Email
+		</button>
+	</div>
+    </motion.div>
+  );
+};
+
+export default BidTable;
