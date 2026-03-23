@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Target, BarChart3, Calendar } from "lucide-react";
+import { Trophy, Target, BarChart3, Calendar,Settings, Shield } from "lucide-react";
 import MatchCard from "@/components/MatchCard";
 import LeaderboardTable from "@/components/LeaderboardTable";
 import BidTable from "@/components/BidTable";
+import AdminConsole from "@/components/AdminConsole";
 import UpcomingMatches from "@/components/UpcomingMatches";
 import NextMatchCountdown from "@/components/NextMatchCountdown";
 import { matchData, getTodaysMatches } from "@/data/matchData";
@@ -12,6 +13,7 @@ const tabs = [
   { id: "predict", label: "Submit Bid", icon: Target },
   { id: "leaderboard", label: "Leaderboard", icon: Trophy },
   { id: "bids", label: "Bid Details", icon: BarChart3 },
+  { id: "admin", label: "Admin  Details", icon: Shield  }
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -125,6 +127,18 @@ const Index = () => {
             >
               <h2 className="font-display text-lg font-semibold mb-4 text-foreground">IPL Prediction Game - Bidding Details</h2>
               <BidTable />
+            </motion.div>
+          )}
+		  {activeTab === "admin" && (
+            <motion.div
+              key="admin"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2 className="font-display text-lg font-semibold mb-4 text-foreground">IPL Prediction Game - Admin</h2>
+              <AdminConsole />
             </motion.div>
           )}
         </AnimatePresence>
