@@ -6,6 +6,7 @@ import { validateEmail } from "@/lib/utils";
 import OtpInput from "@/components/OtpInput";
 import { useQueryClient } from "@tanstack/react-query";
 import { members } from "@/data/members";
+//import { admins } from "@/data/admins";
 
 type Match = {
   matchnumber: number;
@@ -36,12 +37,19 @@ export default function AdminConsole() {
 	"parthiece08@gmail.com",
 	"isudarsan93@gmail.com"
   ];
+  
+  /*const ADMIN_EMAILS = Array.from(
+	new Map(admins.map((m) => [m.Email, m])).values()
+  );*/
 
   const userEmail = localStorage.getItem("email");
+  /*console.log(`Admin email: ${ADMIN_EMAILS}`);
+  console.log(`Admins: ${admins}`);
+  console.log(`Unique email: ${uniqueMembers}`);*/
   console.log(`local email: ${userEmail}`);
 
   if (!ADMIN_EMAILS.includes(userEmail || "")) {
-    return <div style={{padding:40}}>Access Denied</div>;
+    return <div style={{padding:40}}>403 Access Denied</div>;
   }
 
   useEffect(() => {
@@ -81,7 +89,7 @@ export default function AdminConsole() {
 
 		setProcessing(true);
 
-		const res = await api.generateUnbids(selectedMatch);
+		const res = await api.generateUnbids(selectedMatch, userEmail);
 
 		console.log(res);
 
@@ -154,7 +162,7 @@ export default function AdminConsole() {
 
           <select
             style={styles.dropdown}
-            value={selectedMatch ?? ""}
+            value={selectedMatch ?? "No Matches Today"}
             onChange={(e)=>setSelectedMatch(Number(e.target.value))}
 			className="w-full border rounded-md px-3 py-2 bg-background"
           >
@@ -172,7 +180,7 @@ export default function AdminConsole() {
           <button
             style={styles.button}
             onClick={generateUnbids}
-            disabled={processing}
+            disabled={processing || !selectedMatch}
 			className="p-3 rounded-lg border text-sm font-medium transition-all duration-200"
           >
             Generate
