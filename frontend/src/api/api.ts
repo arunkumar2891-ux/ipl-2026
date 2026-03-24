@@ -49,7 +49,20 @@ export const api = {
 
    return res.json();
  },
+ 
+ checkAdmin: async (userEmail) => {
 
+   const res = await fetch(`${API_URL}/api/admin/checkAdmin?email=${userEmail}`);
+
+   if (!res.ok) {
+     throw new Error("403 - Unauthorized");
+   }
+   
+	console.log("res: ",res);
+	
+   return res.json();
+ },
+	
  generateUnbids: async (matchnumber) => {
 
    const res = await fetch(
