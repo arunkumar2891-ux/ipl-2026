@@ -6,7 +6,6 @@ import { validateEmail } from "@/lib/utils";
 import OtpInput from "@/components/OtpInput";
 import { useQueryClient } from "@tanstack/react-query";
 import { members } from "@/data/members";
-//import { admins } from "@/data/admins";
 
 type Match = {
   matchnumber: number;
@@ -60,29 +59,6 @@ export default function AdminConsole() {
 	//fetchMatches();
 
   }, []);
-
-  
-
-  
-  /*
-  const ADMIN_EMAILS = [
-    "iamarunkumor@gmail.com",
-	"midun.mib@gmail.com",
-	"gopi13karthick@gmail.com",
-	"parthiece08@gmail.com",
-	"isudarsan93@gmail.com"
-  ];
-  console.log(`Admin email: ${ADMIN_EMAILS}`);
-  console.log(`Admins: ${admins}`);
-  console.log(`local email: ${userEmail}`);
-
-  if (!ADMIN_EMAILS.includes(userEmail || "")) {
-    return <div style={{padding:40}}>403 Access Denied</div>;
-  }
-
-  useEffect(() => {
-    fetchMatches();
-  }, []);*/
   
   useEffect(() => {
 
@@ -93,11 +69,11 @@ export default function AdminConsole() {
   }, [isAdmin]);
   
   if (isAdmin === null) {
-	return <div style={{ padding: 40 }}>Checking permissions...</div>;
+	return <div style={{ padding: 40 }}>Verifying Supreme Authority...</div>;
   }
 
   if (!isAdmin) {
-	return <div style={{ padding: 40 }}>403 Access Denied</div>;
+	return <div style={{ padding: 40 }}>403 – You’re not in the playing XI for this console</div>;
   }
   
   const fetchMatches = async () => {
@@ -186,7 +162,7 @@ export default function AdminConsole() {
   };
 
   if (loadingMatches) {
-    return <div style={{padding:40}}>Loading Admin Console...</div>;
+    return <div style={{padding:40}}>Preparing Questionable Admin Decisions...</div>;
   }
 
   if (isAdmin) {
