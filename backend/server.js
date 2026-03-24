@@ -540,6 +540,52 @@ app.get("/api/admin/todayMatches", async (req, res) => {
 	
 });
 
+/* ---------- Admin Validation ---------- */
+
+app.get("/api/admin/checkAdmin", async (req, res) => {
+
+  try {
+
+    const { email } = req.query;
+	
+	console.log("admin email", email);
+	
+    if (!email) {
+      return res.status(400).json({
+        error: "Email is required"
+      });
+    }
+
+    const { data, error } = await supabase
+      .from("admins")
+      .select("id")
+      .eq("email", email)
+      .limit(1);
+	
+	console.log("admin data: ", data);
+	
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: "DB error" });
+    }
+
+    const isAdmin = data.length > 0;
+
+    res.json({
+      isAdmin
+    });
+
+  } catch (err) {
+
+    console.error("Admin check failed:", err);
+
+    res.status(500).json({
+      error: "Internal server error"
+    });
+
+  }
+
+});
 /* ---------- Start server ---------- */
 
 app.listen(PORT, () => {
