@@ -26,10 +26,45 @@ export default function AdminConsole() {
   const [selectedEmail, setSelectedEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [otpValidated, setOtpValidated] = useState(false);
-  const uniqueMembers = Array.from(
-	new Map(members.map((m) => [m.Email, m])).values()
-  );
+  
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  
+  const userEmail = localStorage.getItem("email");
+  
+  useEffect(() => {
 
+	  const checkAdmin = async () => {
+
+	  //const userEmail = localStorage.getItem("email");
+
+	  console.log(`local email: ${userEmail}`);
+
+	  if (!userEmail) {
+		setIsAdmin(false);
+		return;
+	  }
+
+	  try {
+
+		const res = await api.checkAdmin(userEmail);
+	    console.log(`res.isadmin ${res.isAdmin}`);
+		setIsAdmin(res.isAdmin);
+
+	  } catch (err) {
+		console.error("Admin check failed", err);
+		setIsAdmin(false);
+	  }
+	};
+
+	checkAdmin();
+	//fetchMatches();
+
+  }, []);
+
+  
+
+  
+  /*
   const ADMIN_EMAILS = [
     "iamarunkumor@gmail.com",
 	"midun.mib@gmail.com",
@@ -37,15 +72,8 @@ export default function AdminConsole() {
 	"parthiece08@gmail.com",
 	"isudarsan93@gmail.com"
   ];
-  
-  /*const ADMIN_EMAILS = Array.from(
-	new Map(admins.map((m) => [m.Email, m])).values()
-  );*/
-
-  const userEmail = localStorage.getItem("email");
-  /*console.log(`Admin email: ${ADMIN_EMAILS}`);
+  console.log(`Admin email: ${ADMIN_EMAILS}`);
   console.log(`Admins: ${admins}`);
-  console.log(`Unique email: ${uniqueMembers}`);*/
   console.log(`local email: ${userEmail}`);
 
   if (!ADMIN_EMAILS.includes(userEmail || "")) {
@@ -54,7 +82,23 @@ export default function AdminConsole() {
 
   useEffect(() => {
     fetchMatches();
-  }, []);
+  }, []);*/
+  
+  useEffect(() => {
+
+    if (isAdmin) {
+      fetchMatches();
+    }
+
+  }, [isAdmin]);
+  
+  if (isAdmin === null) {
+	return <div style={{ padding: 40 }}>Checking permissions...</div>;
+  }
+
+  if (!isAdmin) {
+	return <div style={{ padding: 40 }}>403 Access Denied</div>;
+  }
   
   const fetchMatches = async () => {
 
@@ -145,6 +189,7 @@ export default function AdminConsole() {
     return <div style={{padding:40}}>Loading Admin Console...</div>;
   }
 
+  if (isAdmin) {
   return (
     
 
@@ -243,6 +288,7 @@ export default function AdminConsole() {
 
     </div>
   );
+  }
 }
 
 const styles = {
