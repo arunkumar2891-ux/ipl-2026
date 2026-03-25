@@ -16,7 +16,7 @@ export const matchData: MatchDataItem[] = [
     "HomeTeam": "Royal Challengers Bengaluru",
     "AwayTeam": "Sunrisers Hyderabad",
     "Location": "Bengaluru"
-  }
+  },
   {
     "MatchNumber": 1,
     "DateUtc": "2026-03-28T14:00:00Z",
