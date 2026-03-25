@@ -139,7 +139,7 @@ const BidTable = () => {
       data
     }))
   }))
-}, [sortedAnalytics])
+}, [sortedAnalytics]);
   
   /*const analyticsByGroup = useMemo(() => {
 	  const map: Record<string, any[]> = {};
