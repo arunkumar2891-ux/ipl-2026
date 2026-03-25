@@ -21,23 +21,17 @@ const BidTable = () => {
   JSON.parse(localStorage.getItem("userGroups") || "[]")
   );*/
   const { groups, isLoggedIn, logout } = useLoggedInUser();
-  //console.log(`${groups} - ${isLoggedIn}`);
+  console.log(`${groups} - ${isLoggedIn}`);
   //const analytics = useMemo(() => aggregateBids(bids), [bids]);
   
   const [sortKey, setSortKey] = useState<SortKey>("Name");
   const [sortAsc, setSortAsc] = useState(false);
 
-  
-  /*const filteredBids = useMemo(() => {
-  return bids.filter((b) =>
-    userGroups.includes(b.group)
-  );
-  }, [bids, userGroups]);*/
   const filteredBids = useMemo(() => {
     return bids.filter((b) => groups.includes(b.group));
   }, [bids, groups]);
   
-  const sorted = useMemo(() => {
+  /*const sorted = useMemo(() => {
   return [...filteredBids].sort((a, b) => {
     const aVal = a[sortKey];
     const bVal = b[sortKey];
@@ -50,7 +44,85 @@ const BidTable = () => {
 
     return 0;
   });
-  }, [filteredBids, sortKey, sortAsc]);
+  }, [filteredBids, sortKey, sortAsc]);*/
+  
+  const analytics = useMemo(
+  () => aggregateBids(filteredBids),
+  [filteredBids]
+  );
+  //console.log("User groups:", userGroups);
+  console.log("Filtered bids:", filteredBids);
+
+  const filteredAnalytics = useMemo(() => {
+  return analytics.filter((a) =>
+    groups.includes(a.group)
+  );
+  }, [analytics, groups]);
+  
+  
+  const sorted = useMemo(() => {
+	  return [...filteredBids].sort((a, b) => {
+
+		// 1️⃣ Group
+		const groupCompare = (a.group ?? "").localeCompare(b.group ?? "");
+		if (groupCompare !== 0) return groupCompare;
+
+		// 2️⃣ Name
+		const nameCompare = (a.Name ?? a.name ?? "")
+		  .localeCompare(b.Name ?? b.name ?? "");
+		if (nameCompare !== 0) return nameCompare;
+
+		// 3️⃣ Team
+		return (a.selectedValue ?? "")
+		  .localeCompare(b.selectedValue ?? "");
+
+	  });
+  }, [filteredBids]);
+  
+  const groupedByGroup = useMemo(() => {
+	  const map: Record<string, any[]> = {};
+
+	  sorted.forEach((bid) => {
+		const g = bid.group ?? "Unknown";
+
+		if (!map[g]) map[g] = [];
+		map[g].push(bid);
+	  });
+
+	  return Object.entries(map).map(([group, data]) => ({
+		group,
+		data
+	  }));
+  }, [sorted]);
+  
+  const sortedAnalytics = useMemo(() => {
+	  return [...filteredAnalytics].sort((a, b) => {
+
+		// 1️⃣ Group
+		const groupCompare = (a.group ?? "").localeCompare(b.group ?? "");
+		if (groupCompare !== 0) return groupCompare;
+
+		// 2️⃣ Team
+		return (a.team ?? "").localeCompare(b.team ?? "");
+
+	  });
+  }, [filteredAnalytics]);
+  
+  const analyticsByGroup = useMemo(() => {
+	  const map: Record<string, any[]> = {};
+
+	  sortedAnalytics.forEach((row) => {
+		const g = row.group ?? "Unknown";
+
+		if (!map[g]) map[g] = [];
+		map[g].push(row);
+	  });
+
+	  return Object.entries(map).map(([group, data]) => ({
+		group,
+		data
+	  }));
+  }, [sortedAnalytics]);
   
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortAsc(!sortAsc);
@@ -80,20 +152,6 @@ const BidTable = () => {
   group,
   data: sorted.filter((x) => x.group === group),
   }));*/
-  
-  const analytics = useMemo(
-  () => aggregateBids(filteredBids),
-  [filteredBids]
-  );
-  //console.log("User groups:", userGroups);
-  //console.log("Filtered bids:", filteredBids);
-
-  const filteredAnalytics = useMemo(() => {
-  return analytics.filter((a) =>
-    groups.includes(a.group)
-  );
-  }, [analytics, groups]);
-  
 
   if (isLoading) {
     return (
@@ -117,10 +175,10 @@ const BidTable = () => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Raw Bid Log */}
-	  {groupedByMatch.map((match) => (
+	  {groupedByGroup.map((groupBlock) => (
       <div className="card-surface overflow-hidden">
         <div className="px-4 py-3 border-b border-border">
-          <h3 className="font-display font-semibold text-sm text-foreground">Match {match.matchNumber} Bids</h3>
+          <h3 className="font-display font-semibold text-sm text-foreground">Match {groupBlock.matchNumber} Bids</h3>
           <p className="text-xs text-muted-foreground mt-1">Individual bid records</p>
         </div>
         <div className="overflow-auto max-h-[500px]">
@@ -149,7 +207,8 @@ const BidTable = () => {
     Team Bid <ArrowUpDown className="h-3 w-3" />
   </th>
 
-  <th className="px-4 py-3 text-left text-xs uppercase text-muted-foreground">
+  <th
+	className="px-4 py-3 text-left text-xs uppercase text-muted-foreground cursor-pointer">
     Group
   </th>
 </tr>
@@ -162,7 +221,7 @@ const BidTable = () => {
                   </td>
                 </tr>
               ) : (
-                match.data.map((bid: any, i: number) => (
+                groupBlock.data.map((bid: any, i: number) => (
                   <tr key={i} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
                     <td className="px-4 py-2 font-mono-data">{i + 1}</td>
                     <td className="px-4 py-2">{bid.Name ?? bid.name}</td>
@@ -195,14 +254,14 @@ const BidTable = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredAnalytics.length === 0 ? (
+              {sortedAnalytics.length === 0 ? (
                 <tr>
                   <td colSpan={3} className="px-4 py-12 text-center text-muted-foreground text-sm">
-                    Hold your horses, captain! Data incoming…
+                    Hold your horses, captain! Data incoming after the cutoff time…
                   </td>
                 </tr>
               ) : (
-                filteredAnalytics.map((item, i) => (
+                sortedAnalytics.map((item, i) => (
                   <tr key={i} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
                     <td className="px-4 py-2">{item.group}</td>
                     <td className="px-4 py-2">{item.team}</td>
