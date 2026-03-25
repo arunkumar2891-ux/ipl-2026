@@ -10,6 +10,14 @@ export interface MatchDataItem {
 
 export const matchData: MatchDataItem[] = [
   {
+    "MatchNumber": 0,
+    "DateUtc": "2026-03-25T14:00:00Z",
+    "RoundNumber": 1,
+    "HomeTeam": "Royal Challengers Bengaluru",
+    "AwayTeam": "Sunrisers Hyderabad",
+    "Location": "Bengaluru"
+  }
+  {
     "MatchNumber": 1,
     "DateUtc": "2026-03-28T14:00:00Z",
     "RoundNumber": 1,
