@@ -6,6 +6,7 @@ import EmailGate from "@/components/EmailGate";
 import { Input } from "@/components/ui/input";
 import { ArrowUpDown } from "lucide-react";
 import { members } from "@/data/members";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 
 interface LeaderEntry {
   name: string;
@@ -45,7 +46,7 @@ const LeaderboardTable = () => {
   );
   console.log(`userGroups ${userGroups}`);*/
   
-  const [userGroups, setUserGroups] = useState<string[]>(() => {
+  /*const [userGroups, setUserGroups] = useState<string[]>(() => {
 	  const email = localStorage.getItem("email");
 	  console.log(`local email: ${email}`);
 	  if (!email) return [];
@@ -55,7 +56,8 @@ const LeaderboardTable = () => {
 		.map((m) => m.Group);
 
 	  return [...new Set(groups)];
-  });
+  });*/
+  const { groups, isLoggedIn, logout } = useLoggedInUser();
   
   const sorted = useMemo(() => {
     return [...data].sort((a, b) => {
@@ -80,9 +82,13 @@ const LeaderboardTable = () => {
     }
   };
 
-  const groupedVisible = userGroups.map((group) => ({
+  /*const groupedVisible = userGroups.map((group) => ({
   group,
   data: sorted.filter((x) => x.group === group),
+  }));*/
+  const groupedVisible = groups.map((group) => ({
+    group,
+    data: sorted.filter((x) => x.group === group),
   }));
 
   if (isLoading) return <LoadingSpinner />;
