@@ -78,8 +78,8 @@ export const members = [
 		"Amount": 20
 	},
 	{
-		"Email": "prabhud465@gmail.com",
-		"Name": "Prabhu",
+		"Email": "er.mugilan@gmail.com",
+		"Name": "Mugilan",
 		"Group": "G1",
 		"Amount": 20
 	},
@@ -180,9 +180,9 @@ export const members = [
 		"Amount": 20
 	},
 	{
-		"Email": "prash.cts@gmail.com",
-		"Name": "Prashanth",
-		"Group": "G2",
+		"Email": "arunps23@gmail.com",
+		"Name": "Arun P",
+		"Group": "G1",
 		"Amount": 20
 	},
 	{
