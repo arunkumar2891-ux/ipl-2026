@@ -5,6 +5,7 @@ import { api } from "@/api/api";
 import { aggregateBids } from "@/lib/utils";
 import EmailGate from "@/components/EmailGate";
 import { ArrowUpDown } from "lucide-react";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 
 type SortKey = "Name" | "selectedValue";
 
@@ -16,21 +17,25 @@ const BidTable = () => {
   refetchOnWindowFocus: true
   });
   
-  const [userGroups, setUserGroups] = useState<string[]>(
+  /*const [userGroups, setUserGroups] = useState<string[]>(
   JSON.parse(localStorage.getItem("userGroups") || "[]")
-  );
-  console.log(userGroups);
+  );*/
+  const { groups, isLoggedIn, logout } = useLoggedInUser();
+  console.log(`${groups} - ${isLoggedIn}`);
   //const analytics = useMemo(() => aggregateBids(bids), [bids]);
   
   const [sortKey, setSortKey] = useState<SortKey>("Name");
   const [sortAsc, setSortAsc] = useState(false);
 
   
-  const filteredBids = useMemo(() => {
+  /*const filteredBids = useMemo(() => {
   return bids.filter((b) =>
     userGroups.includes(b.group)
   );
-  }, [bids, userGroups]);
+  }, [bids, userGroups]);*/
+  const filteredBids = useMemo(() => {
+    return bids.filter((b) => groups.includes(b.group));
+  }, [bids, groups]);
   
   const sorted = useMemo(() => {
   return [...filteredBids].sort((a, b) => {
@@ -71,23 +76,23 @@ const BidTable = () => {
   }));
   }, [sorted]);
   
-  const groupedVisible = userGroups.map((group) => ({
+  /*const groupedVisible = userGroups.map((group) => ({
   group,
   data: sorted.filter((x) => x.group === group),
-  }));
+  }));*/
   
   const analytics = useMemo(
   () => aggregateBids(filteredBids),
   [filteredBids]
   );
-  console.log("User groups:", userGroups);
+  //console.log("User groups:", userGroups);
   console.log("Filtered bids:", filteredBids);
 
   const filteredAnalytics = useMemo(() => {
   return analytics.filter((a) =>
-    userGroups.includes(a.group)
+    groups.includes(a.group)
   );
-  }, [analytics, userGroups]);
+  }, [analytics, groups]);
   
 
   if (isLoading) {
@@ -106,9 +111,9 @@ const BidTable = () => {
     </div>
   );
   
-  if (userGroups.length === 0) {
+  /*if (userGroups.length === 0) {
 		return <EmailGate onGroupDetected={setUserGroups} />;
-  }
+  }*/
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Raw Bid Log */}
@@ -209,17 +214,7 @@ const BidTable = () => {
           </table>
         </div>
       </div>
-	  <div className="text-center mt-6">
-		<button
-		  onClick={() => {
-			localStorage.removeItem("userGroups");
-			setUserGroups([]);
-		  }}
-		  className="text-sm text-muted-foreground underline"
-		>
-		  Change Email
-		</button>
-	</div>
+	  
     </motion.div>
   );
 };
