@@ -30,6 +30,10 @@ export default function AdminConsole() {
   
   const userEmail = localStorage.getItem("email");
   
+  const uniqueMembers = Array.from(
+	new Map(members.map((m) => [m.Email, m])).values()
+  );
+  
   useEffect(() => {
 
 	  const checkAdmin = async () => {
@@ -259,9 +263,29 @@ export default function AdminConsole() {
 
           </div>
         ))}
-
       </section>
+	  {/* Change Active emails */}
 
+      <section style={styles.section}>
+
+        <h3>Change Active Email</h3>
+	 <select
+  value={selectedEmail}
+  onChange={(e) => {
+    const tempEmail = e.target.value;
+    localStorage.setItem("email", tempEmail);
+    setSelectedEmail(tempEmail);
+  }}
+  className="w-full border rounded-md px-3 py-2 bg-background"
+>
+  <option value="">Select your name</option>
+  {uniqueMembers.map((member) => (
+    <option key={`${member.Email}-${member.Group}`} value={member.Email}>
+      {member.Name}
+    </option>
+  ))}
+</select>
+</section>
     </div>
   );
   }
