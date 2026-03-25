@@ -10,7 +10,10 @@ import { getMemberDetails } from "./src/utils/memberUtils.js";
 const PORT = process.env.PORT || 3001;
 
 const app = express();
-app.use(cors());
+//app.use(cors());
+app.use(cors({
+  origin: ["https://ipl-2026-wx6e.onrender.com"]
+}));
 app.use(express.json());
 
 /*const SNAP_BASE = "https://prod-paloaltonetworks-dev-cloud-fm.snaplogic.io/api/1/rest/feed-master/queue/PaloAltoNetworks-Dev/projects/Arunkumar%20J%20S";
