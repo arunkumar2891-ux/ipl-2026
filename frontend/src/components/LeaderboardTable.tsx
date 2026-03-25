@@ -5,6 +5,7 @@ import { api } from "@/api/api";
 import EmailGate from "@/components/EmailGate";
 import { Input } from "@/components/ui/input";
 import { ArrowUpDown } from "lucide-react";
+import { members } from "@/data/members";
 
 interface LeaderEntry {
   name: string;
@@ -39,10 +40,23 @@ const LeaderboardTable = () => {
   const [sortKey, setSortKey] = useState<SortKey>("amount");
   const [sortAsc, setSortAsc] = useState(false);
 
-  const [userGroups, setUserGroups] = useState<string[]>(
+  /*const [userGroups, setUserGroups] = useState<string[]>(
   JSON.parse(localStorage.getItem("userGroups") || "[]")
   );
+  console.log(`userGroups ${userGroups}`);*/
+  
+  const [userGroups, setUserGroups] = useState<string[]>(() => {
+	  const email = localStorage.getItem("email");
+	  console.log(`local email: ${email}`);
+	  if (!email) return [];
 
+	  const groups = members
+		.filter((m) => m.Email.toLowerCase() === email.toLowerCase())
+		.map((m) => m.Group);
+
+	  return [...new Set(groups)];
+  });
+  
   const sorted = useMemo(() => {
     return [...data].sort((a, b) => {
       const aVal = a[sortKey];
@@ -77,9 +91,9 @@ if (isError) return <div className="text-center py-20 text-destructive text-sm">
   /*if (!userGroups) {
     return <EmailGate onGroupDetected={setUserGroups} />
   }*/
-  if (userGroups.length === 0) {
+  /*if (userGroups.length === 0) {
 		return <EmailGate onGroupDetected={setUserGroups} />;
-  }
+  }*/
 	/*useEffect(() => {
 	  const storedGroups = localStorage.getItem("userGroups");
 
@@ -100,15 +114,7 @@ if (isError) return <div className="text-center py-20 text-destructive text-sm">
   ))}
 
   <div className="text-center mt-6">
-    <button
-      onClick={() => {
-        localStorage.removeItem("userGroups");
-        setUserGroups([]);
-      }}
-      className="text-sm text-muted-foreground underline"
-    >
-      Change Email
-    </button>
+    <p>The leaderboard will be visible once you submit your first bid</p>
   </div>
 </motion.div>
   );
