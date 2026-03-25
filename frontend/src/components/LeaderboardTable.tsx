@@ -92,6 +92,11 @@ const LeaderboardTable = () => {
   }));
 
   if (isLoading) return <LoadingSpinner />;
+  if(!groups) return (
+  <div className="text-center mt-6">
+    <p>The leaderboard will be visible once you submit your first bid</p>
+  </div>
+  )
 if (isError) return <div className="text-center py-20 text-destructive text-sm">Leaderboard Fetch Error. Please try again.</div>;
 
   /*if (!userGroups) {
@@ -118,10 +123,6 @@ if (isError) return <div className="text-center py-20 text-destructive text-sm">
       toggleSort={toggleSort}
     />
   ))}
-
-  <div className="text-center mt-6">
-    <p>The leaderboard will be visible once you submit your first bid</p>
-  </div>
 </motion.div>
   );
 };
