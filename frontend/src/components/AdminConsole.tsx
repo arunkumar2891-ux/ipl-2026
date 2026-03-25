@@ -40,7 +40,7 @@ export default function AdminConsole() {
 
 	  //const userEmail = localStorage.getItem("email");
 
-	  console.log(`local email: ${userEmail}`);
+	  //console.log(`local email: ${userEmail}`);
 
 	  if (!userEmail) {
 		setIsAdmin(false);
@@ -50,7 +50,7 @@ export default function AdminConsole() {
 	  try {
 
 		const res = await api.checkAdmin(userEmail);
-	    console.log(`res.isadmin ${res.isAdmin}`);
+	    //console.log(`res.isadmin ${res.isAdmin}`);
 		setIsAdmin(res.isAdmin);
 
 	  } catch (err) {
