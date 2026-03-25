@@ -119,15 +119,15 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled, matchStart }: P
 
 	  const selectedName = teamMember?.Name || "Player";
 	  
-	  console.log("Name", selectedName);
+	  /*console.log("Name", selectedName);
 	  console.log("email", selectedEmail);
 	  console.log("userGroups", userGroups);
 	  console.log("email", selectedEmail);
 	  console.log("matchId", matchId);
-	  console.log("selectedTeam", selectedTeam);
+	  console.log("selectedTeam", selectedTeam);*/
 	const result = await Promise.all(
 	  userGroups.map((group) => {
-		console.log("Submitting prediction for group:", group);
+		//console.log("Submitting prediction for group:", group);
 
 		return api.submitPrediction({
 		  email: selectedEmail.toLowerCase(),
