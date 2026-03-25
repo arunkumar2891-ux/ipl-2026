@@ -27,7 +27,7 @@ export const matchData: MatchDataItem[] = [
   },
   {
     "MatchNumber": 2,
-    "DateUtc": "2026-03-25T14:00:00Z",
+    "DateUtc": "2026-03-29T14:00:00Z",
     "RoundNumber": 1,
     "HomeTeam": "Mumbai Indians",
     "AwayTeam": "Kolkata Knight Riders",
