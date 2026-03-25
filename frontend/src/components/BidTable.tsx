@@ -21,7 +21,7 @@ const BidTable = () => {
   JSON.parse(localStorage.getItem("userGroups") || "[]")
   );*/
   const { groups, isLoggedIn, logout } = useLoggedInUser();
-  console.log(`${groups} - ${isLoggedIn}`);
+  //console.log(`${groups} - ${isLoggedIn}`);
   //const analytics = useMemo(() => aggregateBids(bids), [bids]);
   
   const [sortKey, setSortKey] = useState<SortKey>("Name");
@@ -86,7 +86,7 @@ const BidTable = () => {
   [filteredBids]
   );
   //console.log("User groups:", userGroups);
-  console.log("Filtered bids:", filteredBids);
+  //console.log("Filtered bids:", filteredBids);
 
   const filteredAnalytics = useMemo(() => {
   return analytics.filter((a) =>
