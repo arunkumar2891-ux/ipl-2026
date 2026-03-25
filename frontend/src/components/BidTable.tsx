@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { api } from "@/api/api";
-import { aggregateBids } from "@/lib/utils";
+//import { aggregateBids } from "@/lib/utils";
+import { aggregateBidsByMatch } from "@/lib/utils";
 import EmailGate from "@/components/EmailGate";
 import { ArrowUpDown } from "lucide-react";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
@@ -47,7 +48,7 @@ const BidTable = () => {
   }, [filteredBids, sortKey, sortAsc]);*/
   
   const analytics = useMemo(
-  () => aggregateBids(filteredBids),
+  () => aggregateBidsByMatch(filteredBids),
   [filteredBids]
   );
   //console.log("User groups:", userGroups);
@@ -79,23 +80,29 @@ const BidTable = () => {
 	  });
   }, [filteredBids]);
   
-  const groupedByGroup = useMemo(() => {
-	  const map: Record<string, any[]> = {};
+  const groupedByMatchGroup = useMemo(() => {
+  const map: Record<number, Record<string, any[]>> = {};
 
-	  sorted.forEach((bid) => {
-		const g = bid.group ?? "Unknown";
+  sorted.forEach((bid) => {
+    const match = bid.matchNumber ?? bid.MatchNumber;
+    const group = bid.group ?? "Unknown";
 
-		if (!map[g]) map[g] = [];
-		map[g].push(bid);
-	  });
+    if (!map[match]) map[match] = {};
+    if (!map[match][group]) map[match][group] = [];
 
-	  return Object.entries(map).map(([group, data]) => ({
-		group,
-		data
-	  }));
-  }, [sorted]);
+    map[match][group].push(bid);
+  });
+
+  return Object.entries(map).map(([matchNumber, groups]) => ({
+    matchNumber,
+    groups: Object.entries(groups).map(([group, data]) => ({
+      group,
+      data
+    }))
+  }));
+}, [sorted]);
   
-  const sortedAnalytics = useMemo(() => {
+  /*const sortedAnalytics = useMemo(() => {
 	  return [...filteredAnalytics].sort((a, b) => {
 
 		// 1️⃣ Group
@@ -106,9 +113,36 @@ const BidTable = () => {
 		return (a.team ?? "").localeCompare(b.team ?? "");
 
 	  });
-  }, [filteredAnalytics]);
+  }, [filteredAnalytics]);*/
+  const sortedAnalytics = useMemo(() => {
+  return [...analytics].sort(
+    (a, b) =>
+      a.matchNumber - b.matchNumber ||
+      a.group.localeCompare(b.group) ||
+      a.team.localeCompare(b.team)
+  )
+}, [analytics]);
   
-  const analyticsByGroup = useMemo(() => {
+  const analyticsByMatchGroup = useMemo(() => {
+  const map: Record<number, Record<string, any[]>> = {}
+
+  sortedAnalytics.forEach(row => {
+    if (!map[row.matchNumber]) map[row.matchNumber] = {}
+    if (!map[row.matchNumber][row.group]) map[row.matchNumber][row.group] = []
+
+    map[row.matchNumber][row.group].push(row)
+  })
+
+  return Object.entries(map).map(([matchNumber, groups]) => ({
+    matchNumber,
+    groups: Object.entries(groups).map(([group, data]) => ({
+      group,
+      data
+    }))
+  }))
+}, [sortedAnalytics])
+  
+  /*const analyticsByGroup = useMemo(() => {
 	  const map: Record<string, any[]> = {};
 
 	  sortedAnalytics.forEach((row) => {
@@ -130,7 +164,7 @@ const BidTable = () => {
       setSortKey(key);
       setSortAsc(false);
     }
-  };
+  };*/
   
   const groupedByMatch = useMemo(() => {
   const map: Record<number, any[]> = {};
@@ -175,104 +209,83 @@ const BidTable = () => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Raw Bid Log */}
-	  {groupedByGroup.map((groupBlock) => (
-      <div className="card-surface overflow-hidden">
-        <div className="px-4 py-3 border-b border-border">
-          <h3 className="font-display font-semibold text-sm text-foreground">Match {groupBlock.matchNumber} Bids</h3>
-          <p className="text-xs text-muted-foreground mt-1">Individual bid records</p>
-        </div>
-        <div className="overflow-auto max-h-[500px]">
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 backdrop-blur-md bg-card/80">
-              <tr className="border-b border-border">
-  <th className="px-4 py-3 text-left text-xs uppercase text-muted-foreground">
-    S.No
-  </th>
-
-  <th
-    onClick={() => toggleSort("Name")}
-    className="px-4 py-3 text-left text-xs uppercase text-muted-foreground cursor-pointer"
-  >
-    Name <ArrowUpDown className="h-3 w-3" />
-  </th>
-
-  <th className="px-4 py-3 text-left text-xs uppercase text-muted-foreground">
-    Match #
-  </th>
-
-  <th
-    onClick={() => toggleSort("selectedValue")}
-    className="px-4 py-3 text-left text-xs uppercase text-muted-foreground cursor-pointer"
-  >
-    Team Bid <ArrowUpDown className="h-3 w-3" />
-  </th>
-
-  <th
-	className="px-4 py-3 text-left text-xs uppercase text-muted-foreground cursor-pointer">
-    Group
-  </th>
-</tr>
-            </thead>
-            <tbody>
-              {filteredBids.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground text-sm">
-                    Hold on to your wickets… loading the magic!
-                  </td>
-                </tr>
-              ) : (
-                groupBlock.data.map((bid: any, i: number) => (
-                  <tr key={i} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                    <td className="px-4 py-2 font-mono-data">{i + 1}</td>
-                    <td className="px-4 py-2">{bid.Name ?? bid.name}</td>
-                    <td className="px-4 py-2 font-mono-data">{bid.matchNumber ?? bid.MatchNumber}</td>
-                    <td className="px-4 py-2">{bid.selectedValue ?? bid.TeamBid}</td>
-                    <td className="px-4 py-2 text-muted-foreground">{bid.group ?? bid.Group}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+	  {groupedByMatchGroup.map((matchBlock) =>
+  matchBlock.groups.map((groupBlock) => (
+    <div
+      key={`${matchBlock.matchNumber}-${groupBlock.group}`}
+      className="card-surface overflow-hidden"
+    >
+      <div className="px-4 py-3 border-b border-border">
+        <h3 className="font-display font-semibold text-sm text-foreground">
+          Match {matchBlock.matchNumber} - {groupBlock.group}
+        </h3>
+        <p className="text-xs text-muted-foreground mt-1">
+          Individual bid records
+        </p>
       </div>
-	  ))}
-      {/* Bid Analytics */}
-      <div className="card-surface overflow-hidden lg:sticky lg:top-6 self-start">
-        <div className="px-4 py-3 border-b border-border">
-          <h3 className="font-display font-semibold text-sm text-foreground">Bid Analytics</h3>
-          <p className="text-xs text-muted-foreground mt-1">Aggregated by group &amp; team</p>
-        </div>
-        <div className="overflow-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                {["Group", "Team", "Count"].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {h}
-                  </th>
-                ))}
+
+      <div className="overflow-auto max-h-[500px]">
+        <table className="w-full text-sm">
+          <thead className="sticky top-0 backdrop-blur-md bg-card/80">
+            <tr className="border-b border-border">
+              <th className="px-4 py-3 text-xs uppercase">S.No</th>
+              <th className="px-4 py-3 text-xs uppercase">Name</th>
+              <th className="px-4 py-3 text-xs uppercase">Match #</th>
+              <th className="px-4 py-3 text-xs uppercase">Team Bid</th>
+              <th className="px-4 py-3 text-xs uppercase">Group</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {groupBlock.data.map((bid: any, i: number) => (
+              <tr key={`${bid.Name}-${bid.matchNumber}-${i}`}>
+                <td className="px-4 py-2">{i + 1}</td>
+                <td className="px-4 py-2">{bid.Name ?? bid.name}</td>
+                <td className="px-4 py-2">{bid.matchNumber}</td>
+                <td className="px-4 py-2">{bid.selectedValue}</td>
+                <td className="px-4 py-2">{bid.group}</td>
               </tr>
-            </thead>
-            <tbody>
-              {sortedAnalytics.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="px-4 py-12 text-center text-muted-foreground text-sm">
-                    Hold your horses, captain! Data incoming after the cutoff time…
-                  </td>
-                </tr>
-              ) : (
-                sortedAnalytics.map((item, i) => (
-                  <tr key={i} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                    <td className="px-4 py-2">{item.group}</td>
-                    <td className="px-4 py-2">{item.team}</td>
-                    <td className="px-4 py-2 font-mono-data">{item.customMetric}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
+    </div>
+  ))
+)}
+
+{/* Bid Analytics */}
+{analyticsByMatchGroup.map(matchBlock =>
+  matchBlock.groups.map(groupBlock => (
+    <div
+      key={`analytics-${matchBlock.matchNumber}-${groupBlock.group}`}
+      className="card-surface overflow-hidden"
+    >
+      <div className="px-4 py-3 border-b border-border">
+        <h3 className="font-display font-semibold text-sm text-foreground">
+          Match {matchBlock.matchNumber} - {groupBlock.group} Analytics
+        </h3>
+      </div>
+
+      <table className="w-full text-sm">
+        <thead>
+          <tr>
+            <th className="px-4 py-3 text-xs uppercase">Team</th>
+            <th className="px-4 py-3 text-xs uppercase">Custom Metric</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {groupBlock.data.map((item, i) => (
+            <tr key={`${item.matchNumber}-${item.group}-${item.team}`}>
+              <td className="px-4 py-2">{item.team}</td>
+              <td className="px-4 py-2 font-mono-data">{item.customMetric}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ))
+)}
 	  
     </motion.div>
   );
