@@ -29,9 +29,12 @@ export default defineConfig(() => ({
   optimizeDeps: {
     include: ["react", "react-dom", "@tanstack/react-query"],
   },
-
   build: {
+    sourcemap: false,
+    minify: "esbuild",
+  },
+  /*build: {
     sourcemap: true,
     minify: false,
-  },
+  },*/
 }));
