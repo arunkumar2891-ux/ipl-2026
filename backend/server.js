@@ -16,30 +16,6 @@ app.use(cors({
 }));
 app.use(express.json());
 
-/*const SNAP_BASE = "https://prod-paloaltonetworks-dev-cloud-fm.snaplogic.io/api/1/rest/feed-master/queue/PaloAltoNetworks-Dev/projects/Arunkumar%20J%20S";
-
-async function callSnap(url, method = "GET", body = null) {
-  const options = {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "*//*"
-    }
-  };
-
-  if (body) {
-    options.body = JSON.stringify(body);
-  }
-
-  const response = await fetch(url, options);
-
-  if (!response.ok) {
-    throw new Error("API failed");
-  }
-
-  return response.json();
-}*/
-
 /* ---------- Prediction DB ---------- */
 
 app.post("/api/prediction", async (req, res) => {
@@ -48,10 +24,7 @@ app.post("/api/prediction", async (req, res) => {
     const email = req.body.email.trim().toLowerCase();
     const { matchNumber, selectedTeam, name, matchStartUtc, group } = req.body;
 	console.log("Request body:", req.body);
-	const tripleUsers = [
-	  "vinay.baskie@gmail.com",
-	  "kishorezum07@gmail.com"
-	];
+
     if (!matchStartUtc) {
       return res.status(400).json({ error: "Match start time missing" });
     }
@@ -80,10 +53,8 @@ app.post("/api/prediction", async (req, res) => {
     }
 
     // 2️.Calculate bid
-    const bid = tripleUsers.includes(email)
-      ? member.amount * 3
-      : member.amount;
-	
+	  
+	const bid = member.amount;
     // 3️.Insert prediction
     const { error: insertError } = await supabase
       .from("prediction")
@@ -112,83 +83,6 @@ app.post("/api/prediction", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-/* ---------- Prediction Only SL---------- */
-/*app.post("/api/prediction", async (req, res) => {
-  try {
-    const url = `${SNAP_BASE}/GetDataTask?bearer_token=${encodeURIComponent(process.env.SNAP_PREDICTION_TOKEN)}`;
-    const data = await callSnap(url, "POST", req.body);
-    res.json(data.response);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});*/
-
-/* ---------- Prediction SL and DB ---------- */
-/*app.post("/api/prediction", async (req, res) => {
-  try {
-
-    const { email, matchNumber, selectedValue, matchStartUtc } = req.body;
-	const { bgroup, bid } = getMemberDetails(email);
-	const tripleUsers = [
-	  "vinay.baskie@gmail.com",
-	  "kishorezum07@gmail.com"
-	];
-    if (!matchStartUtc) {
-      return res.status(400).json({ error: "Match start time missing" });
-    }
-
-    const startTime = new Date(matchStartUtc);
-    const cutoff = new Date(startTime.getTime() - (15 * 60 * 1000));
-    const now = new Date();
-
-    if (now > cutoff) {
-      return res.status(403).json({
-        error: "Predictions closed 15 minutes before match start"
-      });
-    }
-	
-	// 1️. Insert prediction into Supabase
-    const { error } = await supabase
-      .from("predictions")
-      .insert([
-        {
-          email: email.toLowerCase(),
-          matchnumber: matchNumber,
-          selectedvalue: selectedWinner,
-          bgroup: bgroup,
-          bid: bid
-        }
-      ]);
-
-    if (error) {
-      console.error(error);
-      return res.status(500).json({ error: "DB insert failed" });
-    }
-	
-	// 2️. Existing SnapLogic call (unchanged)
-    const url = `${SNAP_BASE}/GetDataTask?bearer_token=${encodeURIComponent(process.env.SNAP_PREDICTION_TOKEN)}`;
-
-    const data = await callSnap(url, "POST", req.body);
-
-    res.json(data.response);
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});*/
-
-/* ---------- Leaderboard SL---------- */
-/*
-app.get("/api/leaderboard", async (req, res) => {
-  try {
-    const url = `${SNAP_BASE}/LeaderBoardAPITask?bearer_token=${encodeURIComponent(process.env.SNAP_LEADER_TOKEN)}`;
-    const data = await callSnap(url);
-    res.json(data.response);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});*/
-
 
 
 /* ---------- Leaderboard DB ---------- */
@@ -240,18 +134,6 @@ app.get("/api/leaderboard", async (req, res) => {
   }
 });
 
-/* ---------- Bids SL ---------- */
-
-/*app.get("/api/bids", async (req, res) => {
-  try {
-    const url = `${SNAP_BASE}/Bid_APITask?bearer_token=${encodeURIComponent(process.env.SNAP_BID_TOKEN)}`;
-    const data = await callSnap(url);
-    res.json(data.response);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});*/
-
 /* ---------- Bids DB ---------- */
 app.get("/api/bids", async (req, res) => {
   try {
@@ -278,17 +160,6 @@ app.get("/api/bids", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-/* ---------- OTP SL ---------- */
-
-/*app.post("/api/otp", async (req, res) => {
-  try {
-    const url = `${SNAP_BASE}/manageOTPUltra?bearer_token=${encodeURIComponent(process.env.SNAP_OTP_TOKEN)}`;
-    const data = await callSnap(url, "POST", req.body);
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});*/
 
 /* ---------- OTP DB ---------- */
 app.post("/api/otp", async (req, res) => {
@@ -335,12 +206,15 @@ app.post("/api/otp", async (req, res) => {
 
 /* ---------- GENERATE UNBIDS DB ---------- */
 app.get("/api/generateunbids", async (req, res) => {
-  const { matchnumber } = req.query;
+  const { matchnumber, useremail } = req.query;
   
   //const { data, error } = await supabase.rpc("insert_unbid_predictions");
+  console.log("matchNumber:", matchnumber);
+  console.log("userEmail:", useremail);
   
   const { data, error } = await supabase.rpc("insert_unbid_predictions", {
-    p_matchnumber: matchnumber
+    p_matchnumber: matchnumber,
+	p_useremail: useremail
   });
 
   if (error) {
@@ -356,7 +230,12 @@ app.get("/api/generateunbids", async (req, res) => {
 app.get("/api/calculateMatchResult", async (req, res) => {
   try {
 	const { winner, matchnumber } = req.query;
-	
+
+	const userMultipliers = {
+	  "vinay.baskie@gmail.com": 5,
+	  "kishorezum07@gmail.com": 5,
+	  "example2x@gmail.com": 2
+	};
 	const shortName = winner?.toString().toUpperCase();
 	const matchNum = parseInt(matchnumber, 10);
 
@@ -397,7 +276,7 @@ app.get("/api/calculateMatchResult", async (req, res) => {
       .eq("matchnumber", matchNum);
 
     if (bidError) throw bidError;
-
+	
     if (!bids || bids.length === 0) {
       return res.json({ message: "No bids found" });
     }
@@ -410,32 +289,52 @@ app.get("/api/calculateMatchResult", async (req, res) => {
     const processGroup = async (group) => {
 	  
 	  console.log("running for ",group);
-	  //console.log("bids: ", bids);
 	  
       const groupPlayers = bids.filter(p => p.bgroup === group);
-
-      const winners = groupPlayers.filter(p => p.selectedvalue?.toLowerCase() === winnerTeam);
-      const losers = groupPlayers.filter(p => p.selectedvalue?.toLowerCase() !== winnerTeam);
-
-      const winnerCount = winners.length;
-      const loserCount = losers.length;
 	  
+	  let winnersCount = 0;
+	  let losersCount = 0;
+
+	  groupPlayers.forEach(p => {
+		  const multiplier = userMultipliers[p.email?.toLowerCase()] || 1;
+		  const isWinner = p.selectedvalue?.toLowerCase() === winnerTeam;
+
+		  if (isWinner) {
+			winnersCount += multiplier;
+		  } else {
+			losersCount += multiplier;
+		  }
+
+	  });
 	  let matchWinAmount = 0;
-	  
-	  if (winnerCount > 0){
-		matchWinAmount = (loserCount * bidValue) / winnerCount;
+	  const round2 = (num) => Math.round(num * 100) / 100;
+	  if (winnersCount > 0) {
+	    matchWinAmount = round2((losersCount * bidValue) / winnersCount);
 	  }
 	  
+	  console.log("matchwinamount: ",matchWinAmount);
+	  
 	  const rows = groupPlayers.map(p => {
-		  const isWinner =
-			p.selectedvalue?.toLowerCase() === winnerTeam;
+
+		  //const multiplier = fiveUsers.includes(p.email?.toLowerCase()) ? 5 : 1;
+		  const multiplier = userMultipliers[p.email?.toLowerCase()] || 1;
+		  //console.log("Email:", p.email, "Multiplier:", multiplier);
+		  const isWinner = p.selectedvalue?.toLowerCase() === winnerTeam;
+
+		  let winAmount = 0;
+
+		  if (isWinner) {
+			winAmount = matchWinAmount * multiplier;
+		  } else {
+			winAmount = -bidValue * multiplier;
+		  }
 
 		  return {
 			email: p.email,
 			selectedvalue: p.selectedvalue,
 			bgroup: p.bgroup,
 			winner: winnerTeam,
-			winamount: isWinner ? matchWinAmount : -bidValue,
+			winamount: winAmount,
 			name: p.name,
 			matchnumber: p.matchnumber
 		  };
@@ -485,7 +384,7 @@ app.get("/api/calculateMatchResult", async (req, res) => {
 		name: r.name,
 		bgroup: r.bgroup,
 		matchnumber: matchNum,
-		winamount: prevTotal + matchWinAmount,
+		winamount: round2(prevTotal + matchWinAmount),
 		matchwinamount: matchWinAmount
 	  };
 	});
@@ -522,6 +421,7 @@ app.get("/api/health", (req, res) => {
 
 app.get("/api/admin/todayMatches", async (req, res) => {
 	try{
+	
 	const { data, error } = await supabase.rpc("get_todaymatches");
 
     if (error) {
@@ -589,6 +489,7 @@ app.get("/api/admin/checkAdmin", async (req, res) => {
   }
 
 });
+
 /* ---------- Start server ---------- */
 
 app.listen(PORT, () => {
