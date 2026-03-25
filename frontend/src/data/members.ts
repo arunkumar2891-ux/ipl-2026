@@ -78,12 +78,6 @@ export const members = [
 		"Amount": 20
 	},
 	{
-		"Email": "naveenalexisit@gmail.com",
-		"Name": "Naveen",
-		"Group": "G1",
-		"Amount": 20
-	},
-	{
 		"Email": "er.mugilan@gmail.com",
 		"Name": "Mugilan",
 		"Group": "G1",
