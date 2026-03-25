@@ -40,7 +40,7 @@ export const validateEmail = (email: string): boolean => {
   return EMAIL_WHITELIST.includes(email.toLowerCase());
 };
 
-export const aggregateBids = (bids: any[]) => {
+/*export const aggregateBids = (bids: any[]) => {
   const stats: Record<string, { group: string; team: string; count: number; totalBid: number; customMetric: number }> = {};
 
   bids.forEach(({ group, selectedValue, bid }) => {
@@ -54,8 +54,14 @@ export const aggregateBids = (bids: any[]) => {
     stats[key].count += 1;
     stats[key].totalBid += bidAmount;
   });
-  
-  export const aggregateBidsByMatch = (bids: any[]) => {
+
+  return Object.values(stats).map(item => ({
+    ...item,
+    customMetric: parseFloat((item.totalBid / 20).toFixed(2)),
+  }));
+};*/
+
+export const aggregateBidsByMatch = (bids: any[]) => {
   const stats: Record<
     string,
     {
@@ -91,12 +97,6 @@ export const aggregateBids = (bids: any[]) => {
     ...item,
     customMetric: parseFloat((item.totalBid / 20).toFixed(2))
   }))
-};
-
-  return Object.values(stats).map(item => ({
-    ...item,
-    customMetric: parseFloat((item.totalBid / 20).toFixed(2)),
-  }));
 };
 
 export const EMAIL_WHITELIST = [
