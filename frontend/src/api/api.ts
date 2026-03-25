@@ -58,7 +58,7 @@ export const api = {
      throw new Error("403 - Unauthorized");
    }
    
-	console.log("res: ",res);
+	//console.log("res: ",res);
 	
    return res.json();
  },
