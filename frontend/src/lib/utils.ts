@@ -54,6 +54,44 @@ export const aggregateBids = (bids: any[]) => {
     stats[key].count += 1;
     stats[key].totalBid += bidAmount;
   });
+  
+  export const aggregateBidsByMatch = (bids: any[]) => {
+  const stats: Record<
+    string,
+    {
+      matchNumber: number
+      group: string
+      team: string
+      count: number
+      totalBid: number
+      customMetric: number
+    }
+  > = {}
+
+  bids.forEach(({ matchNumber, group, selectedValue, bid }) => {
+    const key = `${matchNumber}|${group}|${selectedValue}`
+    const bidAmount = parseFloat(bid)
+
+    if (!stats[key]) {
+      stats[key] = {
+        matchNumber,
+        group,
+        team: selectedValue,
+        count: 0,
+        totalBid: 0,
+        customMetric: 0
+      }
+    }
+
+    stats[key].count += 1
+    stats[key].totalBid += bidAmount
+  })
+
+  return Object.values(stats).map(item => ({
+    ...item,
+    customMetric: parseFloat((item.totalBid / 20).toFixed(2))
+  }))
+};
 
   return Object.values(stats).map(item => ({
     ...item,
