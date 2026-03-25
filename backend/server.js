@@ -234,7 +234,7 @@ app.get("/api/calculateMatchResult", async (req, res) => {
 	const userMultipliers = {
 	  "vinay.baskie@gmail.com": 5,
 	  "kishorezum07@gmail.com": 5,
-	  "example2x@gmail.com": 2
+	  "sethusandhiya44@gmail.com": 2
 	};
 	const shortName = winner?.toString().toUpperCase();
 	const matchNum = parseInt(matchnumber, 10);
