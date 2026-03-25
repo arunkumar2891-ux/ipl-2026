@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { api } from "@/api/api";
-//import { aggregateBids } from "@/lib/utils";
 import { aggregateBidsByMatch } from "@/lib/utils";
 import EmailGate from "@/components/EmailGate";
 import { ArrowUpDown } from "lucide-react";
