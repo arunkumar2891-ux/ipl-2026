@@ -398,7 +398,7 @@ app.get("/api/calculateMatchResult", async (req, res) => {
     };
 
     await processGroup("G1");
-    await processGroup("G2");
+    //await processGroup("G2");
 	
     res.json({
       success: true,
