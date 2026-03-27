@@ -150,69 +150,15 @@ export const members = [
 		"Amount": 20
 	},
 	{
-		"Email": "parthiece08@gmail.com",
-		"Name": "Parthi",
-		"Group": "G2",
-		"Amount": 20
-	},
-	{
-		"Email": "singh.ajaykumar@gmail.com",
-		"Name": "Ajay kumar Singh",
-		"Group": "G2",
-		"Amount": 20
-	},
-	{
-		"Email": "ashsubram@gmail.com",
-		"Name": "Ashok",
-		"Group": "G2",
-		"Amount": 20
-	},
-	{
-		"Email": "lord.deeps@gmail.com",
-		"Name": "Deepak Alakkal",
-		"Group": "G2",
-		"Amount": 20
-	},
-	{
-		"Email": "mailjisjoseph@gmail.com",
-		"Name": "Jis",
-		"Group": "G2",
-		"Amount": 20
-	},
-	{
 		"Email": "matrixmohanbabu@gmail.com",
 		"Name": "Mohanbabu",
-		"Group": "G2",
-		"Amount": 20
-	},
-	{
-		"Email": "skaran1988@gmail.com",
-		"Name": "Praba",
-		"Group": "G2",
-		"Amount": 20
-	},
-	{
-		"Email": "arunps23@gmail.com",
-		"Name": "Arun P",
 		"Group": "G1",
-		"Amount": 20
-	},
-	{
-		"Email": "ramya.cse2@gmail.com",
-		"Name": "Ramya Ganesh",
-		"Group": "G2",
 		"Amount": 20
 	},
 	{
 		"Email": "srinivaskumar.mv30@gmail.com",
 		"Name": "Srinivas Kumar",
-		"Group": "G2",
-		"Amount": 20
-	},
-	{
-		"Email": "vedantvyas91@gmail.com",
-		"Name": "Vedant",
-		"Group": "G2",
+		"Group": "G1",
 		"Amount": 20
 	}
 ];
