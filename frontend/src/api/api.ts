@@ -63,10 +63,10 @@ export const api = {
    return res.json();
  },
 	
- generateUnbids: async (matchnumber) => {
+ generateUnbids: async (matchnumber, userEmail) => {
 
    const res = await fetch(
-     `${API_URL}/api/generateunbids?matchnumber=${matchnumber}`
+     `${API_URL}/api/generateunbids?matchnumber=${matchnumber}&useremail=${userEmail}`
    );
 
    if (!res.ok) {
