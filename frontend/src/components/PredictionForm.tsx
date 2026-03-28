@@ -29,7 +29,7 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled, matchStart }: P
   const [otpValidated, setOtpValidated] = useState(false);
   const uniqueMembers = Array.from(
 	new Map(members.map((m) => [m.Email, m])).values()
-  );
+  ).sort((a, b) => a.Email.localeCompare(b.Email));
   
   const [selectedTeam, setSelectedTeam] = useState("");
   const [loading, setLoading] = useState(false);
