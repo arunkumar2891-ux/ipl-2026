@@ -52,13 +52,6 @@ const BidTable = () => {
   );
   //console.log("User groups:", userGroups);
   console.log("Filtered bids:", filteredBids);
-  
-  /*if(filteredBids.length === 0)
-	  return (
-    <div className="font-display font-semibold text-sm text-foreground">
-      The bids are warming up in the pavilion. Reveal when the players walk out.
-    </div>
-  );*/
 	
   const filteredAnalytics = useMemo(() => {
   return analytics.filter((a) =>
@@ -208,7 +201,13 @@ const BidTable = () => {
       Fetch Error. Please try again.
     </div>
   );
-  
+  if(filteredBids.length === 0){
+	  return (
+    <div className="font-display font-semibold text-sm text-foreground">
+      The bids are warming up in the pavilion. Reveal when the players walk out.
+    </div>
+  )
+  }
   /*if (userGroups.length === 0) {
 		return <EmailGate onGroupDetected={setUserGroups} />;
   }*/
@@ -241,7 +240,6 @@ const BidTable = () => {
               <th className="px-4 py-3 text-xs uppercase">Group</th>
             </tr>
           </thead>
-
           <tbody>
             {groupBlock.data.map((bid: any, i: number) => (
               <tr key={`${bid.Name}-${bid.matchNumber}-${i}`}>
