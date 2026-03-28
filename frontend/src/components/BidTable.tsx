@@ -53,12 +53,12 @@ const BidTable = () => {
   //console.log("User groups:", userGroups);
   console.log("Filtered bids:", filteredBids);
   
-  if(filteredBids.length === 0)
+  /*if(filteredBids.length === 0)
 	  return (
     <div className="font-display font-semibold text-sm text-foreground">
       The bids are warming up in the pavilion. Reveal when the players walk out.
     </div>
-  );
+  );*/
 	
   const filteredAnalytics = useMemo(() => {
   return analytics.filter((a) =>
