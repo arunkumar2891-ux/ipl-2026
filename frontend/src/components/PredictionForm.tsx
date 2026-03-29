@@ -196,15 +196,15 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled, matchStart }: P
           <OtpInput
 			otp={otp}
 			setOtp={setOtp}
-			disabled={otpValidated}
+			disabled={!selectedEmail || otpValidated}
 		  />
 
           {otpValidated && (
-            <p className="text-xs text-green-500">✅ OTP validated</p>
+            <p className="text-xs text-green-500">✅ OTP validated. You may place your bid.</p>
           )}
 
           {error && <p className="text-xs text-destructive">{error}</p>}
-		
+		{otpValidated && (
 		  {/* TEAM SELECTION */}
           <div className="grid grid-cols-2 gap-3">
             {teams.map((team) => (
@@ -233,6 +233,7 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled, matchStart }: P
             {loading ? "Submitting..." : disabled ? "⛔ Submissions Closed" : "Submit Prediction"}
           </Button>
         </>
+	  )}
       )}
     </div>
   );
