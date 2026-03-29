@@ -204,7 +204,7 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled, matchStart }: P
           )}
 
           {error && <p className="text-xs text-destructive">{error}</p>}
-		{otpValidated && (
+		
 		  {/* TEAM SELECTION */}
           <div className="grid grid-cols-2 gap-3">
             {teams.map((team) => (
@@ -233,7 +233,6 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled, matchStart }: P
             {loading ? "Submitting..." : disabled ? "⛔ Submissions Closed" : "Submit Prediction"}
           </Button>
         </>
-	  )}
       )}
     </div>
   );
