@@ -192,12 +192,16 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled, matchStart }: P
 			  ))}
 		  </select>
 
+         {selectedEmail && (
+  <>
           {/* OTP INPUT */}
           <OtpInput
 			otp={otp}
 			setOtp={setOtp}
 			disabled={!selectedEmail || otpValidated}
 		  />
+		  </>
+)}
 
           {otpValidated && (
             <p className="text-xs text-green-500">✅ OTP validated. You may place your bid.</p>
