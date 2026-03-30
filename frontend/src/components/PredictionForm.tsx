@@ -205,33 +205,47 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled, matchStart }: P
 
           {error && <p className="text-xs text-destructive">{error}</p>}
 		
-		  {/* TEAM SELECTION */}
-          <div className="grid grid-cols-2 gap-3">
-            {teams.map((team) => (
-              <button
-                key={team}
-                type="button"
-                disabled={disabled || !otpValidated}
-                onClick={() => setSelectedTeam(team)}
-                className={`p-3 rounded-lg border text-sm font-medium transition-all duration-200 ${
-                  selectedTeam === team
-                    ? "border-primary bg-primary/10 text-foreground glow-primary"
-                    : "border-border bg-secondary/30 text-muted-foreground hover:border-primary/50"
-                } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-              >
-                {team}
-              </button>
-            ))}
-          </div>
-		  
-          {/* SUBMIT */}
-          <Button
-            onClick={handleSubmit}
-            disabled={disabled || loading || !selectedTeam || !otpValidated || !selectedEmail}
-            className="w-full glow-primary"
+		  {otpValidated && (
+  <>
+    {/* TEAM SELECTION */}
+    <div className="space-y-2">
+      <p className="text-sm font-medium text-muted-foreground">
+        Select your prediction
+      </p>
+
+      <div className="grid grid-cols-2 gap-3">
+        {teams.map((team) => (
+          <button
+            key={team}
+            type="button"
+            disabled={disabled}
+            onClick={() => setSelectedTeam(team)}
+            className={`p-3 rounded-lg border text-sm font-medium transition-all duration-200 ${
+              selectedTeam === team
+                ? "border-primary bg-primary/10 text-foreground glow-primary"
+                : "border-border bg-secondary/30 text-muted-foreground hover:border-primary/50"
+            } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
           >
-            {loading ? "Submitting..." : disabled ? "⛔ Submissions Closed" : "Submit Prediction"}
-          </Button>
+            {team}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    {/* SUBMIT */}
+    <Button
+      onClick={handleSubmit}
+      disabled={disabled || loading || !selectedTeam}
+      className="w-full glow-primary"
+    >
+      {loading
+        ? "Submitting..."
+        : disabled
+        ? "⛔ Submissions Closed"
+        : "Submit Prediction"}
+    </Button>
+  </>
+)}
         </>
       )}
     </div>
