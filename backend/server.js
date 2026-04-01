@@ -134,12 +134,43 @@ app.get("/api/leaderboard", async (req, res) => {
   }
 });
 
-/* ---------- Bids DB ---------- */
+/* ---------- Bids DB ---------- 
 app.get("/api/bids", async (req, res) => {
   try {
 
     const { data, error } = await supabase.rpc("get_bids_today");
 
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Failed to fetch bids" });
+    }
+
+    const response = data.map(row => ({
+      Name: row.name,
+      selectedValue: row.selectedvalue,
+      bid: row.bid,
+      group: row.bgroup,
+      matchNumber: row.matchnumber
+	  
+    }));
+
+    res.json(response);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});*/
+/* ---------- Bids DB with Email---------- */
+app.get("/api/bids", async (req, res) => {
+  try {
+	const { email } = req.query;
+	
+	//const { data, error } = await supabase.rpc("get_bids_today");
+	console.log(email);
+	const { data, error } = await supabase.rpc('get_bids_today', {
+		user_email: email
+	});
+	
     if (error) {
       console.error(error);
       return res.status(500).json({ error: "Failed to fetch bids" });
