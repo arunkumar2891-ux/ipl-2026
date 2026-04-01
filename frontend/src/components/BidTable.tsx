@@ -9,13 +9,16 @@ import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 
 type SortKey = "Name" | "selectedValue";
 
+const activeUser = localStorage.getItem("email");
+console.log(`local email: ${activeUser}`);
 const BidTable = () => {
   const { data: bids = [], isLoading, isError } = useQuery({
-  queryKey: ["bids"],
-  queryFn: api.getBids,
+  queryKey: ["bids", activeUser],
+  queryFn: () => api.getBids(activeUser),
+  enabled: !!activeUser,
   staleTime: 0,
   refetchOnWindowFocus: true
-  });
+});
   
   /*const [userGroups, setUserGroups] = useState<string[]>(
   JSON.parse(localStorage.getItem("userGroups") || "[]")
@@ -30,6 +33,7 @@ const BidTable = () => {
   const filteredBids = useMemo(() => {
     return bids.filter((b) => groups.includes(b.group));
   }, [bids, groups]);
+  
   
   /*const sorted = useMemo(() => {
   return [...filteredBids].sort((a, b) => {
@@ -52,12 +56,19 @@ const BidTable = () => {
   );
   //console.log("User groups:", userGroups);
   console.log("Filtered bids:", filteredBids);
-	
-  const filteredAnalytics = useMemo(() => {
+  
+  /*if(filteredBids.length === 0)
+	  return (
+    <div className="font-display font-semibold text-sm text-foreground">
+      The bids are warming up in the pavilion. Reveal when the players walk out.
+    </div>
+  );*/
+
+  /*const filteredAnalytics = useMemo(() => {
   return analytics.filter((a) =>
     groups.includes(a.group)
   );
-  }, [analytics, groups]);
+  }, [analytics, groups]);*/
   
   
   const sorted = useMemo(() => {
@@ -201,13 +212,7 @@ const BidTable = () => {
       Fetch Error. Please try again.
     </div>
   );
-  if(filteredBids.length === 0){
-	  return (
-    <div className="font-display font-semibold text-sm text-foreground">
-      The bids are warming up in the pavilion. Reveal when the players walk out.
-    </div>
-  )
-  }
+  
   /*if (userGroups.length === 0) {
 		return <EmailGate onGroupDetected={setUserGroups} />;
   }*/
@@ -240,6 +245,7 @@ const BidTable = () => {
               <th className="px-4 py-3 text-xs uppercase">Group</th>
             </tr>
           </thead>
+
           <tbody>
             {groupBlock.data.map((bid: any, i: number) => (
               <tr key={`${bid.Name}-${bid.matchNumber}-${i}`}>
