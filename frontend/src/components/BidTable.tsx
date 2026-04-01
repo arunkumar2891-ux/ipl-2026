@@ -10,7 +10,7 @@ import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 type SortKey = "Name" | "selectedValue";
 
 const activeUser = localStorage.getItem("email");
-console.log(`local email: ${activeUser}`);
+//console.log(`local email: ${activeUser}`);
 const BidTable = () => {
   const { data: bids = [], isLoading, isError } = useQuery({
   queryKey: ["bids", activeUser],
