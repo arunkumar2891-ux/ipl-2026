@@ -20,8 +20,13 @@ export const api = {
    return res.json();
  },
 
- getBids: async () => {
+ /*getBids: async () => {
    const res = await fetch(`${API_URL}/api/bids`);
+   return res.json();
+ },*/
+ getBids: async (activeUser) => {
+   //console.log("activeUser: ",activeUser);
+   const res = await fetch(`${API_URL}/api/bids?email=${activeUser}`);
    return res.json();
  },
 
