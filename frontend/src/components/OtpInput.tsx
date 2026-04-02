@@ -104,9 +104,9 @@ const OtpInput = ({ otp, setOtp, disabled }: OtpInputProps) => {
   {[...Array(6)].map((_, i) => (
     <Input
       key={i}
-      type="tel"
+      type="password"
       inputMode="numeric"
-      pattern="[0-9]*"
+      autoComplete="one-time-code"
       maxLength={1}
       disabled={disabled}
       ref={(el) => (inputs.current[i] = el)}
