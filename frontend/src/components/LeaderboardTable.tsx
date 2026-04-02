@@ -16,6 +16,12 @@ interface LeaderEntry {
   matchNumber: number;
 }
 
+interface FormEntry {
+  name: string;
+  group: string;
+  form: { match: number; result: "W" | "L" }[];
+}
+
 type SortKey = "name" | "amount" | "winAmount";
 
 const LeaderboardTable = () => {
@@ -37,6 +43,19 @@ const LeaderboardTable = () => {
     return normalized;
   }
 });
+
+  const { data: formData = [] } = useQuery<FormEntry[]>({
+    queryKey: ["leaderboardForm"],
+    queryFn: () => api.getLeaderboardForm(),
+  });
+
+  const formMap = useMemo(() => {
+    const map: Record<string, FormEntry["form"]> = {};
+    formData.forEach((entry) => {
+      map[`${entry.name}_${entry.group}`] = entry.form;
+    });
+    return map;
+  }, [formData]);
 
   const [sortKey, setSortKey] = useState<SortKey>("amount");
   const [sortAsc, setSortAsc] = useState(false);
@@ -121,13 +140,14 @@ if (isError) return <div className="text-center py-20 text-destructive text-sm">
       title={`Group ${g.group} Leaderboard`}
       data={g.data}
       toggleSort={toggleSort}
+      formMap={formMap}
     />
   ))}
 </motion.div>
   );
 };
 
-const LeaderboardGroup = ({ title, data, toggleSort }: any) => {
+const LeaderboardGroup = ({ title, data, toggleSort, formMap }: any) => {
 
   const columns = [
     { key: "name", label: "Name" },
@@ -172,11 +192,16 @@ const LeaderboardGroup = ({ title, data, toggleSort }: any) => {
                 </th>
               ))}
 
+              <th className="px-4 py-3 text-left text-xs uppercase text-muted-foreground">
+                Last 5
+              </th>
             </tr>
           </thead>
 
           <tbody>
-            {data.map((entry: LeaderEntry, i: number) => (
+            {data.map((entry: LeaderEntry, i: number) => {
+              const form = formMap[`${entry.name}_${entry.group}`] || [];
+              return (
               <motion.tr
                 key={i}
                 initial={{ opacity: 0 }}
@@ -189,8 +214,24 @@ const LeaderboardGroup = ({ title, data, toggleSort }: any) => {
                 <td className="px-4 py-3">₹{entry.amount}</td>
                 <td className="px-4 py-3">₹{entry.winAmount}</td>
                 <td className="px-4 py-3">Match {entry.matchNumber}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-1.5">
+                    {form.map((f: { match: number; result: string }, idx: number) => (
+                      <span
+                        key={idx}
+                        title={`Match ${f.match}: ${f.result === "W" ? "Won" : "Lost"}`}
+                        className={`inline-block h-2.5 w-2.5 rounded-full ${
+                          f.result === "W"
+                            ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]"
+                            : "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)]"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </td>
               </motion.tr>
-            ))}
+              );
+            })}
           </tbody>
 
         </table>

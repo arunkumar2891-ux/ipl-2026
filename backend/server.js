@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3001;
 const app = express();
 //app.use(cors());
 app.use(cors({
-  origin: ["https://ipl-2026-wx6e.onrender.com"]
+  origin: ["https://ipl-2026-wx6e.onrender.com","http://localhost:8080/"]
 }));
 app.use(express.json());
 
@@ -436,6 +436,58 @@ app.get("/api/calculateMatchResult", async (req, res) => {
       matchnumber
     });
 
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* ---------- Last 5 Match Form (W/L dots) ---------- */
+
+app.get("/api/leaderboard/form", async (req, res) => {
+  try {
+    const { data: matchRows, error: matchError } = await supabase
+      .from("leaderboard")
+      .select("matchnumber")
+      .order("matchnumber", { ascending: false });
+
+    if (matchError) {
+      console.error(matchError);
+      return res.status(500).json({ error: "Failed to fetch match numbers" });
+    }
+
+    const uniqueMatches = [...new Set(matchRows.map(r => r.matchnumber))]
+      .sort((a, b) => b - a)
+      .slice(0, 5);
+
+    if (uniqueMatches.length === 0) {
+      return res.json([]);
+    }
+
+    const { data, error } = await supabase
+      .from("leaderboard")
+      .select("name, bgroup, matchnumber, matchwinamount")
+      .in("matchnumber", uniqueMatches)
+      .order("matchnumber", { ascending: true });
+
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Failed to fetch form data" });
+    }
+
+    const formMap = {};
+    data.forEach(row => {
+      const key = `${row.name}_${row.bgroup}`;
+      if (!formMap[key]) {
+        formMap[key] = { name: row.name, group: row.bgroup, form: [] };
+      }
+      formMap[key].form.push({
+        match: row.matchnumber,
+        result: row.matchwinamount > 0 ? "W" : "L"
+      });
+    });
+
+    res.json(Object.values(formMap));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

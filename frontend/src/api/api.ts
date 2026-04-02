@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "";
 //console.log(import.meta.env.VITE_API_URL);
 //console.log(`API_URL: ${API_URL}`);
 
@@ -17,6 +17,11 @@ export const api = {
 
  getLeaderboard: async () => {
    const res = await fetch(`${API_URL}/api/leaderboard`);
+   return res.json();
+ },
+
+ getLeaderboardForm: async () => {
+   const res = await fetch(`${API_URL}/api/leaderboard/form`);
    return res.json();
  },
 
