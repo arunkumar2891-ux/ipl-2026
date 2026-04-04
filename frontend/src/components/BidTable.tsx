@@ -31,7 +31,8 @@ const BidTable = () => {
   const [sortAsc, setSortAsc] = useState(false);
 
   const filteredBids = useMemo(() => {
-    return bids.filter((b) => groups.includes(b.group));
+    const list = Array.isArray(bids) ? bids : [];
+    return list.filter((b) => groups.includes(b.group));
   }, [bids, groups]);
   
   

@@ -163,26 +163,28 @@ app.get("/api/bids", async (req, res) => {
 /* ---------- Bids DB with Email---------- */
 app.get("/api/bids", async (req, res) => {
   try {
-	const { email } = req.query;
-	
-	//const { data, error } = await supabase.rpc("get_bids_today");
-	console.log(email);
-	const { data, error } = await supabase.rpc('get_bids_today', {
-		user_email: email
+	const email = typeof req.query.email === "string" ? req.query.email.trim() : "";
+	if (!email) {
+	  return res.status(400).json({ error: "email query parameter required" });
+	}
+
+	const { data, error } = await supabase.rpc("get_bids_today", {
+		user_email: email,
 	});
-	
+  console.log("data: ",data);
+  console.log("error: ",error);
     if (error) {
-      console.error(error);
+      console.error("get_bids_today RPC error:", error.message, error.details, error.hint);
       return res.status(500).json({ error: "Failed to fetch bids" });
     }
 
-    const response = data.map(row => ({
+    const rows = Array.isArray(data) ? data : [];
+    const response = rows.map((row) => ({
       Name: row.name,
       selectedValue: row.selectedvalue,
       bid: row.bid,
       group: row.bgroup,
-      matchNumber: row.matchnumber
-	  
+      matchNumber: row.matchnumber,
     }));
 
     res.json(response);

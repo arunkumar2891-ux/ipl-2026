@@ -30,9 +30,15 @@ export const api = {
    return res.json();
  },*/
  getBids: async (activeUser) => {
-   //console.log("activeUser: ",activeUser);
-   const res = await fetch(`${API_URL}/api/bids?email=${activeUser}`);
-   return res.json();
+   const q = encodeURIComponent(activeUser ?? "");
+   const res = await fetch(`${API_URL}/api/bids?email=${q}`);
+   const body = await res.json();
+   if (!res.ok) {
+     throw new Error(
+       typeof body?.error === "string" ? body.error : "Failed to fetch bids"
+     );
+   }
+   return Array.isArray(body) ? body : [];
  },
 
  otp: async (payload) => {
