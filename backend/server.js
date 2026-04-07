@@ -269,7 +269,6 @@ app.get("/api/calculateMatchResult", async (req, res) => {
 	  "kishorezum07@gmail.com": 5,
 	  "sethusandhiya44@gmail.com": 2
 	};
-	const shortName = winner?.toString().toUpperCase();
 	const matchNum = parseInt(matchnumber, 10);
 
 	if (isNaN(matchNum)) {
@@ -277,11 +276,67 @@ app.get("/api/calculateMatchResult", async (req, res) => {
 		error: "matchnumber must be a number"
 	  });
 	}
-	console.log("shortName: ",shortName);
-	
+
 	if (!winner) {
       return res.status(400).json({ error: "Winner query param required" });
     }
+
+	//No Result Logic
+	if (winner === "No Result") {
+	  console.log("No Result for match:", matchNum);
+
+	  const processNoResultGroup = async (group) => {
+		const { data: prevLeaderboard, error: prevError } = await supabase
+		  .from("leaderboard")
+		  .select("name, bgroup, winamount")
+		  .eq("matchnumber", matchNum - 1)
+		  .eq("bgroup", group);
+
+		if (prevError) throw prevError;
+
+		if (!prevLeaderboard || prevLeaderboard.length === 0) {
+		  console.log(`No previous leaderboard rows for group ${group}`);
+		  return;
+		}
+
+		const { error: delError } = await supabase
+		  .from("leaderboard")
+		  .delete()
+		  .eq("matchnumber", matchNum)
+		  .eq("bgroup", group);
+
+		if (delError) {
+		  console.error("Delete error:", delError);
+		}
+
+		const leaderboardRows = prevLeaderboard.map(p => ({
+		  name: p.name,
+		  bgroup: p.bgroup,
+		  matchnumber: matchNum,
+		  winamount: p.winamount || 0,
+		  matchwinamount: 0
+		}));
+
+		const { error: insertError } = await supabase
+		  .from("leaderboard")
+		  .insert(leaderboardRows);
+
+		if (insertError) throw insertError;
+
+		console.log(`No Result leaderboard inserted for group ${group}:`, leaderboardRows.length, "rows");
+	  };
+
+	  await processNoResultGroup("G1");
+
+	  return res.json({
+		success: true,
+		matchnumber,
+		noResult: true
+	  });
+	}
+
+	const shortName = winner?.toString().toUpperCase();
+	console.log("shortName: ",shortName);
 	
 	const { data: team, error: teamError } = await supabase
       .from("teams")

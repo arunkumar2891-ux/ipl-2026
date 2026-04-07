@@ -243,6 +243,8 @@ export default function AdminConsole() {
             >
 
               <option value="">Select Winner</option>
+              {/* No Result Logic */}
+              <option value="No Result">No Result</option>
 
               {[m.home, m.away].map(team => (
 				  <option key={team} value={team}>
