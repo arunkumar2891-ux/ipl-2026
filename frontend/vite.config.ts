@@ -15,7 +15,20 @@ export default defineConfig(() => ({
     },
   },
 
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: "design-rewrite",
+      configureServer(server) {
+        server.middlewares.use((req, _res, next) => {
+          if (req.url === "/design") {
+            req.url = "/design.html";
+          }
+          next();
+        });
+      },
+    },
+  ],
 
   resolve: {
     alias: {

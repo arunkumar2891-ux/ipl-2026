@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPL Predictor 2026 — LinkedIn Post</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent2: #22d3ee;
+      --gold: #facc15;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 1100px; width: 100%; }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 0.25rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--accent2);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .linkedin-post {
+      line-height: 1.85;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      color: var(--text);
+    }
+
+    .linkedin-post .highlight { color: var(--gold); font-weight: 600; }
+    .linkedin-post .tag { color: var(--accent); font-weight: 600; }
+
+    .mermaid-wrapper {
+      display: flex;
+      justify-content: center;
+      overflow-x: auto;
+      padding: 1.5rem 0;
+    }
+
+    .mermaid-wrapper svg {
+      min-width: 100%;
+      min-height: 700px;
+      max-width: none;
+    }
+
+    .tech-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+
+    .pill {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: var(--accent);
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .pill.green { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #34d399; }
+    .pill.purple { background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.3); color: #c084fc; }
+    .pill.orange { background: rgba(251, 146, 60, 0.15); border-color: rgba(251, 146, 60, 0.3); color: #fb923c; }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 1rem;
+      padding: 0.6rem 1.2rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .copy-btn:hover { background: #2563eb; }
+    .copy-btn.copied { background: #16a34a; }
+
+    .divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
+
+    .footer { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 1rem; }
+
+    .stack-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+
+    .stack-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .stack-card h4 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .stack-card .tech-pills { margin-top: 0; }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .feature-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .feature-card h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent2);
+      margin-bottom: 0.4rem;
+    }
+
+    .feature-card p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+
+    .comparison-table th {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comparison-table th:nth-child(2) { color: #f87171; }
+    .comparison-table th:nth-child(3) { color: #34d399; }
+
+    .comparison-table td {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+      vertical-align: top;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .comparison-table td:first-child {
+      color: var(--accent2);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .comparison-table td:nth-child(2) { color: #fca5a5; }
+    .comparison-table td:nth-child(3) { color: #6ee7b7; }
+
+    .comparison-table tr:last-child td { border-bottom: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>IPL Predictor 2026</h1>
+    <p class="subtitle">Architecture Overview &amp; LinkedIn Post Draft</p>
+
+    <!-- MERMAID DIAGRAM -->
+    <div class="section">
+      <h2>Architecture &amp; Data Flow</h2>
+      <div class="mermaid-wrapper">
+        <pre class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#3b82f6', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#60a5fa', 'lineColor': '#475569', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0f172a', 'background': '#0f172a', 'mainBkg': '#1e293b', 'nodeBorder': '#60a5fa', 'clusterBkg': '#1e293b', 'clusterBorder': '#334155', 'edgeLabelBackground': '#1e293b' }}}%%
+flowchart TD
+    subgraph FE ["Frontend — React 18 + TypeScript SPA"]
+        A["👤 User Opens App"] --> B["📋 Select Name from\nRegistered Members"]
+        B --> B2["🔒 Enter Masked 6-digit OTP\n(password input + paste support)"]
+        B2 -->|auto-submit on 6 digits| C{"OTP Valid?"}
+        C -- Invalid OTP --> B2
+        C -- Valid OTP --> D["🏏 View Today's Matches\nw/ Live Countdown Timer"]
+        D --> E["🎯 Pick Winner\n(locks 15 min before start)"]
+        E --> F["📊 View Dashboard"]
+        F --> F1["🏆 Leaderboard\nRanked by points · Gold/Silver/Bronze"]
+        F --> F2["🟢🔴 Last 5 Form Guide\nDynamic W/L dots per user"]
+        F --> F3["📝 Prediction Details\nPer-match breakdown"]
+        F --> F4["📅 Upcoming Schedule\n70+ matches with times"]
+    end
+
+    subgraph BE ["Backend — Node.js + Express REST API"]
+        G["POST /api/otp\nValidate OTP against DB"]
+        H["POST /api/prediction\n15-min cutoff enforced\nMulti-group insertion"]
+        I["GET /api/leaderboard\nLatest match cumulative standings"]
+        J["GET /api/leaderboard/form\nLast 5 match W/L per user"]
+        K["GET /api/bids\nPer-user prediction history"]
+    end
+
+    subgraph ADMIN ["Admin Console — Protected by Email Whitelist"]
+        AA["📋 Display Match Number\n& Playing Teams"]
+        AA --> L["⚙️ Generate Default\nPredictions for\nNon-Participants"]
+        AA --> M["🏆 Declare Match Winner"]
+        M --> N["📐 Points Engine"]
+        N --> N1["Fetch all predictions\nfor that match"]
+        N1 --> N2["Apply user multipliers\n(1x, 2x, 5x)"]
+        N2 --> N3["Losers' points pooled\n÷ among winners"]
+        N3 --> N4["Write to matchdata\n+ update leaderboard"]
+    end
+
+    subgraph DB ["Supabase — PostgreSQL + RPC"]
+        O[("members · otp · prediction\nfinal_prediction · matchdata\nleaderboard · teams · admins")]
+        P1["RPC: get_todaymatches"]
+        P2["RPC: get_bids_today"]
+        P3["RPC: insert_unbid_predictions"]
+    end
+
+    B2 --> G
+    E --> H
+    F1 --> I
+    F2 --> J
+    F3 --> K
+    G --> O
+    H --> O
+    I --> O
+    J --> O
+    K --> P2
+    AA --> P1
+    L --> P3
+    N4 --> O
+
+    %% Frontend internal arrows — blue
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10 stroke:#60a5fa,stroke-width:2px
+    %% Admin internal arrows — purple
+    linkStyle 11,12,13,14,15,16,17 stroke:#c084fc,stroke-width:2px
+    %% Frontend → Backend arrows — cyan
+    linkStyle 18,19,20,21,22 stroke:#22d3ee,stroke-width:2.5px
+    %% Backend → DB arrows — cyan (same as FE→BE flow)
+    linkStyle 23,24,25,26,27 stroke:#22d3ee,stroke-width:2.5px
+    %% Admin → DB arrows — purple
+    linkStyle 28,29,30 stroke:#c084fc,stroke-width:2.5px
+
+    style FE fill:#0f172a,stroke:#3b82f6,color:#e2e8f0
+    style BE fill:#0f172a,stroke:#22d3ee,color:#e2e8f0
+    style ADMIN fill:#0f172a,stroke:#c084fc,color:#e2e8f0
+    style DB fill:#0f172a,stroke:#fb923c,color:#e2e8f0
+    style A fill:#1e3a5f,stroke:#60a5fa,color:#e2e8f0
+    style B fill:#1e3a5f,stroke:#60a5fa,color:#e2e8f0
+    style B2 fill:#1e3a5f,stroke:#60a5fa,color:#e2e8f0
+    style C fill:#312e81,stroke:#818cf8,color:#e2e8f0
+    style D fill:#1e3a5f,stroke:#60a5fa,color:#e2e8f0
+    style E fill:#14532d,stroke:#4ade80,color:#e2e8f0
+    style F fill:#1e3a5f,stroke:#60a5fa,color:#e2e8f0
+    style F1 fill:#1e3a5f,stroke:#60a5fa,color:#e2e8f0
+    style F2 fill:#1e3a5f,stroke:#60a5fa,color:#e2e8f0
+    style F3 fill:#1e3a5f,stroke:#60a5fa,color:#e2e8f0
+    style F4 fill:#1e3a5f,stroke:#60a5fa,color:#e2e8f0
+    style G fill:#164e63,stroke:#22d3ee,color:#e2e8f0
+    style H fill:#164e63,stroke:#22d3ee,color:#e2e8f0
+    style I fill:#164e63,stroke:#22d3ee,color:#e2e8f0
+    style J fill:#164e63,stroke:#22d3ee,color:#e2e8f0
+    style K fill:#164e63,stroke:#22d3ee,color:#e2e8f0
+    style AA fill:#4a1d6a,stroke:#c084fc,color:#e2e8f0
+    style L fill:#4a1d6a,stroke:#c084fc,color:#e2e8f0
+    style M fill:#4a1d6a,stroke:#c084fc,color:#e2e8f0
+    style N fill:#4a1d6a,stroke:#c084fc,color:#e2e8f0
+    style N1 fill:#4a1d6a,stroke:#c084fc,color:#e2e8f0
+    style N2 fill:#4a1d6a,stroke:#c084fc,color:#e2e8f0
+    style N3 fill:#4a1d6a,stroke:#c084fc,color:#e2e8f0
+    style N4 fill:#4a1d6a,stroke:#c084fc,color:#e2e8f0
+    style O fill:#7c2d12,stroke:#fb923c,color:#e2e8f0
+    style P1 fill:#7c2d12,stroke:#fb923c,color:#e2e8f0
+    style P2 fill:#7c2d12,stroke:#fb923c,color:#e2e8f0
+    style P3 fill:#7c2d12,stroke:#fb923c,color:#e2e8f0
+        </pre>
+      </div>
+    </div>
+
+    <!-- BEFORE & AFTER COMPARISON -->
+    <div class="section">
+      <h2>Existing Webapp vs New App</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Aspect</th>
+            <th>Existing Webapp (2025)</th>
+            <th>New App — Vibecoded (2026)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Architecture</td>
+            <td>Single HTML file (~590 lines) with inline CSS, inline JS, and hardcoded JSON data — all in one monolith</td>
+            <td>Separated frontend (React SPA) + backend (Express REST API) + database (Supabase PostgreSQL) — clean 3-tier architecture</td>
+          </tr>
+          <tr>
+            <td>UI / Design</td>
+            <td>Blue (#0047AB) background, Arial font, white containers with basic borders, no dark mode, no responsive design system</td>
+            <td>Dark-mode-first UI with Tailwind CSS custom properties, shadcn/ui components (Radix primitives), smooth Framer Motion animations, gold/silver/bronze ranking accents</td>
+          </tr>
+          <tr>
+            <td>Authentication</td>
+            <td>Plain text email input validated against a hardcoded JS array of allowed emails — no password, no OTP, no security</td>
+            <td>Masked 6-digit OTP input (password-type, auto-submit, paste support) validated server-side against a Supabase table, session persisted in localStorage</td>
+          </tr>
+          <tr>
+            <td>Team Selection</td>
+            <td>HTML radio buttons rendered via document.createElement() with raw DOM manipulation</td>
+            <td>Styled interactive team cards with active state glow, Framer Motion transitions, and disabled-state handling when cutoff passes</td>
+          </tr>
+          <tr>
+            <td>Match Data</td>
+            <td>Entire 74-match schedule hardcoded as a massive JSON array directly inside a &lt;script&gt; tag (~200 lines of JSON)</td>
+            <td>Match data in a dedicated TypeScript module (matchData.ts) with typed interfaces, imported by components that need it</td>
+          </tr>
+          <tr>
+            <td>Countdown Timer</td>
+            <td>Global next-match timer with a manually hardcoded date (const nextMatchTime = new Date('2025-05-17T14:00:00Z')). Per-match timers with manual IST offset arithmetic</td>
+            <td>Auto-computed next-match countdown scanning the full schedule. Per-match cutoff timers with reactive form disabling. Zero hardcoded dates</td>
+          </tr>
+          <tr>
+            <td>Navigation</td>
+            <td>Plain &lt;button&gt; elements toggling sections via display: none/block with inline onclick handlers</td>
+            <td>Tab-based navigation with Framer Motion layoutId animated indicator, AnimatePresence page transitions, and React Router for routing</td>
+          </tr>
+          <tr>
+            <td>Leaderboard</td>
+            <td>Basic HTML table built via string concatenation (html += &lt;tr&gt;...), no sorting, no ranking visuals, no grouping</td>
+            <td>Sortable leaderboard with column click sorting, grouped by league (G1/G2), gold/silver/bronze border accents, row fade-in animations, and a "Last 5" form guide with glowing W/L dots</td>
+          </tr>
+          <tr>
+            <td>Backend / APIs</td>
+            <td>Direct fetch() calls to external backend APIs with bearer tokens loaded from an env.js script file. No input validation on the client side</td>
+            <td>Dedicated Node.js + Express.js backend with 10 REST endpoints, server-side cutoff enforcement, input validation on all routes (encodeURIComponent on client, trim + type checks on server), CORS lockdown, Supabase JS client with RPC stored procedures, and "No Result" handling for abandoned matches</td>
+          </tr>
+          <tr>
+            <td>Scoring</td>
+            <td>Handled entirely by the external backend APIs — no client-side visibility into the logic</td>
+            <td>Full pari-mutuel scoring engine in Express: fetch predictions → apply weighted multipliers → compute point redistribution → write matchdata + update cumulative leaderboard — all in one server-side pipeline</td>
+          </tr>
+          <tr>
+            <td>State Management</td>
+            <td>Global JS variables (let stats = {}), raw DOM reads (document.getElementById), manual innerHTML updates</td>
+            <td>TanStack React Query for server state (caching, retries, background refetch), React useState/useMemo for local state, queryClient invalidation after mutations</td>
+          </tr>
+          <tr>
+            <td>Admin Tools</td>
+            <td>None — all admin operations handled outside the webapp</td>
+            <td>Email-whitelisted admin console with match display, unbid generation, winner declaration, and scoring trigger — all in-app</td>
+          </tr>
+          <tr>
+            <td>Deployment</td>
+            <td>Static HTML file served as-is</td>
+            <td>Frontend and backend as two separate Render.com services, Vite build for production, SPA _redirects routing, health-check keep-alive</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- KEY FEATURES -->
+    <div class="section">
+      <h2>Key Features — Technical Deep Dive</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>Masked OTP Authentication</h4>
+          <p>6-digit OTP rendered via password-type inputs with auto-focus progression — each digit auto-advances to the next field. Auto-submits the moment the 6th digit is entered (useEffect watching OTP length). Full clipboard paste support that distributes digits across all 6 fields. Mobile-optimized with inputMode="numeric" for the number keyboard. OTP validated server-side against a Supabase table; session stored in localStorage.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Live Countdown Timers</h4>
+          <p>Two timer systems: a per-match countdown computing the delta between now and matchStartUtc minus 15 minutes (the cutoff), and a global next-match countdown that finds the nearest future match from a hardcoded schedule of 74 matches. Both convert UTC to IST for display. The prediction form disables itself reactively when the countdown hits zero — and the backend independently rejects late submissions with a 403.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Pari-Mutuel Points Engine</h4>
+          <p>Server-side scoring pipeline in a single Express route: fetches all rows from final_prediction for the match number, groups by bgroup, applies per-user multipliers (configurable map — 1x default, 2x and 5x for specific users), counts weighted winners vs losers, computes matchWinAmount = (losersCount × bidValue) / winnersCount, then writes per-player rows to matchdata. Cumulative leaderboard is built by fetching the previous match's leaderboard and adding the new matchWinAmount. Playoff escalation: base 20 → 50 for qualifiers → 100 for the final. "No Result" handling (rain/abandonment) carries forward the previous leaderboard with matchwinamount: 0 and deletes stale rows before re-inserting.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Last 5 Form Guide</h4>
+          <p>Dedicated GET /api/leaderboard/form endpoint queries the leaderboard table, extracts the 5 most recent distinct match numbers via Set + sort + slice, fetches matchwinamount for each user across those matches, and classifies positive values as "W" and non-positive as "L". Frontend renders the result as glowing CSS dots (box-shadow with rgba glow) with hover tooltips showing "Match N: Won/Lost". The sliding window advances automatically — zero manual config needed.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Multi-Group Prediction</h4>
+          <p>Users belonging to multiple groups (e.g., G1 and G2) have their groups resolved from a members array at submit time. The frontend fires Promise.all() across all groups, inserting one prediction row per group per submission. Each group has its own independent leaderboard and pari-mutuel pool. The admin's "generate unbids" RPC also respects group membership.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Admin Console</h4>
+          <p>Email-whitelisted via a Supabase admins table check (GET /api/admin/checkAdmin). Fetches today's match numbers and team names via RPC get_todaymatches. "Generate Unbids" calls RPC insert_unbid_predictions to backfill default entries for users who didn't predict. "Declare Winner" triggers the full scoring pipeline — matchdata write + leaderboard update — in one click. The admin can also switch the active user email for testing.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Dark-Mode UI with Animations</h4>
+          <p>Ship-ready dark theme via Tailwind CSS custom properties (CSS variables for background, card, border, muted, accent). shadcn/ui components built on Radix UI headless primitives for accessibility. Framer Motion powers tab transitions (AnimatePresence + layoutId for the active tab indicator), row fade-ins on the leaderboard, and page-level mount animations. Gold/silver/bronze border accents on the top 3 leaderboard rows.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Data Layer &amp; Caching</h4>
+          <p>TanStack React Query v5 manages all server state with declarative queryKey-based caching. Leaderboard and form guide queries run in parallel on mount. After a prediction submission, queryClient.refetchQueries invalidates the bids cache so the prediction log updates instantly. The backend uses Supabase JS client with .select(), .eq(), .in(), .order(), .maybeSingle() for type-safe query building, and .rpc() for stored procedures. API inputs are validated and sanitized on both ends — email params are encodeURIComponent'd on the client and trimmed on the server, with proper Array.isArray() safety checks on all RPC responses.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TECH STACK -->
+    <div class="section">
+      <h2>Tech Stack</h2>
+      <div class="stack-grid">
+        <div class="stack-card">
+          <h4>Frontend</h4>
+          <div class="tech-pills">
+            <span class="pill">React 18</span>
+            <span class="pill">TypeScript</span>
+            <span class="pill">Vite 5 + SWC</span>
+            <span class="pill">Tailwind CSS 3</span>
+            <span class="pill">shadcn/ui</span>
+            <span class="pill">Radix UI</span>
+            <span class="pill">Framer Motion</span>
+            <span class="pill">TanStack Query v5</span>
+            <span class="pill">React Router v6</span>
+            <span class="pill">Zod</span>
+          </div>
+        </div>
+        <div class="stack-card">
+          <h4>Backend &amp; Data</h4>
+          <div class="tech-pills">
+            <span class="pill green">Node.js (ES Modules)</span>
+            <span class="pill green">Express.js</span>
+            <span class="pill green">Supabase JS Client</span>
+            <span class="pill green">PostgreSQL</span>
+            <span class="pill green">RPC Stored Procedures</span>
+            <span class="pill green">CORS Lockdown</span>
+            <span class="pill green">dotenv</span>
+          </div>
+        </div>
+        <div class="stack-card">
+          <h4>AI Tooling &amp; Deploy</h4>
+          <div class="tech-pills">
+            <span class="pill purple">Cursor AI (Agent Mode)</span>
+            <span class="pill purple">Lovable.dev (Scaffold)</span>
+            <span class="pill purple">Vibecoded End-to-End</span>
+            <span class="pill orange">Render.com (2 services)</span>
+            <span class="pill orange">Vite Dev Proxy</span>
+            <span class="pill orange">SPA _redirects</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LINKEDIN POST -->
+    <div class="section">
+      <h2>LinkedIn Post</h2>
+      <div class="linkedin-post" id="post-content">I built a full-stack IPL Prediction app for 30+ friends — and I hadn't touched JavaScript since Angular 1.5 in 2016.
+
+Back then, jQuery was the default, two-way data binding in Angular felt like magic, and "npm install" was the most advanced thing in my workflow. Fast forward a decade — I haven't written a single line of modern JS, React, or Node.js in between.
+
+Then IPL 2026 was around the corner, and I thought: what if I just... described what I wanted and let AI build it?
+
+<span class="highlight">Some context — the existing webapp I was replacing:</span>
+Last year, I built an IPL prediction webapp with what I knew — basic HTML, CSS, vanilla JS, and backend APIs. It was a single ~590-line HTML file: inline styles, inline scripts, match data hardcoded as a giant JSON array in a &lt;script&gt; tag, plain text email validation against a JS array, radio buttons for team selection, raw DOM manipulation (document.createElement, innerHTML concatenation), sections toggled via display:none/block, and a next-match countdown timer with a manually hardcoded date. It worked — but it was fragile, hard to extend, and looked like it was built in 2010.
+
+<span class="highlight">What vibecoding turned it into:</span>
+I fed the existing webapp into Lovable.dev as context and described what I wanted the modernized version to look like. Here's what changed — every single upgrade vibecoded:
+
+→ Single HTML monolith → separated React SPA + Express REST API + Supabase PostgreSQL (3-tier architecture)
+→ Blue background with Arial font → dark-mode-first UI with Tailwind CSS, shadcn/ui components, and Framer Motion animations
+→ Plain text email input → masked 6-digit OTP (password-type, auto-submit on 6 digits, clipboard paste, server-side validation)
+→ Radio buttons → styled interactive team cards with active-state glow and disabled states
+→ Global JS variables and innerHTML → TanStack React Query for server state, React hooks for local state, declarative caching
+→ String-concatenated HTML tables → sortable leaderboard with gold/silver/bronze accents, grouped by league, with a "Last 5" W/L form guide
+→ Manual hardcoded countdown date → auto-computed next-match countdown scanning the full schedule, per-match cutoff timers
+→ onclick + display:none navigation → Framer Motion tab transitions with layoutId animated indicator
+→ No admin tools → full email-whitelisted admin console with unbid generation, winner declaration, and scoring trigger
+→ External backend API calls → dedicated Express.js backend with 6 endpoints, server-side cutoff enforcement, CORS lockdown, and a pari-mutuel scoring engine
+
+Here's what I vibecoded in under a week:
+
+🏏 <span class="highlight">IPL Predictor 2026</span> — a private prediction league where 30+ friends pick IPL match winners, earn or lose points based on outcomes, and compete on a live leaderboard across the entire tournament.
+
+<span class="highlight">What vibecoding looked like in practice:</span>
+I didn't write code in the traditional sense. I opened Lovable.dev, described the app I wanted for modernizing the existing webapp I created using my limited HTML, CSS, JS and DB knowledge for last year — and it scaffolded a full React + TypeScript + Tailwind project in minutes. And added all the additional features on top of this basic working template. All by vibecoding. From there, every feature was built in Cursor AI's agent mode: I described what I needed in plain English, the AI generated the implementation, I reviewed the logic, tested it, and iterated. When something broke, I pasted the error back and said "fix this." When I wanted a new feature, I described the behaviour and the AI wired up the frontend component, the Express route, and the Supabase query together.
+
+I didn't read the React docs. I didn't learn Express from scratch. I didn't study TanStack Query's API. I described intent, and AI translated it into working code — across the entire stack.
+
+<span class="highlight">The user experience I shipped:</span>
+→ Users pick their name from a dropdown and authenticate with a masked 6-digit OTP — digits render as dots, auto-submit fires the moment the 6th digit is entered, and clipboard paste distributes digits across all fields
+→ Today's IPL matches appear with live countdown timers ticking to the 15-minute pre-match cutoff
+→ Users pick the winning team; the form locks reactively when the timer hits zero — and the backend independently rejects late submissions with a 403
+→ Changed your mind? Submit again — only the latest prediction counts
+→ Missed a match? The admin auto-generates default predictions so everyone stays in the standings
+
+<span class="highlight">The scoring engine I described into existence:</span>
+→ Pari-mutuel model: incorrect predictors lose their points, and the combined total is pooled and redistributed equally among the correct predictors
+→ Weighted user multipliers (1x, 2x, 5x) — configured in a server-side map — scale both stakes and rewards proportionally
+→ Playoff escalation: base 20 points for league matches, 50 for qualifiers, 100 for the final
+→ One admin click triggers a full server-side pipeline: fetch all predictions from final_prediction → group by league → apply multipliers → compute matchWinAmount per player → write to matchdata → read previous leaderboard → compute cumulative totals → insert new leaderboard rows
+→ "No Result" edge case (rain/abandonment) handled separately — carries forward the previous leaderboard with zero points for that match, so cumulative standings remain intact
+
+<span class="highlight">The dashboard features — all vibecoded:</span>
+→ A ranked leaderboard sorted by cumulative points, with gold/silver/bronze left-border accents on the top 3, grouped independently per league (G1, G2)
+→ A "Last 5" form guide column — glowing green dots for wins, red for losses — dynamically computed by querying the 5 most recent distinct match numbers from the leaderboard table. No hardcoded match IDs, no manual config — it's a sliding window that advances automatically
+→ A detailed prediction log per match showing who picked which team after the cutoff.
+→ A detailed prediction log per player showing the list of all predictions for the match before the cutoff.
+→ A full schedule of 70+ remaining IPL 2026 matches
+
+<span class="highlight">The technical stack — all new to me, all vibecoded:</span>
+→ React 18 + TypeScript + Vite 5 (SWC plugin) as the frontend SPA with React Router v6 for routing
+→ Tailwind CSS 3 + shadcn/ui (Radix UI primitives) + Framer Motion for a dark-mode UI with animated tab transitions, row fade-ins, and layout animations
+→ TanStack React Query v5 for declarative data fetching with queryKey caching, parallel queries, and cache invalidation after mutations
+→ Node.js (ES Modules) + Express.js backend with 10 REST endpoints, input validation on all routes, and CORS locked to the production domain
+→ Supabase (PostgreSQL) with 8 tables and 3 RPC stored procedures for complex server-side queries
+→ Deployed as two separate services on Render.com with a health-check keep-alive endpoint and Vite dev proxy for local development
+
+<span class="highlight">What I learned about vibecoding:</span>
+→ It's not "no-code" — you still need to understand what you're building, why a pari-mutuel model works, how cutoff enforcement should work on both client and server, why you need cache invalidation after a mutation
+→ The skill isn't writing syntax — it's decomposing problems clearly enough that AI can generate correct implementations
+→ When it breaks, you debug by describing the symptom. When you want a feature, you describe the behaviour. The feedback loop is: intent → generation → review → iterate
+→ I went from "I don't know what useEffect does" to shipping a production app with React hooks, TanStack Query, Framer Motion animations, and Express middleware — in days, not months
+
+10 years away from JavaScript. Zero modern JS experience going in. One week of vibecoding. A production app used by 30+ people every single day of IPL 2026.
+
+The barrier to building software has fundamentally shifted. You don't need to mass every framework. You need the ability to think clearly about what you're building — and the tools will meet you there.
+
+If you've been away from coding and think you've "fallen behind" — you haven't. The tools have caught up to you.
+
+<span class="tag">#Vibecoding</span> <span class="tag">#AI</span> <span class="tag">#BuildInPublic</span> <span class="tag">#CursorAI</span> <span class="tag">#Lovable</span> <span class="tag">#IPL2026</span> <span class="tag">#React</span> <span class="tag">#Supabase</span> <span class="tag">#FullStack</span> <span class="tag">#SoftwareEngineering</span> <span class="tag">#JavaScript</span></div>
+      <div class="divider"></div>
+      <button class="copy-btn" onclick="copyPost()">📋 Copy Plain Text for LinkedIn</button>
+    </div>
+
+    <p class="footer">Built with vibecoding — Cursor AI + Lovable.dev</p>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      flowchart: { curve: 'basis', padding: 20, nodeSpacing: 40, rankSpacing: 60 },
+      securityLevel: 'loose'
+    });
+
+    function copyPost() {
+      const text = `I built a full-stack IPL Prediction app for 30+ friends — and I hadn't touched JavaScript since Angular 1.5 in 2016.
+
+Back then, jQuery was the default, two-way data binding in Angular felt like magic, and "npm install" was the most advanced thing in my workflow. Fast forward a decade — I haven't written a single line of modern JS, React, or Node.js in between.
+
+Then IPL 2026 was around the corner, and I thought: what if I just... described what I wanted and let AI build it?
+
+Some context — the existing webapp I was replacing:
+Last year, I built an IPL prediction webapp with what I knew — basic HTML, CSS, vanilla JS, and backend APIs. It was a single ~590-line HTML file: inline styles, inline scripts, match data hardcoded as a giant JSON array in a <script> tag, plain text email validation against a JS array, radio buttons for team selection, raw DOM manipulation (document.createElement, innerHTML concatenation), sections toggled via display:none/block, and a next-match countdown timer with a manually hardcoded date. It worked — but it was fragile, hard to extend, and looked like it was built in 2010.
+
+What vibecoding turned it into:
+I fed the existing webapp into Lovable.dev as context and described what I wanted the modernized version to look like. Here's what changed — every single upgrade vibecoded:
+
+→ Single HTML monolith → separated React SPA + Express REST API + Supabase PostgreSQL (3-tier architecture)
+→ Blue background with Arial font → dark-mode-first UI with Tailwind CSS, shadcn/ui components, and Framer Motion animations
+→ Plain text email input → masked 6-digit OTP (password-type, auto-submit on 6 digits, clipboard paste, server-side validation)
+→ Radio buttons → styled interactive team cards with active-state glow and disabled states
+→ Global JS variables and innerHTML → TanStack React Query for server state, React hooks for local state, declarative caching
+→ String-concatenated HTML tables → sortable leaderboard with gold/silver/bronze accents, grouped by league, with a "Last 5" W/L form guide
+→ Manual hardcoded countdown date → auto-computed next-match countdown scanning the full schedule, per-match cutoff timers
+→ onclick + display:none navigation → Framer Motion tab transitions with layoutId animated indicator
+→ No admin tools → full email-whitelisted admin console with unbid generation, winner declaration, and scoring trigger
+→ External backend API calls → dedicated Express.js backend with 6 endpoints, server-side cutoff enforcement, CORS lockdown, and a pari-mutuel scoring engine
+
+Here's what I vibecoded in under a week:
+
+🏏 IPL Predictor 2026 — a private prediction league where 30+ friends pick IPL match winners, earn or lose points based on outcomes, and compete on a live leaderboard across the entire tournament.
+
+What vibecoding looked like in practice:
+I didn't write code in the traditional sense. I opened Lovable.dev, described the app I wanted based for modernizing the existing webapp I created using my limited HTML, CSS, JS and DB knowledge for last year — and it scaffolded a full React + TypeScript + Tailwind project in minutes. And added all the additional features on top of this basic working template. All by vibecoding. From there, every feature was built in Cursor AI's agent mode: I described what I needed in plain English, the AI generated the implementation, I reviewed the logic, tested it, and iterated. When something broke, I pasted the error back and said "fix this." When I wanted a new feature, I described the behaviour and the AI wired up the frontend component, the Express route, and the Supabase query together.
+
+I didn't read the React docs. I didn't learn Express from scratch. I didn't study TanStack Query's API. I described intent, and AI translated it into working code — across the entire stack.
+
+The user experience I shipped:
+→ Users pick their name from a dropdown and authenticate with a masked 6-digit OTP — digits render as dots, auto-submit fires the moment the 6th digit is entered, and clipboard paste distributes digits across all fields
+→ Today's IPL matches appear with live countdown timers ticking to the 15-minute pre-match cutoff
+→ Users pick the winning team; the form locks reactively when the timer hits zero — and the backend independently rejects late submissions with a 403
+→ Changed your mind? Submit again — only the latest prediction counts
+→ Missed a match? The admin auto-generates default predictions so everyone stays in the standings
+
+The scoring engine I described into existence:
+→ Pari-mutuel model: incorrect predictors lose their points, and the combined total is pooled and redistributed equally among the correct predictors
+→ Weighted user multipliers (1x, 2x, 5x) — configured in a server-side map — scale both stakes and rewards proportionally
+→ Playoff escalation: base 20 points for league matches, 50 for qualifiers, 100 for the final
+→ One admin click triggers a full server-side pipeline: fetch all predictions from final_prediction → group by league → apply multipliers → compute matchWinAmount per player → write to matchdata → read previous leaderboard → compute cumulative totals → insert new leaderboard rows
+→ "No Result" edge case (rain/abandonment) handled separately — carries forward the previous leaderboard with zero points for that match, so cumulative standings remain intact
+
+The dashboard features — all vibecoded:
+→ A ranked leaderboard sorted by cumulative points, with gold/silver/bronze left-border accents on the top 3, grouped independently per league (G1, G2)
+→ A "Last 5" form guide column — glowing green dots for wins, red for losses — dynamically computed by querying the 5 most recent distinct match numbers from the leaderboard table. No hardcoded match IDs, no manual config — it's a sliding window that advances automatically
+→ A detailed prediction log per match showing who picked which team after the cutoff.
+→ A detailed prediction log per player showing the list of all predictions for the match before the cutoff.
+→ A full schedule of 70+ remaining IPL 2026 matches
+
+The technical stack — all new to me, all vibecoded:
+→ React 18 + TypeScript + Vite 5 (SWC plugin) as the frontend SPA with React Router v6 for routing
+→ Tailwind CSS 3 + shadcn/ui (Radix UI primitives) + Framer Motion for a dark-mode UI with animated tab transitions, row fade-ins, and layout animations
+→ TanStack React Query v5 for declarative data fetching with queryKey caching, parallel queries, and cache invalidation after mutations
+→ Node.js (ES Modules) + Express.js backend with 10 REST endpoints, input validation on all routes, and CORS locked to the production domain
+→ Supabase (PostgreSQL) with 8 tables and 3 RPC stored procedures for complex server-side queries
+→ Deployed as two separate services on Render.com with a health-check keep-alive endpoint and Vite dev proxy for local development
+
+What I learned about vibecoding:
+→ It's not "no-code" — you still need to understand what you're building, why a pari-mutuel model works, how cutoff enforcement should work on both client and server, why you need cache invalidation after a mutation
+→ The skill isn't writing syntax — it's decomposing problems clearly enough that AI can generate correct implementations
+→ When it breaks, you debug by describing the symptom. When you want a feature, you describe the behaviour. The feedback loop is: intent → generation → review → iterate
+→ I went from "I don't know what useEffect does" to shipping a production app with React hooks, TanStack Query, Framer Motion animations, and Express middleware — in days, not months
+
+10 years away from JavaScript. Zero modern JS experience going in. One week of vibecoding. A production app used by 30+ people every single day of IPL 2026.
+
+The barrier to building software has fundamentally shifted. You don't need to master every framework. You need the ability to think clearly about what you're building — and the tools will meet you there.
+
+If you've been away from coding and think you've "fallen behind" — you haven't. The tools have caught up to you.
+
+#Vibecoding #AI #BuildInPublic #CursorAI #Lovable #IPL2026 #React #Supabase #FullStack #SoftwareEngineering #JavaScript`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = '✅ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '📋 Copy Plain Text for LinkedIn';
+          btn.classList.remove('copied');
+        }, 2500);
+      });
+    }
+  </script>
+</body>
+</html>
