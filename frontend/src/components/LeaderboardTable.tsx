@@ -25,6 +25,13 @@ interface FormEntry {
 type SortKey = "name" | "amount" | "winAmount";
 
 const LeaderboardTable = () => {
+  const activeEmail = localStorage.getItem("email")?.toLowerCase() ?? "";
+  const activeNames = new Set(
+    members
+      .filter((m) => m.Email.toLowerCase() === activeEmail)
+      .map((m) => m.Name)
+  );
+
   const { data = [], isLoading, isError } = useQuery({
   queryKey: ["leaderboard"],
   queryFn: async () => {
@@ -141,13 +148,14 @@ if (isError) return <div className="text-center py-20 text-destructive text-sm">
       data={g.data}
       toggleSort={toggleSort}
       formMap={formMap}
+      activeNames={activeNames}
     />
   ))}
 </motion.div>
   );
 };
 
-const LeaderboardGroup = ({ title, data, toggleSort, formMap }: any) => {
+const LeaderboardGroup = ({ title, data, toggleSort, formMap, activeNames }: any) => {
 
   const columns = [
     { key: "name", label: "Name" },
@@ -201,13 +209,14 @@ const LeaderboardGroup = ({ title, data, toggleSort, formMap }: any) => {
           <tbody>
             {data.map((entry: LeaderEntry, i: number) => {
               const form = formMap[`${entry.name}_${entry.group}`] || [];
+              const isActiveUser = activeNames.has(entry.name);
               return (
               <motion.tr
                 key={i}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.02 }}
-                className={`border-b border-border/50 hover:bg-secondary/30 ${getRankStyle(i)}`}
+                className={`border-b border-border/50 hover:bg-secondary/30 ${getRankStyle(i)} ${isActiveUser ? "bg-primary/10 font-semibold" : ""}`}
               >
                 <td className="px-4 py-3 font-mono">{i + 1}</td>
                 <td className="px-4 py-3 font-medium">{entry.name}</td>

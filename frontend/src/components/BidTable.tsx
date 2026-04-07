@@ -5,6 +5,7 @@ import { api } from "@/api/api";
 import { aggregateBidsByMatch } from "@/lib/utils";
 import EmailGate from "@/components/EmailGate";
 import { ArrowUpDown } from "lucide-react";
+import { members } from "@/data/members";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 
 type SortKey = "Name" | "selectedValue";
@@ -12,6 +13,12 @@ type SortKey = "Name" | "selectedValue";
 const activeUser = localStorage.getItem("email");
 //console.log(`local email: ${activeUser}`);
 const BidTable = () => {
+  const activeNames = new Set(
+    members
+      .filter((m) => m.Email.toLowerCase() === (activeUser?.toLowerCase() ?? ""))
+      .map((m) => m.Name)
+  );
+
   const { data: bids = [], isLoading, isError } = useQuery({
   queryKey: ["bids", activeUser],
   queryFn: () => api.getBids(activeUser),
@@ -248,15 +255,18 @@ const BidTable = () => {
           </thead>
 
           <tbody>
-            {groupBlock.data.map((bid: any, i: number) => (
-              <tr key={`${bid.Name}-${bid.matchNumber}-${i}`}>
+            {groupBlock.data.map((bid: any, i: number) => {
+              const isActiveUser = activeNames.has(bid.Name ?? bid.name);
+              return (
+              <tr key={`${bid.Name}-${bid.matchNumber}-${i}`} className={isActiveUser ? "bg-primary/10 font-semibold" : ""}>
                 <td className="px-4 py-2">{i + 1}</td>
                 <td className="px-4 py-2">{bid.Name ?? bid.name}</td>
                 <td className="px-4 py-2">{bid.matchNumber}</td>
                 <td className="px-4 py-2">{bid.selectedValue}</td>
                 <td className="px-4 py-2">{bid.group}</td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

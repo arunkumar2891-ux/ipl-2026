@@ -378,7 +378,7 @@ flowchart TD
           <tr>
             <td>Leaderboard</td>
             <td>Basic HTML table built via string concatenation (html += &lt;tr&gt;...), no sorting, no ranking visuals, no grouping</td>
-            <td>Sortable leaderboard with column click sorting, grouped by league (G1/G2), gold/silver/bronze border accents, row fade-in animations, and a "Last 5" form guide with glowing W/L dots</td>
+            <td>Sortable leaderboard with column click sorting, grouped by league (G1/G2), gold/silver/bronze border accents, row fade-in animations, and a "Last 5" form guide with glowing green (W), red (L), and orange (NR) dots</td>
           </tr>
           <tr>
             <td>Backend / APIs</td>
@@ -427,7 +427,7 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Last 5 Form Guide</h4>
-          <p>Dedicated GET /api/leaderboard/form endpoint queries the leaderboard table, extracts the 5 most recent distinct match numbers via Set + sort + slice, fetches matchwinamount for each user across those matches, and classifies positive values as "W" and non-positive as "L". Frontend renders the result as glowing CSS dots (box-shadow with rgba glow) with hover tooltips showing "Match N: Won/Lost". The sliding window advances automatically — zero manual config needed.</p>
+          <p>Dedicated GET /api/leaderboard/form endpoint queries the leaderboard table, extracts the 5 most recent distinct match numbers via Set + sort + slice, fetches matchwinamount for each user across those matches, and classifies: positive = "W", zero = "NR" (no result), negative = "L". Frontend renders three dot colors — glowing green for wins, orange for no-result, red for losses (CSS box-shadow with rgba glow) — with hover tooltips showing "Match N: Won/Lost/No Result". The sliding window advances automatically — zero manual config needed.</p>
         </div>
         <div class="feature-card">
           <h4>Multi-Group Prediction</h4>
@@ -436,6 +436,10 @@ flowchart TD
         <div class="feature-card">
           <h4>Admin Console</h4>
           <p>Email-whitelisted via a Supabase admins table check (GET /api/admin/checkAdmin). Fetches today's match numbers and team names via RPC get_todaymatches. "Generate Unbids" calls RPC insert_unbid_predictions to backfill default entries for users who didn't predict. "Declare Winner" triggers the full scoring pipeline — matchdata write + leaderboard update — in one click. The admin can also switch the active user email for testing.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Active User Highlighting</h4>
+          <p>The logged-in user's row is highlighted across both the leaderboard and bid details tables. The active email is read from localStorage, matched against the members array to resolve name(s), and a Set lookup applies bg-primary/10 + font-semibold to matching rows — so users can instantly spot themselves in the standings and prediction logs.</p>
         </div>
         <div class="feature-card">
           <h4>Dark-Mode UI with Animations</h4>
@@ -543,8 +547,8 @@ I didn't read the React docs. I didn't learn Express from scratch. I didn't stud
 → "No Result" edge case (rain/abandonment) handled separately — carries forward the previous leaderboard with zero points for that match, so cumulative standings remain intact
 
 <span class="highlight">The dashboard features — all vibecoded:</span>
-→ A ranked leaderboard sorted by cumulative points, with gold/silver/bronze left-border accents on the top 3, grouped independently per league (G1, G2)
-→ A "Last 5" form guide column — glowing green dots for wins, red for losses — dynamically computed by querying the 5 most recent distinct match numbers from the leaderboard table. No hardcoded match IDs, no manual config — it's a sliding window that advances automatically
+→ A ranked leaderboard sorted by cumulative points, with gold/silver/bronze left-border accents on the top 3, grouped independently per league (G1, G2). The logged-in user's row is highlighted so you can instantly spot yourself in the standings
+→ A "Last 5" form guide column — glowing green dots for wins, red for losses, orange for no-result (rain/abandonment) — dynamically computed by querying the 5 most recent distinct match numbers from the leaderboard table. No hardcoded match IDs, no manual config — it's a sliding window that advances automatically
 → A detailed prediction log per match showing who picked which team after the cutoff.
 → A detailed prediction log per player showing the list of all predictions for the match before the cutoff.
 → A full schedule of 70+ remaining IPL 2026 matches
@@ -633,8 +637,8 @@ The scoring engine I described into existence:
 → "No Result" edge case (rain/abandonment) handled separately — carries forward the previous leaderboard with zero points for that match, so cumulative standings remain intact
 
 The dashboard features — all vibecoded:
-→ A ranked leaderboard sorted by cumulative points, with gold/silver/bronze left-border accents on the top 3, grouped independently per league (G1, G2)
-→ A "Last 5" form guide column — glowing green dots for wins, red for losses — dynamically computed by querying the 5 most recent distinct match numbers from the leaderboard table. No hardcoded match IDs, no manual config — it's a sliding window that advances automatically
+→ A ranked leaderboard sorted by cumulative points, with gold/silver/bronze left-border accents on the top 3, grouped independently per league (G1, G2). The logged-in user's row is highlighted so you can instantly spot yourself in the standings
+→ A "Last 5" form guide column — glowing green dots for wins, red for losses, orange for no-result (rain/abandonment) — dynamically computed by querying the 5 most recent distinct match numbers from the leaderboard table. No hardcoded match IDs, no manual config — it's a sliding window that advances automatically
 → A detailed prediction log per match showing who picked which team after the cutoff.
 → A detailed prediction log per player showing the list of all predictions for the match before the cutoff.
 → A full schedule of 70+ remaining IPL 2026 matches

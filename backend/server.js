@@ -539,9 +539,10 @@ app.get("/api/leaderboard/form", async (req, res) => {
         formMap[key] = { name: row.name, group: row.bgroup, form: [] };
       }
       //No Result Logic
+      const amt = row.matchwinamount ?? 0;
       formMap[key].form.push({
         match: row.matchnumber,
-        result: row.matchwinamount > 0 ? "W" : row.matchwinamount === 0 ? "NR" : "L"
+        result: amt > 0 ? "W" : amt === 0 ? "NR" : "L"
       });
     });
 

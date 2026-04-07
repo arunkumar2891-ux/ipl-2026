@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IPL Predictor 2026 — LinkedIn Post</title>
+  <title>IPL Predictor 2026 — Design</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
     :root {
@@ -218,7 +218,7 @@
 <body>
   <div class="container">
     <h1>IPL Predictor 2026</h1>
-    <p class="subtitle">Architecture Overview &amp; LinkedIn Post Draft</p>
+    <p class="subtitle">Architecture Overview &amp; Design Document</p>
 
     <!-- MERMAID DIAGRAM -->
     <div class="section">
@@ -378,7 +378,7 @@ flowchart TD
           <tr>
             <td>Leaderboard</td>
             <td>Basic HTML table built via string concatenation (html += &lt;tr&gt;...), no sorting, no ranking visuals, no grouping</td>
-            <td>Sortable leaderboard with column click sorting, grouped by league (G1/G2), gold/silver/bronze border accents, row fade-in animations, and a "Last 5" form guide with glowing W/L dots</td>
+            <td>Sortable leaderboard with column click sorting, grouped by league (G1/G2), gold/silver/bronze border accents, row fade-in animations, and a "Last 5" form guide with glowing green (W), red (L), and orange (NR) dots</td>
           </tr>
           <tr>
             <td>Backend / APIs</td>
@@ -427,7 +427,7 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Last 5 Form Guide</h4>
-          <p>Dedicated GET /api/leaderboard/form endpoint queries the leaderboard table, extracts the 5 most recent distinct match numbers via Set + sort + slice, fetches matchwinamount for each user across those matches, and classifies positive values as "W" and non-positive as "L". Frontend renders the result as glowing CSS dots (box-shadow with rgba glow) with hover tooltips showing "Match N: Won/Lost". The sliding window advances automatically — zero manual config needed.</p>
+          <p>Dedicated GET /api/leaderboard/form endpoint queries the leaderboard table, extracts the 5 most recent distinct match numbers via Set + sort + slice, fetches matchwinamount for each user across those matches, and classifies: positive = "W", zero = "NR" (no result), negative = "L". Frontend renders three dot colors — glowing green for wins, orange for no-result, red for losses (CSS box-shadow with rgba glow) — with hover tooltips showing "Match N: Won/Lost/No Result". The sliding window advances automatically — zero manual config needed.</p>
         </div>
         <div class="feature-card">
           <h4>Multi-Group Prediction</h4>
@@ -436,6 +436,10 @@ flowchart TD
         <div class="feature-card">
           <h4>Admin Console</h4>
           <p>Email-whitelisted via a Supabase admins table check (GET /api/admin/checkAdmin). Fetches today's match numbers and team names via RPC get_todaymatches. "Generate Unbids" calls RPC insert_unbid_predictions to backfill default entries for users who didn't predict. "Declare Winner" triggers the full scoring pipeline — matchdata write + leaderboard update — in one click. The admin can also switch the active user email for testing.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Active User Highlighting</h4>
+          <p>The logged-in user's row is highlighted across both the leaderboard and bid details tables. The active email is read from localStorage, matched against the members array to resolve name(s), and a Set lookup applies bg-primary/10 + font-semibold to matching rows — so users can instantly spot themselves in the standings and prediction logs.</p>
         </div>
         <div class="feature-card">
           <h4>Dark-Mode UI with Animations</h4>
@@ -490,86 +494,6 @@ flowchart TD
             <span class="pill orange">SPA _redirects</span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- LINKEDIN POST -->
-    <div class="section">
-      <h2>LinkedIn Post</h2>
-      <div class="linkedin-post" id="post-content">I built a full-stack IPL Prediction app for 30+ friends — and I hadn't touched JavaScript since Angular 1.5 in 2016.
-
-Back then, jQuery was the default, two-way data binding in Angular felt like magic, and "npm install" was the most advanced thing in my workflow. Fast forward a decade — I haven't written a single line of modern JS, React, or Node.js in between.
-
-Then IPL 2026 was around the corner, and I thought: what if I just... described what I wanted and let AI build it?
-
-<span class="highlight">Some context — the existing webapp I was replacing:</span>
-Last year, I built an IPL prediction webapp with what I knew — basic HTML, CSS, vanilla JS, and backend APIs. It was a single ~590-line HTML file: inline styles, inline scripts, match data hardcoded as a giant JSON array in a &lt;script&gt; tag, plain text email validation against a JS array, radio buttons for team selection, raw DOM manipulation (document.createElement, innerHTML concatenation), sections toggled via display:none/block, and a next-match countdown timer with a manually hardcoded date. It worked — but it was fragile, hard to extend, and looked like it was built in 2010.
-
-<span class="highlight">What vibecoding turned it into:</span>
-I fed the existing webapp into Lovable.dev as context and described what I wanted the modernized version to look like. Here's what changed — every single upgrade vibecoded:
-
-→ Single HTML monolith → separated React SPA + Express REST API + Supabase PostgreSQL (3-tier architecture)
-→ Blue background with Arial font → dark-mode-first UI with Tailwind CSS, shadcn/ui components, and Framer Motion animations
-→ Plain text email input → masked 6-digit OTP (password-type, auto-submit on 6 digits, clipboard paste, server-side validation)
-→ Radio buttons → styled interactive team cards with active-state glow and disabled states
-→ Global JS variables and innerHTML → TanStack React Query for server state, React hooks for local state, declarative caching
-→ String-concatenated HTML tables → sortable leaderboard with gold/silver/bronze accents, grouped by league, with a "Last 5" W/L form guide
-→ Manual hardcoded countdown date → auto-computed next-match countdown scanning the full schedule, per-match cutoff timers
-→ onclick + display:none navigation → Framer Motion tab transitions with layoutId animated indicator
-→ No admin tools → full email-whitelisted admin console with unbid generation, winner declaration, and scoring trigger
-→ External backend API calls → dedicated Express.js backend with 6 endpoints, server-side cutoff enforcement, CORS lockdown, and a pari-mutuel scoring engine
-
-Here's what I vibecoded in under a week:
-
-🏏 <span class="highlight">IPL Predictor 2026</span> — a private prediction league where 30+ friends pick IPL match winners, earn or lose points based on outcomes, and compete on a live leaderboard across the entire tournament.
-
-<span class="highlight">What vibecoding looked like in practice:</span>
-I didn't write code in the traditional sense. I opened Lovable.dev, described the app I wanted for modernizing the existing webapp I created using my limited HTML, CSS, JS and DB knowledge for last year — and it scaffolded a full React + TypeScript + Tailwind project in minutes. And added all the additional features on top of this basic working template. All by vibecoding. From there, every feature was built in Cursor AI's agent mode: I described what I needed in plain English, the AI generated the implementation, I reviewed the logic, tested it, and iterated. When something broke, I pasted the error back and said "fix this." When I wanted a new feature, I described the behaviour and the AI wired up the frontend component, the Express route, and the Supabase query together.
-
-I didn't read the React docs. I didn't learn Express from scratch. I didn't study TanStack Query's API. I described intent, and AI translated it into working code — across the entire stack.
-
-<span class="highlight">The user experience I shipped:</span>
-→ Users pick their name from a dropdown and authenticate with a masked 6-digit OTP — digits render as dots, auto-submit fires the moment the 6th digit is entered, and clipboard paste distributes digits across all fields
-→ Today's IPL matches appear with live countdown timers ticking to the 15-minute pre-match cutoff
-→ Users pick the winning team; the form locks reactively when the timer hits zero — and the backend independently rejects late submissions with a 403
-→ Changed your mind? Submit again — only the latest prediction counts
-→ Missed a match? The admin auto-generates default predictions so everyone stays in the standings
-
-<span class="highlight">The scoring engine I described into existence:</span>
-→ Pari-mutuel model: incorrect predictors lose their points, and the combined total is pooled and redistributed equally among the correct predictors
-→ Weighted user multipliers (1x, 2x, 5x) — configured in a server-side map — scale both stakes and rewards proportionally
-→ Playoff escalation: base 20 points for league matches, 50 for qualifiers, 100 for the final
-→ One admin click triggers a full server-side pipeline: fetch all predictions from final_prediction → group by league → apply multipliers → compute matchWinAmount per player → write to matchdata → read previous leaderboard → compute cumulative totals → insert new leaderboard rows
-→ "No Result" edge case (rain/abandonment) handled separately — carries forward the previous leaderboard with zero points for that match, so cumulative standings remain intact
-
-<span class="highlight">The dashboard features — all vibecoded:</span>
-→ A ranked leaderboard sorted by cumulative points, with gold/silver/bronze left-border accents on the top 3, grouped independently per league (G1, G2)
-→ A "Last 5" form guide column — glowing green dots for wins, red for losses — dynamically computed by querying the 5 most recent distinct match numbers from the leaderboard table. No hardcoded match IDs, no manual config — it's a sliding window that advances automatically
-→ A detailed prediction log per match showing who picked which team after the cutoff.
-→ A detailed prediction log per player showing the list of all predictions for the match before the cutoff.
-→ A full schedule of 70+ remaining IPL 2026 matches
-
-<span class="highlight">The technical stack — all new to me, all vibecoded:</span>
-→ React 18 + TypeScript + Vite 5 (SWC plugin) as the frontend SPA with React Router v6 for routing
-→ Tailwind CSS 3 + shadcn/ui (Radix UI primitives) + Framer Motion for a dark-mode UI with animated tab transitions, row fade-ins, and layout animations
-→ TanStack React Query v5 for declarative data fetching with queryKey caching, parallel queries, and cache invalidation after mutations
-→ Node.js (ES Modules) + Express.js backend with 10 REST endpoints, input validation on all routes, and CORS locked to the production domain
-→ Supabase (PostgreSQL) with 8 tables and 3 RPC stored procedures for complex server-side queries
-→ Deployed as two separate services on Render.com with a health-check keep-alive endpoint and Vite dev proxy for local development
-
-<span class="highlight">What I learned about vibecoding:</span>
-→ It's not "no-code" — you still need to understand what you're building, why a pari-mutuel model works, how cutoff enforcement should work on both client and server, why you need cache invalidation after a mutation
-→ The skill isn't writing syntax — it's decomposing problems clearly enough that AI can generate correct implementations
-→ When it breaks, you debug by describing the symptom. When you want a feature, you describe the behaviour. The feedback loop is: intent → generation → review → iterate
-→ I went from "I don't know what useEffect does" to shipping a production app with React hooks, TanStack Query, Framer Motion animations, and Express middleware — in days, not months
-
-10 years away from JavaScript. Zero modern JS experience going in. One week of vibecoding. A production app used by 30+ people every single day of IPL 2026.
-
-The barrier to building software has fundamentally shifted. You don't need to mass every framework. You need the ability to think clearly about what you're building — and the tools will meet you there.
-
-If you've been away from coding and think you've "fallen behind" — you haven't. The tools have caught up to you.
-
-<span class="tag">#Vibecoding</span> <span class="tag">#AI</span> <span class="tag">#BuildInPublic</span> <span class="tag">#CursorAI</span> <span class="tag">#Lovable</span> <span class="tag">#IPL2026</span> <span class="tag">#React</span> <span class="tag">#Supabase</span> <span class="tag">#FullStack</span> <span class="tag">#SoftwareEngineering</span> <span class="tag">#JavaScript</span></div>
       </div>
     </div>
 
