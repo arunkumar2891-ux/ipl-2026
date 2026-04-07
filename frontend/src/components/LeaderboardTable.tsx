@@ -19,7 +19,7 @@ interface LeaderEntry {
 interface FormEntry {
   name: string;
   group: string;
-  form: { match: number; result: "W" | "L" }[];
+  form: { match: number; result: "W" | "L" | "NR" }[];
 }
 
 type SortKey = "name" | "amount" | "winAmount";
@@ -219,10 +219,12 @@ const LeaderboardGroup = ({ title, data, toggleSort, formMap }: any) => {
                     {form.map((f: { match: number; result: string }, idx: number) => (
                       <span
                         key={idx}
-                        title={`Match ${f.match}: ${f.result === "W" ? "Won" : "Lost"}`}
+                        title={`Match ${f.match}: ${f.result === "W" ? "Won" : f.result === "NR" ? "No Result" : "Lost"}`}
                         className={`inline-block h-2.5 w-2.5 rounded-full ${
                           f.result === "W"
                             ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]"
+                            : f.result === "NR"
+                            ? "bg-orange-400 shadow-[0_0_6px_rgba(251,146,60,0.6)]"
                             : "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)]"
                         }`}
                       />

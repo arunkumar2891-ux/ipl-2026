@@ -538,9 +538,10 @@ app.get("/api/leaderboard/form", async (req, res) => {
       if (!formMap[key]) {
         formMap[key] = { name: row.name, group: row.bgroup, form: [] };
       }
+      //No Result Logic
       formMap[key].form.push({
         match: row.matchnumber,
-        result: row.matchwinamount > 0 ? "W" : "L"
+        result: row.matchwinamount > 0 ? "W" : row.matchwinamount === 0 ? "NR" : "L"
       });
     });
 
