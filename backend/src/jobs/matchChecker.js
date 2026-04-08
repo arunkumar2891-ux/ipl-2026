@@ -4,17 +4,15 @@ import { supabase } from "../lib/supabase.js";
 const CRIC_API_URL =
   "https://api.cricapi.com/v1/currentMatches?apikey=32873d41-895d-4066-8015-c354cc70046f&offset=0";
 
-const CHECK_WINDOW_BEFORE_MS = 20 * 60 * 1000;  // start checking 20 min before match
-const CHECK_WINDOW_DURATION_MS = 4 * 60 * 60 * 1000; // keep checking for 4 hours
-const POSTPONE_OFFSET_MS = 25 * 60 * 1000; // push dateutc by 25 min from now
+const IPL_MAX_MATCH = 74;
+const CHECK_WINDOW_BEFORE_MS = 20 * 60 * 1000;
+const CHECK_WINDOW_DURATION_MS = 4 * 60 * 60 * 1000;
+const POSTPONE_OFFSET_MS = 25 * 60 * 1000;
 
-// Tracks matches already found in the API so we stop rechecking them.
-// Keyed by matchnumber. Cleared daily at midnight.
 const foundMatches = new Set();
 
 // Stores the *original* scheduled start times fetched on first check of the day,
 // so that pushing dateutc forward doesn't shift the check window end.
-// Keyed by matchnumber → original dateutc ISO string.
 const originalStartTimes = {};
 
 function clearDailyState() {
@@ -31,9 +29,11 @@ async function fetchTodayFixtures() {
     new Date(todayStart).getTime() + 24 * 60 * 60 * 1000
   ).toISOString();
 
+  console.log(`[MatchChecker] Querying fixtures: ${todayStart} to ${tomorrowStart}`);
+
   const { data, error } = await supabase
     .from("fixtures")
-    .select("matchnumber, dateutc, home, away")
+    .select("id, matchnumber, dateutc, home, away")
     .gte("dateutc", todayStart)
     .lt("dateutc", tomorrowStart)
     .order("dateutc", { ascending: true });
@@ -74,12 +74,15 @@ function isMatchInApiResponse(apiMatches, homeTeam, awayTeam) {
   });
 }
 
-async function updateFixtureTime(matchnumber) {
+async function updateFixtureTime(fixtureId, matchnumber) {
   const newTime = new Date(Date.now() + POSTPONE_OFFSET_MS);
+  newTime.setSeconds(0, 0);
+  const newTimeISO = newTime.toISOString();
+
   const { error } = await supabase
     .from("fixtures")
-    .update({ dateutc: newTime.toISOString() })
-    .eq("matchnumber", matchnumber);
+    .update({ dateutc: newTimeISO })
+    .eq("id", fixtureId);
 
   if (error) {
     console.error(
@@ -88,21 +91,11 @@ async function updateFixtureTime(matchnumber) {
     );
   } else {
     console.log(
-      `[MatchChecker] Match ${matchnumber} NOT found in API. dateutc pushed to ${newTime.toISOString()} (now + 25 min)`
+      `[MatchChecker] Match ${matchnumber} NOT found in API. dateutc pushed to ${newTimeISO}`
     );
   }
 }
 
-/**
- * Check window for each match is based on its *original* scheduled start time:
- *   windowStart = originalStart - 20 minutes
- *   windowEnd   = windowStart + 4 hours
- *
- * Example: match at 7:30 PM IST → check from 7:10 PM to 11:10 PM IST.
- *
- * The original start time is captured the first time we see the fixture each day,
- * so that subsequent dateutc pushes don't keep extending the window.
- */
 function isInCheckWindow(fixture) {
   const mn = fixture.matchnumber;
 
@@ -126,6 +119,8 @@ async function checkMatches() {
     console.log("[MatchChecker] No fixtures today, skipping.");
     return;
   }
+
+  console.log("[MatchChecker] Today's fixtures from DB:", JSON.stringify(fixtures));
 
   const fixturesToCheck = fixtures.filter(
     (f) => !foundMatches.has(f.matchnumber) && isInCheckWindow(f)
@@ -157,7 +152,7 @@ async function checkMatches() {
         `[MatchChecker] Match #${fixture.matchnumber} (${fixture.home} vs ${fixture.away}) FOUND in API — stopping further checks for this match.`
       );
     } else {
-      await updateFixtureTime(fixture.matchnumber);
+      await updateFixtureTime(fixture.id, fixture.matchnumber);
     }
   }
 }
@@ -169,7 +164,6 @@ export function startMatchChecker() {
     );
   });
 
-  // Reset found-matches and original start times at midnight UTC every day
   cron.schedule("0 0 * * *", clearDailyState);
 
   console.log("[MatchChecker] Scheduled — checks every 10 min, resets daily at midnight UTC.");
