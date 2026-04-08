@@ -213,6 +213,37 @@
     .comparison-table td:nth-child(3) { color: #6ee7b7; }
 
     .comparison-table tr:last-child td { border-bottom: none; }
+
+    /* ---- Mobile responsive ---- */
+    @media (max-width: 768px) {
+      body { padding: 1rem 0.5rem; }
+
+      h1 { font-size: 1.5rem; }
+
+      .section { padding: 1rem; }
+
+      .mermaid-wrapper svg {
+        min-width: 600px;
+        min-height: 500px;
+      }
+
+      .stack-grid { grid-template-columns: 1fr; }
+
+      .feature-grid { grid-template-columns: 1fr; }
+
+      .comparison-table { font-size: 0.75rem; display: block; overflow-x: auto; }
+      .comparison-table td:first-child { white-space: normal; }
+      .comparison-table th, .comparison-table td { padding: 0.5rem 0.6rem; }
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 1.25rem; }
+      .subtitle { font-size: 0.8rem; }
+      .section h2 { font-size: 1rem; }
+      .pill { font-size: 0.7rem; padding: 0.2rem 0.6rem; }
+      .feature-card p { font-size: 0.75rem; }
+      .comparison-table { font-size: 0.7rem; }
+    }
   </style>
 </head>
 <body>
