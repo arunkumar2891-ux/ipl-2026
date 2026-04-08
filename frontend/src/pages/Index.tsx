@@ -26,6 +26,8 @@ const Index = () => {
   const { data: todaysMatches = [], isLoading: loadingToday } = useQuery<MatchDataItem[]>({
     queryKey: ["fixtures-today"],
     queryFn: api.getTodaysFixtures,
+    staleTime: 0,
+    refetchOnMount: "always",
     refetchInterval: 5 * 60 * 1000,
   });
 
