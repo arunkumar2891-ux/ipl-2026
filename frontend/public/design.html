@@ -214,23 +214,13 @@
 
     .comparison-table tr:last-child td { border-bottom: none; }
 
-    /* ---- Mobile responsive ---- */
     @media (max-width: 768px) {
       body { padding: 1rem 0.5rem; }
-
       h1 { font-size: 1.5rem; }
-
       .section { padding: 1rem; }
-
-      .mermaid-wrapper svg {
-        min-width: 600px;
-        min-height: 500px;
-      }
-
+      .mermaid-wrapper svg { min-width: 600px; min-height: 500px; }
       .stack-grid { grid-template-columns: 1fr; }
-
       .feature-grid { grid-template-columns: 1fr; }
-
       .comparison-table { font-size: 0.75rem; display: block; overflow-x: auto; }
       .comparison-table td:first-child { white-space: normal; }
       .comparison-table th, .comparison-table td { padding: 0.5rem 0.6rem; }
@@ -482,7 +472,7 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Fixtures DB &amp; Auto-Postpone</h4>
-          <p>Match schedule stored in a Supabase fixtures table ù the single source of truth. The backend prediction endpoint fetches match start time from fixtures rather than trusting client input, making cutoff enforcement fully server-authoritative. A node-cron background job (matchChecker.js) runs every 10 minutes: it queries today's fixtures, cross-checks against the live CricAPI to verify whether each match has actually started, and if a match is NOT found in the API within its check window, it auto-pushes dateutc forward by 25 minutes ù effectively extending the prediction cutoff for rain delays, toss delays, or late starts. Once the match appears in the live API, it stops checking. Daily state resets at midnight UTC.</p>
+          <p>Match schedule stored in a Supabase fixtures table ù the single source of truth ù with a matchstarted flag column. The backend prediction endpoint fetches match start time from fixtures rather than trusting client input, making cutoff enforcement fully server-authoritative. A node-cron background job (matchChecker.js) runs every 10 minutes: it queries today's unstarted fixtures (matchstarted = "N"), cross-checks against the live CricAPI to verify whether each match has actually started. If found, it marks the fixture as started (matchstarted = "Y") in the DB. If NOT found within the check window, it auto-pushes dateutc forward by 25 minutes ù extending the prediction cutoff for rain delays or late starts. All state is persisted in the DB ù no in-memory tracking needed.</p>
         </div>
       </div>
     </div>
