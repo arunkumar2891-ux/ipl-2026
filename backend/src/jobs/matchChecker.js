@@ -74,9 +74,18 @@ function isMatchInApiResponse(apiMatches, homeTeam, awayTeam) {
   });
 }
 
-async function updateFixtureTime(fixtureId, matchnumber) {
+async function updateFixtureTime(fixtureId, matchnumber, currentDateutc) {
   const newTime = new Date(Date.now() + POSTPONE_OFFSET_MS);
   newTime.setSeconds(0, 0);
+
+  const currentTime = new Date(currentDateutc);
+  if (newTime <= currentTime) {
+    console.log(
+      `[MatchChecker] Match ${matchnumber} dateutc (${currentDateutc}) is already ahead of now+25min (${newTime.toISOString()}). Skipping update.`
+    );
+    return;
+  }
+
   const newTimeISO = newTime.toISOString();
 
   const { error } = await supabase
@@ -152,7 +161,7 @@ async function checkMatches() {
         `[MatchChecker] Match #${fixture.matchnumber} (${fixture.home} vs ${fixture.away}) FOUND in API — stopping further checks for this match.`
       );
     } else {
-      await updateFixtureTime(fixture.id, fixture.matchnumber);
+      await updateFixtureTime(fixture.id, fixture.matchnumber, fixture.dateutc);
     }
   }
 }
