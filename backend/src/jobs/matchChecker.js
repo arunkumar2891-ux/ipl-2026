@@ -112,10 +112,15 @@ function isInCheckWindow(fixture) {
     originalStartTimes[mn] = fixture.dateutc;
   }
 
-  const originalStart = new Date(originalStartTimes[mn]).getTime();
-  const windowStart = originalStart - CHECK_WINDOW_BEFORE_MS;
-  const windowEnd = windowStart + CHECK_WINDOW_DURATION_MS;
   const now = Date.now();
+  const currentStart = new Date(fixture.dateutc).getTime();
+  const originalStart = new Date(originalStartTimes[mn]).getTime();
+  const maxWindowEnd = originalStart - CHECK_WINDOW_BEFORE_MS + CHECK_WINDOW_DURATION_MS;
+
+  const closeEnough = now >= currentStart - CHECK_WINDOW_BEFORE_MS;
+  const withinMaxWindow = now <= maxWindowEnd;
+
+  return closeEnough && withinMaxWindow;
 
   return now >= windowStart && now <= windowEnd;
 }
