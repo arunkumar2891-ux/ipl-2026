@@ -450,8 +450,8 @@ flowchart TD
           <p>TanStack React Query v5 manages all server state with declarative queryKey-based caching. Leaderboard and form guide queries run in parallel on mount. Today's matches and upcoming fixtures are fetched via dedicated API endpoints with 5-minute auto-refetch intervals. After a prediction submission, queryClient.refetchQueries invalidates the bids cache so the prediction log updates instantly. The backend uses Supabase JS client with .select(), .eq(), .in(), .order(), .maybeSingle() for type-safe query building, and .rpc() for stored procedures. API inputs are validated and sanitized on both ends ù email params are encodeURIComponent'd on the client and trimmed on the server, with proper Array.isArray() safety checks on all RPC responses.</p>
         </div>
         <div class="feature-card">
-          <h4>Fixtures as Single Source of Truth</h4>
-          <p>Match schedule migrated from a hardcoded frontend TypeScript module to a Supabase fixtures table ù the single source of truth for all match data (matchnumber, dateutc, home, away, location). The backend prediction endpoint now fetches the match start time from the fixtures table rather than trusting client-supplied matchStartUtc, making cutoff enforcement fully server-authoritative. Two new endpoints (GET /api/fixtures/today and GET /api/fixtures/upcoming) serve the frontend with date-range filtered queries, eliminating stale hardcoded data.</p>
+          <h4>Fixtures DB &amp; Auto-Postpone</h4>
+          <p>Match schedule stored in a Supabase fixtures table ù the single source of truth. The backend prediction endpoint fetches match start time from fixtures rather than trusting client input, making cutoff enforcement fully server-authoritative. A node-cron background job (matchChecker.js) runs every 10 minutes: it queries today's fixtures, cross-checks against the live CricAPI to verify whether each match has actually started, and if a match is NOT found in the API within its check window, it auto-pushes dateutc forward by 25 minutes ù effectively extending the prediction cutoff for rain delays, toss delays, or late starts. Once the match appears in the live API, it stops checking. Daily state resets at midnight UTC.</p>
         </div>
       </div>
     </div>
@@ -484,6 +484,8 @@ flowchart TD
             <span class="pill green">PostgreSQL</span>
             <span class="pill green">RPC Stored Procedures</span>
             <span class="pill green">CORS Lockdown</span>
+            <span class="pill green">node-cron</span>
+            <span class="pill green">CricAPI Integration</span>
             <span class="pill green">dotenv</span>
           </div>
         </div>
