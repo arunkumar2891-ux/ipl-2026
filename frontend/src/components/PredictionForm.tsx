@@ -69,7 +69,6 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled }: PredictionFor
 	
     try {
 	  //console.log("api object:", api);
-      localStorage.setItem("email", selectedEmail.toLowerCase());
 	  await api.otp({
         email: selectedEmail.trim().toLowerCase(),//email.trim().toLowerCase(),
         flow: "validateOTP",
@@ -124,6 +123,8 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled }: PredictionFor
 	  console.log("email", selectedEmail);
 	  console.log("matchId", matchId);
 	  console.log("selectedTeam", selectedTeam);*/
+    localStorage.setItem("email", selectedEmail.toLowerCase());
+    //console.log("email", localStorage.getItem("email"));
 	const result = await Promise.all(
 	  userGroups.map((group) => {
 		//console.log("Submitting prediction for group:", group);
