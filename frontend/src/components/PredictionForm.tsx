@@ -12,7 +12,6 @@ interface PredictionFormProps {
   homeTeam: string;
   awayTeam: string;
   disabled: boolean;
-  matchStart: string;
 }
 
 interface OtpInputProps {
@@ -21,7 +20,7 @@ interface OtpInputProps {
   disabled?: boolean;
 }
 
-const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled, matchStart }: PredictionFormProps) => {
+const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled }: PredictionFormProps) => {
   const queryClient = useQueryClient();
   //const [email, setEmail] = useState("");
   const [selectedEmail, setSelectedEmail] = useState("");
@@ -134,7 +133,6 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled, matchStart }: P
 		  group,
 		  name: selectedName,
 		  matchNumber: matchId,
-		  matchStartUtc: matchStart,
 		  selectedTeam,
 		});
 	  })

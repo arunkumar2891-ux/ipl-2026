@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, Target, BarChart3, Calendar,Settings, Shield } from "lucide-react";
 import MatchCard from "@/components/MatchCard";
@@ -7,7 +8,8 @@ import BidTable from "@/components/BidTable";
 import AdminConsole from "@/components/AdminConsole";
 import UpcomingMatches from "@/components/UpcomingMatches";
 import NextMatchCountdown from "@/components/NextMatchCountdown";
-import { matchData, getTodaysMatches } from "@/data/matchData";
+import { api } from "@/api/api";
+import { MatchDataItem, getUpcomingMatches } from "@/data/matchData";
 
 const tabs = [
   { id: "predict", label: "Submit Bid", icon: Target },
@@ -20,7 +22,14 @@ type TabId = (typeof tabs)[number]["id"];
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabId>("predict");
-  const todaysMatches = getTodaysMatches();
+
+  const { data: todaysMatches = [], isLoading: loadingToday } = useQuery<MatchDataItem[]>({
+    queryKey: ["fixtures-today"],
+    queryFn: api.getTodaysFixtures,
+    refetchInterval: 5 * 60 * 1000,
+  });
+
+  const upcomingMatches = getUpcomingMatches();
   //console.log(import.meta.env.VITE_API_URL);
   return (
     <div className="min-h-screen bg-background">
@@ -83,7 +92,11 @@ const Index = () => {
               transition={{ duration: 0.3 }}
               className="space-y-8"
             >
-              {todaysMatches.length === 0 ? (
+              {loadingToday ? (
+                <div className="text-center py-12 text-muted-foreground text-sm card-surface p-8">
+                  <p>Loading today's matches...</p>
+                </div>
+              ) : todaysMatches.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground text-sm card-surface p-8">
                   <p className="text-lg mb-2">🏏</p>
                   <p>Relax… No fours, no sixes and most importantly no wrong predictions possible today</p>

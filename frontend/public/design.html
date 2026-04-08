@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IPL Predictor 2026 ‚Äî Design</title>
+  <title>IPL Predictor 2026 ù Design</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
     :root {
@@ -227,21 +227,21 @@
         <pre class="mermaid">
 %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#3b82f6', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#60a5fa', 'lineColor': '#475569', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0f172a', 'background': '#0f172a', 'mainBkg': '#1e293b', 'nodeBorder': '#60a5fa', 'clusterBkg': '#1e293b', 'clusterBorder': '#334155', 'edgeLabelBackground': '#1e293b' }}}%%
 flowchart TD
-    subgraph FE ["Frontend ‚Äî React 18 + TypeScript SPA"]
-        A["üë§ User Opens App"] --> B["üìã Select Name from\nRegistered Members"]
-        B --> B2["üîí Enter Masked 6-digit OTP\n(password input + paste support)"]
+    subgraph FE ["Frontend ù React 18 + TypeScript SPA"]
+        A["?? User Opens App"] --> B["?? Select Name from\nRegistered Members"]
+        B --> B2["?? Enter Masked 6-digit OTP\n(password input + paste support)"]
         B2 -->|auto-submit on 6 digits| C{"OTP Valid?"}
         C -- Invalid OTP --> B2
-        C -- Valid OTP --> D["üèè View Today's Matches\nw/ Live Countdown Timer"]
-        D --> E["üéØ Pick Winner\n(locks 15 min before start)"]
-        E --> F["üìä View Dashboard"]
-        F --> F1["üèÜ Leaderboard\nRanked by points ¬∑ Gold/Silver/Bronze"]
-        F --> F2["üü¢üî¥ Last 5 Form Guide\nDynamic W/L dots per user"]
-        F --> F3["üìù Prediction Details\nPer-match breakdown"]
-        F --> F4["üìÖ Upcoming Schedule\n70+ matches with times"]
+        C -- Valid OTP --> D["?? View Today's Matches\nw/ Live Countdown Timer"]
+        D --> E["?? Pick Winner\n(locks 15 min before start)"]
+        E --> F["?? View Dashboard"]
+        F --> F1["?? Leaderboard\nRanked by points ù Gold/Silver/Bronze"]
+        F --> F2["???? Last 5 Form Guide\nDynamic W/L dots per user"]
+        F --> F3["?? Prediction Details\nPer-match breakdown"]
+        F --> F4["?? Upcoming Schedule\n70+ matches with times"]
     end
 
-    subgraph BE ["Backend ‚Äî Node.js + Express REST API"]
+    subgraph BE ["Backend ù Node.js + Express REST API"]
         G["POST /api/otp\nValidate OTP against DB"]
         H["POST /api/prediction\n15-min cutoff enforced\nMulti-group insertion"]
         I["GET /api/leaderboard\nLatest match cumulative standings"]
@@ -249,19 +249,19 @@ flowchart TD
         K["GET /api/bids\nPer-user prediction history"]
     end
 
-    subgraph ADMIN ["Admin Console ‚Äî Protected by Email Whitelist"]
-        AA["üìã Display Match Number\n& Playing Teams"]
-        AA --> L["‚öôÔ∏è Generate Default\nPredictions for\nNon-Participants"]
-        AA --> M["üèÜ Declare Match Winner"]
-        M --> N["üìê Points Engine"]
+    subgraph ADMIN ["Admin Console ù Protected by Email Whitelist"]
+        AA["?? Display Match Number\n& Playing Teams"]
+        AA --> L["?? Generate Default\nPredictions for\nNon-Participants"]
+        AA --> M["?? Declare Match Winner"]
+        M --> N["?? Points Engine"]
         N --> N1["Fetch all predictions\nfor that match"]
         N1 --> N2["Apply user multipliers\n(1x, 2x, 5x)"]
-        N2 --> N3["Losers' points pooled\n√∑ among winners"]
+        N2 --> N3["Losers' points pooled\nù among winners"]
         N3 --> N4["Write to matchdata\n+ update leaderboard"]
     end
 
-    subgraph DB ["Supabase ‚Äî PostgreSQL + RPC"]
-        O[("members ¬∑ otp ¬∑ prediction\nfinal_prediction ¬∑ matchdata\nleaderboard ¬∑ teams ¬∑ admins")]
+    subgraph DB ["Supabase ù PostgreSQL + RPC"]
+        O[("members ù otp ù prediction\nfinal_prediction ù matchdata\nleaderboard ù teams ù admins")]
         P1["RPC: get_todaymatches"]
         P2["RPC: get_bids_today"]
         P3["RPC: insert_unbid_predictions"]
@@ -281,15 +281,15 @@ flowchart TD
     L --> P3
     N4 --> O
 
-    %% Frontend internal arrows ‚Äî blue
+    %% Frontend internal arrows ù blue
     linkStyle 0,1,2,3,4,5,6,7,8,9,10 stroke:#60a5fa,stroke-width:2px
-    %% Admin internal arrows ‚Äî purple
+    %% Admin internal arrows ù purple
     linkStyle 11,12,13,14,15,16,17 stroke:#c084fc,stroke-width:2px
-    %% Frontend ‚Üí Backend arrows ‚Äî cyan
+    %% Frontend ? Backend arrows ù cyan
     linkStyle 18,19,20,21,22 stroke:#22d3ee,stroke-width:2.5px
-    %% Backend ‚Üí DB arrows ‚Äî cyan (same as FE‚ÜíBE flow)
+    %% Backend ? DB arrows ù cyan (same as FE?BE flow)
     linkStyle 23,24,25,26,27 stroke:#22d3ee,stroke-width:2.5px
-    %% Admin ‚Üí DB arrows ‚Äî purple
+    %% Admin ? DB arrows ù purple
     linkStyle 28,29,30 stroke:#c084fc,stroke-width:2.5px
 
     style FE fill:#0f172a,stroke:#3b82f6,color:#e2e8f0
@@ -336,14 +336,14 @@ flowchart TD
           <tr>
             <th>Aspect</th>
             <th>Existing Webapp (2025)</th>
-            <th>New App ‚Äî Vibecoded (2026)</th>
+            <th>New App ù Vibecoded (2026)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>Architecture</td>
-            <td>Single HTML file (~590 lines) with inline CSS, inline JS, and hardcoded JSON data ‚Äî all in one monolith</td>
-            <td>Separated frontend (React SPA) + backend (Express REST API) + database (Supabase PostgreSQL) ‚Äî clean 3-tier architecture</td>
+            <td>Single HTML file (~590 lines) with inline CSS, inline JS, and hardcoded JSON data ù all in one monolith</td>
+            <td>Separated frontend (React SPA) + backend (Express REST API) + database (Supabase PostgreSQL) ù clean 3-tier architecture</td>
           </tr>
           <tr>
             <td>UI / Design</td>
@@ -352,7 +352,7 @@ flowchart TD
           </tr>
           <tr>
             <td>Authentication</td>
-            <td>Plain text email input validated against a hardcoded JS array of allowed emails ‚Äî no password, no OTP, no security</td>
+            <td>Plain text email input validated against a hardcoded JS array of allowed emails ù no password, no OTP, no security</td>
             <td>Masked 6-digit OTP input (password-type, auto-submit, paste support) validated server-side against a Supabase table, session persisted in localStorage</td>
           </tr>
           <tr>
@@ -363,7 +363,7 @@ flowchart TD
           <tr>
             <td>Match Data</td>
             <td>Entire 74-match schedule hardcoded as a massive JSON array directly inside a &lt;script&gt; tag (~200 lines of JSON)</td>
-            <td>Match data in a dedicated TypeScript module (matchData.ts) with typed interfaces, imported by components that need it</td>
+            <td>Match schedule stored in a Supabase fixtures table (single source of truth). Frontend fetches today's and upcoming matches via dedicated API endpoints with React Query caching and 5-minute auto-refetch</td>
           </tr>
           <tr>
             <td>Countdown Timer</td>
@@ -383,12 +383,12 @@ flowchart TD
           <tr>
             <td>Backend / APIs</td>
             <td>Direct fetch() calls to external backend APIs with bearer tokens loaded from an env.js script file. No input validation on the client side</td>
-            <td>Dedicated Node.js + Express.js backend with 10 REST endpoints, server-side cutoff enforcement, input validation on all routes (encodeURIComponent on client, trim + type checks on server), CORS lockdown, Supabase JS client with RPC stored procedures, and "No Result" handling for abandoned matches</td>
+            <td>Dedicated Node.js + Express.js backend with 12 REST endpoints, server-authoritative cutoff enforcement (match times fetched from fixtures DB, not trusted from client), input validation on all routes, CORS lockdown, Supabase JS client with RPC stored procedures, and "No Result" handling for abandoned matches</td>
           </tr>
           <tr>
             <td>Scoring</td>
-            <td>Handled entirely by the external backend APIs ‚Äî no client-side visibility into the logic</td>
-            <td>Full pari-mutuel scoring engine in Express: fetch predictions ‚Üí apply weighted multipliers ‚Üí compute point redistribution ‚Üí write matchdata + update cumulative leaderboard ‚Äî all in one server-side pipeline</td>
+            <td>Handled entirely by the external backend APIs ù no client-side visibility into the logic</td>
+            <td>Full pari-mutuel scoring engine in Express: fetch predictions ? apply weighted multipliers ? compute point redistribution ? write matchdata + update cumulative leaderboard ù all in one server-side pipeline</td>
           </tr>
           <tr>
             <td>State Management</td>
@@ -397,8 +397,8 @@ flowchart TD
           </tr>
           <tr>
             <td>Admin Tools</td>
-            <td>None ‚Äî all admin operations handled outside the webapp</td>
-            <td>Email-whitelisted admin console with match display, unbid generation, winner declaration, and scoring trigger ‚Äî all in-app</td>
+            <td>None ù all admin operations handled outside the webapp</td>
+            <td>Email-whitelisted admin console with match display, unbid generation, winner declaration, and scoring trigger ù all in-app</td>
           </tr>
           <tr>
             <td>Deployment</td>
@@ -411,23 +411,23 @@ flowchart TD
 
     <!-- KEY FEATURES -->
     <div class="section">
-      <h2>Key Features ‚Äî Technical Deep Dive</h2>
+      <h2>Key Features ù Technical Deep Dive</h2>
       <div class="feature-grid">
         <div class="feature-card">
           <h4>Masked OTP Authentication</h4>
-          <p>6-digit OTP rendered via password-type inputs with auto-focus progression ‚Äî each digit auto-advances to the next field. Auto-submits the moment the 6th digit is entered (useEffect watching OTP length). Full clipboard paste support that distributes digits across all 6 fields. Mobile-optimized with inputMode="numeric" for the number keyboard. OTP validated server-side against a Supabase table; session stored in localStorage.</p>
+          <p>6-digit OTP rendered via password-type inputs with auto-focus progression ù each digit auto-advances to the next field. Auto-submits the moment the 6th digit is entered (useEffect watching OTP length). Full clipboard paste support that distributes digits across all 6 fields. Mobile-optimized with inputMode="numeric" for the number keyboard. OTP validated server-side against a Supabase table; session stored in localStorage.</p>
         </div>
         <div class="feature-card">
           <h4>Live Countdown Timers</h4>
-          <p>Two timer systems: a per-match countdown computing the delta between now and matchStartUtc minus 15 minutes (the cutoff), and a global next-match countdown that finds the nearest future match from a hardcoded schedule of 74 matches. Both convert UTC to IST for display. The prediction form disables itself reactively when the countdown hits zero ‚Äî and the backend independently rejects late submissions with a 403.</p>
+          <p>Two timer systems: a per-match countdown computing the delta between now and the match's dateutc minus 15 minutes (the cutoff), and a global next-match countdown derived from the upcoming fixtures API. Match schedule is fetched from the Supabase fixtures table ù the single source of truth ù via React Query with 5-minute auto-refetch. The prediction form disables itself reactively when the countdown hits zero ù and the backend independently verifies the cutoff by querying the fixtures table before accepting any prediction.</p>
         </div>
         <div class="feature-card">
           <h4>Pari-Mutuel Points Engine</h4>
-          <p>Server-side scoring pipeline in a single Express route: fetches all rows from final_prediction for the match number, groups by bgroup, applies per-user multipliers (configurable map ‚Äî 1x default, 2x and 5x for specific users), counts weighted winners vs losers, computes matchWinAmount = (losersCount √ó bidValue) / winnersCount, then writes per-player rows to matchdata. Cumulative leaderboard is built by fetching the previous match's leaderboard and adding the new matchWinAmount. Playoff escalation: base 20 ‚Üí 50 for qualifiers ‚Üí 100 for the final. "No Result" handling (rain/abandonment) carries forward the previous leaderboard with matchwinamount: 0 and deletes stale rows before re-inserting.</p>
+          <p>Server-side scoring pipeline in a single Express route: fetches all rows from final_prediction for the match number, groups by bgroup, applies per-user multipliers (configurable map ù 1x default, 2x and 5x for specific users), counts weighted winners vs losers, computes matchWinAmount = (losersCount ù bidValue) / winnersCount, then writes per-player rows to matchdata. Cumulative leaderboard is built by fetching the previous match's leaderboard and adding the new matchWinAmount. Playoff escalation: base 20 ? 50 for qualifiers ? 100 for the final. "No Result" handling (rain/abandonment) carries forward the previous leaderboard with matchwinamount: 0 and deletes stale rows before re-inserting.</p>
         </div>
         <div class="feature-card">
           <h4>Last 5 Form Guide</h4>
-          <p>Dedicated GET /api/leaderboard/form endpoint queries the leaderboard table, extracts the 5 most recent distinct match numbers via Set + sort + slice, fetches matchwinamount for each user across those matches, and classifies: positive = "W", zero = "NR" (no result), negative = "L". Frontend renders three dot colors ‚Äî glowing green for wins, orange for no-result, red for losses (CSS box-shadow with rgba glow) ‚Äî with hover tooltips showing "Match N: Won/Lost/No Result". The sliding window advances automatically ‚Äî zero manual config needed.</p>
+          <p>Dedicated GET /api/leaderboard/form endpoint queries the leaderboard table, extracts the 5 most recent distinct match numbers via Set + sort + slice, fetches matchwinamount for each user across those matches, and classifies: positive = "W", zero = "NR" (no result), negative = "L". Frontend renders three dot colors ù glowing green for wins, orange for no-result, red for losses (CSS box-shadow with rgba glow) ù with hover tooltips showing "Match N: Won/Lost/No Result". The sliding window advances automatically ù zero manual config needed.</p>
         </div>
         <div class="feature-card">
           <h4>Multi-Group Prediction</h4>
@@ -435,11 +435,11 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Admin Console</h4>
-          <p>Email-whitelisted via a Supabase admins table check (GET /api/admin/checkAdmin). Fetches today's match numbers and team names via RPC get_todaymatches. "Generate Unbids" calls RPC insert_unbid_predictions to backfill default entries for users who didn't predict. "Declare Winner" triggers the full scoring pipeline ‚Äî matchdata write + leaderboard update ‚Äî in one click. The admin can also switch the active user email for testing.</p>
+          <p>Email-whitelisted via a Supabase admins table check (GET /api/admin/checkAdmin). Fetches today's match numbers and team names via RPC get_todaymatches. "Generate Unbids" calls RPC insert_unbid_predictions to backfill default entries for users who didn't predict. "Declare Winner" triggers the full scoring pipeline ù matchdata write + leaderboard update ù in one click. The admin can also switch the active user email for testing.</p>
         </div>
         <div class="feature-card">
           <h4>Active User Highlighting</h4>
-          <p>The logged-in user's row is highlighted across both the leaderboard and bid details tables. The active email is read from localStorage, matched against the members array to resolve name(s), and a Set lookup applies bg-primary/10 + font-semibold to matching rows ‚Äî so users can instantly spot themselves in the standings and prediction logs.</p>
+          <p>The logged-in user's row is highlighted across both the leaderboard and bid details tables. The active email is read from localStorage, matched against the members array to resolve name(s), and a Set lookup applies bg-primary/10 + font-semibold to matching rows ù so users can instantly spot themselves in the standings and prediction logs.</p>
         </div>
         <div class="feature-card">
           <h4>Dark-Mode UI with Animations</h4>
@@ -447,7 +447,11 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Data Layer &amp; Caching</h4>
-          <p>TanStack React Query v5 manages all server state with declarative queryKey-based caching. Leaderboard and form guide queries run in parallel on mount. After a prediction submission, queryClient.refetchQueries invalidates the bids cache so the prediction log updates instantly. The backend uses Supabase JS client with .select(), .eq(), .in(), .order(), .maybeSingle() for type-safe query building, and .rpc() for stored procedures. API inputs are validated and sanitized on both ends ‚Äî email params are encodeURIComponent'd on the client and trimmed on the server, with proper Array.isArray() safety checks on all RPC responses.</p>
+          <p>TanStack React Query v5 manages all server state with declarative queryKey-based caching. Leaderboard and form guide queries run in parallel on mount. Today's matches and upcoming fixtures are fetched via dedicated API endpoints with 5-minute auto-refetch intervals. After a prediction submission, queryClient.refetchQueries invalidates the bids cache so the prediction log updates instantly. The backend uses Supabase JS client with .select(), .eq(), .in(), .order(), .maybeSingle() for type-safe query building, and .rpc() for stored procedures. API inputs are validated and sanitized on both ends ù email params are encodeURIComponent'd on the client and trimmed on the server, with proper Array.isArray() safety checks on all RPC responses.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Fixtures as Single Source of Truth</h4>
+          <p>Match schedule migrated from a hardcoded frontend TypeScript module to a Supabase fixtures table ù the single source of truth for all match data (matchnumber, dateutc, home, away, location). The backend prediction endpoint now fetches the match start time from the fixtures table rather than trusting client-supplied matchStartUtc, making cutoff enforcement fully server-authoritative. Two new endpoints (GET /api/fixtures/today and GET /api/fixtures/upcoming) serve the frontend with date-range filtered queries, eliminating stale hardcoded data.</p>
         </div>
       </div>
     </div>
@@ -497,7 +501,7 @@ flowchart TD
       </div>
     </div>
 
-    <p class="footer">Built with vibecoding ‚Äî Cursor AI + Lovable.dev</p>
+    <p class="footer">Built with vibecoding ù Cursor AI + Lovable.dev</p>
   </div>
 
   <script>

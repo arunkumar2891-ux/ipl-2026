@@ -363,7 +363,7 @@ flowchart TD
           <tr>
             <td>Match Data</td>
             <td>Entire 74-match schedule hardcoded as a massive JSON array directly inside a &lt;script&gt; tag (~200 lines of JSON)</td>
-            <td>Match data in a dedicated TypeScript module (matchData.ts) with typed interfaces, imported by components that need it</td>
+            <td>Match schedule stored in a Supabase fixtures table (single source of truth). Frontend fetches today's and upcoming matches via dedicated API endpoints with React Query caching and 5-minute auto-refetch</td>
           </tr>
           <tr>
             <td>Countdown Timer</td>
@@ -383,7 +383,7 @@ flowchart TD
           <tr>
             <td>Backend / APIs</td>
             <td>Direct fetch() calls to external backend APIs with bearer tokens loaded from an env.js script file. No input validation on the client side</td>
-            <td>Dedicated Node.js + Express.js backend with 10 REST endpoints, server-side cutoff enforcement, input validation on all routes (encodeURIComponent on client, trim + type checks on server), CORS lockdown, Supabase JS client with RPC stored procedures, and "No Result" handling for abandoned matches</td>
+            <td>Dedicated Node.js + Express.js backend with 12 REST endpoints, server-authoritative cutoff enforcement (match times fetched from fixtures DB, not trusted from client), input validation on all routes, CORS lockdown, Supabase JS client with RPC stored procedures, and "No Result" handling for abandoned matches</td>
           </tr>
           <tr>
             <td>Scoring</td>
@@ -419,7 +419,7 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Live Countdown Timers</h4>
-          <p>Two timer systems: a per-match countdown computing the delta between now and matchStartUtc minus 15 minutes (the cutoff), and a global next-match countdown that finds the nearest future match from a hardcoded schedule of 74 matches. Both convert UTC to IST for display. The prediction form disables itself reactively when the countdown hits zero — and the backend independently rejects late submissions with a 403.</p>
+          <p>Two timer systems: a per-match countdown computing the delta between now and the match's dateutc minus 15 minutes (the cutoff), and a global next-match countdown derived from the upcoming fixtures API. Match schedule is fetched from the Supabase fixtures table — the single source of truth — via React Query with 5-minute auto-refetch. The prediction form disables itself reactively when the countdown hits zero — and the backend independently verifies the cutoff by querying the fixtures table before accepting any prediction.</p>
         </div>
         <div class="feature-card">
           <h4>Pari-Mutuel Points Engine</h4>
@@ -447,7 +447,11 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Data Layer &amp; Caching</h4>
-          <p>TanStack React Query v5 manages all server state with declarative queryKey-based caching. Leaderboard and form guide queries run in parallel on mount. After a prediction submission, queryClient.refetchQueries invalidates the bids cache so the prediction log updates instantly. The backend uses Supabase JS client with .select(), .eq(), .in(), .order(), .maybeSingle() for type-safe query building, and .rpc() for stored procedures. API inputs are validated and sanitized on both ends — email params are encodeURIComponent'd on the client and trimmed on the server, with proper Array.isArray() safety checks on all RPC responses.</p>
+          <p>TanStack React Query v5 manages all server state with declarative queryKey-based caching. Leaderboard and form guide queries run in parallel on mount. Today's matches and upcoming fixtures are fetched via dedicated API endpoints with 5-minute auto-refetch intervals. After a prediction submission, queryClient.refetchQueries invalidates the bids cache so the prediction log updates instantly. The backend uses Supabase JS client with .select(), .eq(), .in(), .order(), .maybeSingle() for type-safe query building, and .rpc() for stored procedures. API inputs are validated and sanitized on both ends — email params are encodeURIComponent'd on the client and trimmed on the server, with proper Array.isArray() safety checks on all RPC responses.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Fixtures as Single Source of Truth</h4>
+          <p>Match schedule migrated from a hardcoded frontend TypeScript module to a Supabase fixtures table — the single source of truth for all match data (matchnumber, dateutc, home, away, location). The backend prediction endpoint now fetches the match start time from the fixtures table rather than trusting client-supplied matchStartUtc, making cutoff enforcement fully server-authoritative. Two new endpoints (GET /api/fixtures/today and GET /api/fixtures/upcoming) serve the frontend with date-range filtered queries, eliminating stale hardcoded data.</p>
         </div>
       </div>
     </div>
@@ -557,8 +561,8 @@ I didn't read the React docs. I didn't learn Express from scratch. I didn't stud
 → React 18 + TypeScript + Vite 5 (SWC plugin) as the frontend SPA with React Router v6 for routing
 → Tailwind CSS 3 + shadcn/ui (Radix UI primitives) + Framer Motion for a dark-mode UI with animated tab transitions, row fade-ins, and layout animations
 → TanStack React Query v5 for declarative data fetching with queryKey caching, parallel queries, and cache invalidation after mutations
-→ Node.js (ES Modules) + Express.js backend with 10 REST endpoints, input validation on all routes, and CORS locked to the production domain
-→ Supabase (PostgreSQL) with 8 tables and 3 RPC stored procedures for complex server-side queries
+→ Node.js (ES Modules) + Express.js backend with 12 REST endpoints, input validation on all routes, and CORS locked to the production domain
+→ Supabase (PostgreSQL) with 9 tables (including a fixtures table as the single source of truth for match schedules) and 3 RPC stored procedures for complex server-side queries
 → Deployed as two separate services on Render.com with a health-check keep-alive endpoint and Vite dev proxy for local development
 
 <span class="highlight">What I learned about vibecoding:</span>
@@ -647,8 +651,8 @@ The technical stack — all new to me, all vibecoded:
 → React 18 + TypeScript + Vite 5 (SWC plugin) as the frontend SPA with React Router v6 for routing
 → Tailwind CSS 3 + shadcn/ui (Radix UI primitives) + Framer Motion for a dark-mode UI with animated tab transitions, row fade-ins, and layout animations
 → TanStack React Query v5 for declarative data fetching with queryKey caching, parallel queries, and cache invalidation after mutations
-→ Node.js (ES Modules) + Express.js backend with 10 REST endpoints, input validation on all routes, and CORS locked to the production domain
-→ Supabase (PostgreSQL) with 8 tables and 3 RPC stored procedures for complex server-side queries
+→ Node.js (ES Modules) + Express.js backend with 12 REST endpoints, input validation on all routes, and CORS locked to the production domain
+→ Supabase (PostgreSQL) with 9 tables (including a fixtures table as the single source of truth for match schedules) and 3 RPC stored procedures for complex server-side queries
 → Deployed as two separate services on Render.com with a health-check keep-alive endpoint and Vite dev proxy for local development
 
 What I learned about vibecoding:

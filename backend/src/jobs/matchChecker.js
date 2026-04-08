@@ -1,0 +1,176 @@
+import cron from "node-cron";
+import { supabase } from "../lib/supabase.js";
+
+const CRIC_API_URL =
+  "https://api.cricapi.com/v1/currentMatches?apikey=32873d41-895d-4066-8015-c354cc70046f&offset=0";
+
+const CHECK_WINDOW_BEFORE_MS = 20 * 60 * 1000;  // start checking 20 min before match
+const CHECK_WINDOW_DURATION_MS = 4 * 60 * 60 * 1000; // keep checking for 4 hours
+const POSTPONE_OFFSET_MS = 25 * 60 * 1000; // push dateutc by 25 min from now
+
+// Tracks matches already found in the API so we stop rechecking them.
+// Keyed by matchnumber. Cleared daily at midnight.
+const foundMatches = new Set();
+
+// Stores the *original* scheduled start times fetched on first check of the day,
+// so that pushing dateutc forward doesn't shift the check window end.
+// Keyed by matchnumber → original dateutc ISO string.
+const originalStartTimes = {};
+
+function clearDailyState() {
+  foundMatches.clear();
+  for (const key of Object.keys(originalStartTimes)) {
+    delete originalStartTimes[key];
+  }
+  console.log("[MatchChecker] Daily state cleared.");
+}
+
+async function fetchTodayFixtures() {
+  const todayStart = new Date().toISOString().split("T")[0] + "T00:00:00Z";
+  const tomorrowStart = new Date(
+    new Date(todayStart).getTime() + 24 * 60 * 60 * 1000
+  ).toISOString();
+
+  const { data, error } = await supabase
+    .from("fixtures")
+    .select("matchnumber, dateutc, home, away")
+    .gte("dateutc", todayStart)
+    .lt("dateutc", tomorrowStart)
+    .order("dateutc", { ascending: true });
+
+  if (error) {
+    console.error("[MatchChecker] Failed to fetch fixtures:", error);
+    return [];
+  }
+  return data || [];
+}
+
+async function fetchCurrentMatches() {
+  try {
+    const res = await fetch(CRIC_API_URL);
+    if (!res.ok) {
+      console.error("[MatchChecker] CricAPI HTTP error:", res.status);
+      return null;
+    }
+    const json = await res.json();
+    if (json.status !== "success") {
+      console.error("[MatchChecker] CricAPI returned status:", json.status);
+      return null;
+    }
+    return json.data || [];
+  } catch (err) {
+    console.error("[MatchChecker] CricAPI fetch error:", err.message);
+    return null;
+  }
+}
+
+function isMatchInApiResponse(apiMatches, homeTeam, awayTeam) {
+  const homeLower = homeTeam.toLowerCase();
+  const awayLower = awayTeam.toLowerCase();
+
+  return apiMatches.some((m) => {
+    const name = (m.name || "").toLowerCase();
+    return name.includes(homeLower) && name.includes(awayLower);
+  });
+}
+
+async function updateFixtureTime(matchnumber) {
+  const newTime = new Date(Date.now() + POSTPONE_OFFSET_MS);
+  const { error } = await supabase
+    .from("fixtures")
+    .update({ dateutc: newTime.toISOString() })
+    .eq("matchnumber", matchnumber);
+
+  if (error) {
+    console.error(
+      `[MatchChecker] Failed to update dateutc for match ${matchnumber}:`,
+      error
+    );
+  } else {
+    console.log(
+      `[MatchChecker] Match ${matchnumber} NOT found in API. dateutc pushed to ${newTime.toISOString()} (now + 25 min)`
+    );
+  }
+}
+
+/**
+ * Check window for each match is based on its *original* scheduled start time:
+ *   windowStart = originalStart - 20 minutes
+ *   windowEnd   = windowStart + 4 hours
+ *
+ * Example: match at 7:30 PM IST → check from 7:10 PM to 11:10 PM IST.
+ *
+ * The original start time is captured the first time we see the fixture each day,
+ * so that subsequent dateutc pushes don't keep extending the window.
+ */
+function isInCheckWindow(fixture) {
+  const mn = fixture.matchnumber;
+
+  if (!(mn in originalStartTimes)) {
+    originalStartTimes[mn] = fixture.dateutc;
+  }
+
+  const originalStart = new Date(originalStartTimes[mn]).getTime();
+  const windowStart = originalStart - CHECK_WINDOW_BEFORE_MS;
+  const windowEnd = windowStart + CHECK_WINDOW_DURATION_MS;
+  const now = Date.now();
+
+  return now >= windowStart && now <= windowEnd;
+}
+
+async function checkMatches() {
+  console.log(`[MatchChecker] Running check at ${new Date().toISOString()}`);
+
+  const fixtures = await fetchTodayFixtures();
+  if (fixtures.length === 0) {
+    console.log("[MatchChecker] No fixtures today, skipping.");
+    return;
+  }
+
+  const fixturesToCheck = fixtures.filter(
+    (f) => !foundMatches.has(f.matchnumber) && isInCheckWindow(f)
+  );
+
+  if (fixturesToCheck.length === 0) {
+    console.log(
+      "[MatchChecker] No fixtures need checking right now (all found or outside window)."
+    );
+    return;
+  }
+
+  console.log(
+    `[MatchChecker] Checking ${fixturesToCheck.length} fixture(s):`,
+    fixturesToCheck.map((f) => `#${f.matchnumber} ${f.home} vs ${f.away}`)
+  );
+
+  const apiMatches = await fetchCurrentMatches();
+  if (apiMatches === null) {
+    console.error("[MatchChecker] Could not fetch API data, will retry next cycle.");
+    return;
+  }
+
+  for (const fixture of fixturesToCheck) {
+    const found = isMatchInApiResponse(apiMatches, fixture.home, fixture.away);
+    if (found) {
+      foundMatches.add(fixture.matchnumber);
+      console.log(
+        `[MatchChecker] Match #${fixture.matchnumber} (${fixture.home} vs ${fixture.away}) FOUND in API — stopping further checks for this match.`
+      );
+    } else {
+      await updateFixtureTime(fixture.matchnumber);
+    }
+  }
+}
+
+export function startMatchChecker() {
+  cron.schedule("*/10 * * * *", () => {
+    checkMatches().catch((err) =>
+      console.error("[MatchChecker] Unhandled error:", err)
+    );
+  });
+
+  // Reset found-matches and original start times at midnight UTC every day
+  cron.schedule("0 0 * * *", clearDailyState);
+
+  console.log("[MatchChecker] Scheduled — checks every 10 min, resets daily at midnight UTC.");
+}

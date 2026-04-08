@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import { supabase } from "./src/lib/supabase.js";
 import { getMemberDetails } from "./src/utils/memberUtils.js";
+import { startMatchChecker } from "./src/jobs/matchChecker.js";
 
 const PORT = process.env.PORT || 3001;
 
@@ -22,15 +23,25 @@ app.post("/api/prediction", async (req, res) => {
   try {
 
     const email = req.body.email.trim().toLowerCase();
-    const { matchNumber, selectedTeam, name, matchStartUtc, group } = req.body;
+    const { matchNumber, selectedTeam, name, group } = req.body;
 	console.log("Request body:", req.body);
 
-    if (!matchStartUtc) {
-      return res.status(400).json({ error: "Match start time missing" });
+    if (!matchNumber) {
+      return res.status(400).json({ error: "Match number missing" });
     }
 
-    // 15 minute cutoff validation
-    const startTime = new Date(matchStartUtc);
+    // Fetch match start time from fixtures DB (single source of truth)
+    const { data: fixture, error: fixtureError } = await supabase
+      .from("fixtures")
+      .select("dateutc")
+      .eq("matchnumber", matchNumber)
+      .maybeSingle();
+
+    if (fixtureError || !fixture) {
+      return res.status(400).json({ error: "Match not found in fixtures" });
+    }
+
+    const startTime = new Date(fixture.dateutc);
     const cutoff = new Date(startTime.getTime() - 15 * 60 * 1000);
 
     if (new Date() > cutoff) {
@@ -553,6 +564,44 @@ app.get("/api/leaderboard/form", async (req, res) => {
   }
 });
 
+/* ---------- Fixtures (single source of truth for match schedule) ---------- */
+
+app.get("/api/fixtures/today", async (req, res) => {
+  try {
+    const todayStart = new Date().toISOString().split("T")[0] + "T00:00:00Z";
+    const tomorrowStart = new Date(new Date(todayStart).getTime() + 24 * 60 * 60 * 1000).toISOString();
+
+    console.log("fixtures/today range:", todayStart, "to", tomorrowStart);
+
+    const { data, error } = await supabase
+      .from("fixtures")
+      .select("matchnumber, dateutc, home, away, location")
+      .gte("dateutc", todayStart)
+      .lt("dateutc", tomorrowStart)
+      .order("dateutc", { ascending: true });
+
+    if (error) {
+      console.error("fixtures/today error:", error);
+      return res.status(500).json({ error: "Failed to fetch today's fixtures" });
+    }
+
+    console.log("fixtures/today rows:", data?.length);
+
+    const response = (data || []).map(row => ({
+      MatchNumber: row.matchnumber,
+      DateUtc: row.dateutc,
+      HomeTeam: row.home,
+      AwayTeam: row.away,
+      Location: row.location
+    }));
+
+    res.json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 /* ---------- Health check (for keeping Render awake) ---------- */
 
 app.get("/api/health", (req, res) => {
@@ -636,4 +685,5 @@ app.get("/api/admin/checkAdmin", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  startMatchChecker();
 });

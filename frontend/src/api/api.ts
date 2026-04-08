@@ -53,6 +53,16 @@ export const api = {
    return res.json();
  },
  
+ /* ---------------- FIXTURE APIS ---------------- */
+
+ getTodaysFixtures: async () => {
+   const res = await fetch(`${API_URL}/api/fixtures/today`);
+   if (!res.ok) {
+     throw new Error("Failed to fetch today's fixtures");
+   }
+   return res.json();
+ },
+
  /* ---------------- ADMIN APIS ---------------- */
 
  getTodayMatches: async () => {

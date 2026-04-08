@@ -67,7 +67,6 @@ const MatchCard = ({ match, index }: MatchCardProps) => {
         homeTeam={match.HomeTeam}
         awayTeam={match.AwayTeam}
         disabled={!allowed}
-        matchStart={match.DateUtc}
       />
     </motion.div>
   );

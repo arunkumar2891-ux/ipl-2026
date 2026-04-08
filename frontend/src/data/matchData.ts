@@ -1,11 +1,11 @@
 export interface MatchDataItem {
   MatchNumber: number;
-  RoundNumber: number | string;
+  RoundNumber?: number | string;
   DateUtc: string;
   Location: string;
   HomeTeam: string;
   AwayTeam: string;
-  Group: null;
+  Group?: null;
 }
 
 export const matchData: MatchDataItem[] = [
