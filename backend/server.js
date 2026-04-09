@@ -414,6 +414,15 @@ app.post("/api/calculateMatchResult", authenticateToken, requireAdmin, adminLimi
 
 	  await processNoResultGroup("G1");
 
+	  const { error: rpError } = await supabase
+		.from("fixtures")
+		.update({ resultprocessed: "Y" })
+		.eq("matchnumber", matchNum);
+
+	  if (rpError) {
+		console.error("Failed to mark resultprocessed:", rpError);
+	  }
+
 	  return res.json({
 		success: true,
 		matchnumber,
@@ -567,7 +576,16 @@ app.post("/api/calculateMatchResult", authenticateToken, requireAdmin, adminLimi
 
     await processGroup("G1");
     //await processGroup("G2");
-	
+
+	const { error: rpError } = await supabase
+	  .from("fixtures")
+	  .update({ resultprocessed: "Y" })
+	  .eq("matchnumber", matchNum);
+
+	if (rpError) {
+	  console.error("Failed to mark resultprocessed:", rpError);
+	}
+
     res.json({
       success: true,
       matchnumber
