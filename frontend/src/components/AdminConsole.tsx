@@ -49,7 +49,7 @@ export default function AdminConsole() {
 
 	  try {
 
-		const res = await api.checkAdmin(userEmail);
+		const res = await api.checkAdmin();
 	    //console.log(`res.isadmin ${res.isAdmin}`);
 		setIsAdmin(res.isAdmin);
 
@@ -113,7 +113,7 @@ export default function AdminConsole() {
 
 		setProcessing(true);
 
-		const res = await api.generateUnbids(selectedMatch, userEmail);
+		const res = await api.generateUnbids(selectedMatch);
 
 		console.log(res);
 

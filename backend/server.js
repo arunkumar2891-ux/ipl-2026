@@ -1,30 +1,96 @@
-process.env.NODE_TLS_REJECT_UNAUTHORIZED=0;
-
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
+import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
 import { supabase } from "./src/lib/supabase.js";
 import { getMemberDetails } from "./src/utils/memberUtils.js";
 import { startMatchChecker } from "./src/jobs/matchChecker.js";
 
 const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || "change-this-to-a-real-secret";
 
 const app = express();
-//app.use(cors());
+
 app.use(cors({
-  origin: ["https://ipl-2026-wx6e.onrender.com","http://localhost:8080/"]
+  origin: ["https://ipl-2026-wx6e.onrender.com", "http://localhost:8080"],
 }));
-app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
+
+/* ---------- Rate Limiters ---------- */
+
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again later" },
+});
+
+const otpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many OTP attempts, please try again after 15 minutes" },
+});
+
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again later" },
+});
+
+app.use("/api/", generalLimiter);
+
+/* ---------- Auth Middleware ---------- */
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch {
+    return res.status(403).json({ error: "Invalid or expired token" });
+  }
+}
+
+async function requireAdmin(req, res, next) {
+  const email = req.user?.email;
+  if (!email) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
+  const { data, error } = await supabase
+    .from("admins")
+    .select("id")
+    .eq("email", email)
+    .limit(1);
+
+  if (error || !data || data.length === 0) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
+  next();
+}
 
 /* ---------- Prediction DB ---------- */
 
-app.post("/api/prediction", async (req, res) => {
+app.post("/api/prediction", authenticateToken, async (req, res) => {
   try {
 
-    const email = req.body.email.trim().toLowerCase();
+    const email = req.user.email;
     const { matchNumber, selectedTeam, name, group } = req.body;
-	console.log("Request body:", req.body);
 
     if (!matchNumber) {
       return res.status(400).json({ error: "Match number missing" });
@@ -50,15 +116,12 @@ app.post("/api/prediction", async (req, res) => {
       });
     }
 	console.log("selectedWinner", selectedTeam);
-    // 1️.Fetch member from Supabase
     const { data: member, error: memberError } = await supabase
       .from("members")
       .select("name, bgroup, amount")
       .eq("email", email)
 	  .limit(1)
       .maybeSingle();
-	console.log("Member query result:", member);
-	console.log("Member query error:", memberError);
     if (memberError || !member) {
       return res.status(400).json({ error: "Member not found" });
     }
@@ -91,7 +154,8 @@ app.post("/api/prediction", async (req, res) => {
     });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Prediction endpoint error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -141,7 +205,8 @@ app.get("/api/leaderboard", async (req, res) => {
     res.json(response);
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Leaderboard endpoint error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -182,8 +247,6 @@ app.get("/api/bids", async (req, res) => {
 	const { data, error } = await supabase.rpc("get_bids_today", {
 		user_email: email,
 	});
-  console.log("data: ",data);
-  console.log("error: ",error);
     if (error) {
       console.error("get_bids_today RPC error:", error.message, error.details, error.hint);
       return res.status(500).json({ error: "Failed to fetch bids" });
@@ -201,12 +264,13 @@ app.get("/api/bids", async (req, res) => {
     res.json(response);
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Bids endpoint error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 /* ---------- OTP DB ---------- */
-app.post("/api/otp", async (req, res) => {
+app.post("/api/otp", otpLimiter, async (req, res) => {
   try {
 
     const { email, otp, flow } = req.body;
@@ -214,20 +278,15 @@ app.post("/api/otp", async (req, res) => {
     if (!email || !otp) {
       return res.status(400).json({ error: "Email and OTP required" });
     }
-	console.log("email: ",email);
     const normalizedEmail = email.trim().toLowerCase();
 	const otpNumber = Number(otp);
-    console.log("normalizedEmail: ",normalizedEmail);
-	console.log("otp:",otpNumber);
-    // Query OTP table
     const { data, error } = await supabase
 	  .from("otp")
 	  .select("id")
 	  .eq("email", normalizedEmail)
 	  .eq("otp", otp)
 	  .maybeSingle();
-	console.log("OTP query result:", data);
-	console.log("OTP query error:", error);
+
     if (error) {
 	  console.error("OTP query error:", error);
 	  return res.status(500).json({ error: "OTP query failed" });
@@ -236,33 +295,43 @@ app.post("/api/otp", async (req, res) => {
 	if (!data) {
 	  return res.status(401).json({ error: "Invalid OTP" });
 	}
+
+	const token = jwt.sign(
+	  { email: normalizedEmail },
+	  JWT_SECRET,
+	  { expiresIn: "4h" }
+	);
 	
 	return res.json({
 	  success: true,
-	  message: "OTP validated"
+	  message: "OTP validated",
+	  token
 	});
 	
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("OTP endpoint error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 /* ---------- GENERATE UNBIDS DB ---------- */
-app.get("/api/generateunbids", async (req, res) => {
-  const { matchnumber, useremail } = req.query;
+app.post("/api/generateunbids", authenticateToken, requireAdmin, adminLimiter, async (req, res) => {
+  const { matchnumber } = req.body;
+  const useremail = req.user.email;
   
-  //const { data, error } = await supabase.rpc("insert_unbid_predictions");
-  console.log("matchNumber:", matchnumber);
-  console.log("userEmail:", useremail);
-  
+  if (!matchnumber) {
+    return res.status(400).json({ error: "matchnumber is required" });
+  }
+
   const { data, error } = await supabase.rpc("insert_unbid_predictions", {
     p_matchnumber: matchnumber,
 	p_useremail: useremail
   });
 
   if (error) {
-    return res.status(500).json(error);
+    console.error("generateunbids error:", error);
+    return res.status(500).json({ error: "Failed to generate unbids" });
   }
 
   res.json({ message: "Unbid predictions inserted" });
@@ -271,9 +340,9 @@ app.get("/api/generateunbids", async (req, res) => {
 
 /* ---------- GENERATE MATCHDATA DB ---------- */
 
-app.get("/api/calculateMatchResult", async (req, res) => {
+app.post("/api/calculateMatchResult", authenticateToken, requireAdmin, adminLimiter, async (req, res) => {
   try {
-	const { winner, matchnumber } = req.query;
+	const { winner, matchnumber } = req.body;
 
 	const userMultipliers = {
 	  "vinay.baskie@gmail.com": 5,
@@ -347,7 +416,6 @@ app.get("/api/calculateMatchResult", async (req, res) => {
 	}
 
 	const shortName = winner?.toString().toUpperCase();
-	console.log("shortName: ",shortName);
 	
 	const { data: team, error: teamError } = await supabase
       .from("teams")
@@ -355,16 +423,11 @@ app.get("/api/calculateMatchResult", async (req, res) => {
       .eq("shortname", shortName)
       .maybeSingle();
 
-    console.log("team error: ",teamError);
-	console.log("team: ",team);
-	
     if (teamError || !team) {
       return res.status(400).json({ error: "Invalid team shortname" });
     }
 
     const winnerFullName = team.fullname;
-	
-	console.log("winnerFullName: ", winnerFullName);
 
 	const winnerTeam = winnerFullName.trim().toLowerCase();
 	
@@ -610,7 +673,7 @@ app.get("/api/health", (req, res) => {
 
 /* ---------- Admin todayMatches ---------- */
 
-app.get("/api/admin/todayMatches", async (req, res) => {
+app.get("/api/admin/todayMatches", authenticateToken, requireAdmin, async (req, res) => {
 	try{
 	
 	const { data, error } = await supabase.rpc("get_todaymatches");
@@ -636,14 +699,12 @@ app.get("/api/admin/todayMatches", async (req, res) => {
 
 /* ---------- Admin Validation ---------- */
 
-app.get("/api/admin/checkAdmin", async (req, res) => {
+app.get("/api/admin/checkAdmin", authenticateToken, async (req, res) => {
 
   try {
 
-    const { email } = req.query;
-	
-	console.log("admin email", email);
-	
+    const email = req.user.email;
+
     if (!email) {
       return res.status(400).json({
         error: "Email is required"
@@ -656,10 +717,8 @@ app.get("/api/admin/checkAdmin", async (req, res) => {
       .eq("email", email)
       .limit(1);
 	
-	console.log("admin data: ", data);
-	
     if (error) {
-      console.error(error);
+      console.error("Admin check DB error:", error);
       return res.status(500).json({ error: "DB error" });
     }
 

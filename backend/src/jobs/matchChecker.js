@@ -1,8 +1,8 @@
 import cron from "node-cron";
 import { supabase } from "../lib/supabase.js";
 
-const CRIC_API_URL =
-  "https://api.cricapi.com/v1/currentMatches?apikey=32873d41-895d-4066-8015-c354cc70046f&offset=0";
+const CRIC_API_KEY = process.env.CRIC_API_KEY;
+const CRIC_API_URL = `https://api.cricapi.com/v1/currentMatches?apikey=${CRIC_API_KEY}&offset=0`;
 
 const CHECK_WINDOW_BEFORE_MS = 10 * 60 * 1000;
 const POSTPONE_OFFSET_MS = 25 * 60 * 1000;

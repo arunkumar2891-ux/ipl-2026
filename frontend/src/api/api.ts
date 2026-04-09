@@ -1,6 +1,13 @@
 const API_URL = import.meta.env.VITE_API_URL || "";
-//console.log(import.meta.env.VITE_API_URL);
-//console.log(`API_URL: ${API_URL}`);
+
+function getAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem("auth_token");
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
 
 export const api = {
 
@@ -8,7 +15,7 @@ export const api = {
    
    const res = await fetch(`${API_URL}/api/prediction`, {
      method: "POST",
-     headers: { "Content-Type": "application/json" },
+     headers: getAuthHeaders(),
      body: JSON.stringify(payload)
    });
 
@@ -25,10 +32,6 @@ export const api = {
    return res.json();
  },
 
- /*getBids: async () => {
-   const res = await fetch(`${API_URL}/api/bids`);
-   return res.json();
- },*/
  getBids: async (activeUser) => {
    const q = encodeURIComponent(activeUser ?? "");
    const res = await fetch(`${API_URL}/api/bids?email=${q}`);
@@ -50,7 +53,11 @@ export const api = {
 	if (res.status !== 200) {
     throw new Error("OTP validation failed");
   }
-   return res.json();
+   const data = await res.json();
+   if (data.token) {
+     localStorage.setItem("auth_token", data.token);
+   }
+   return data;
  },
  
  /* ---------------- FIXTURE APIS ---------------- */
@@ -67,7 +74,9 @@ export const api = {
 
  getTodayMatches: async () => {
 
-   const res = await fetch(`${API_URL}/api/admin/todayMatches`);
+   const res = await fetch(`${API_URL}/api/admin/todayMatches`, {
+     headers: getAuthHeaders(),
+   });
 
    if (!res.ok) {
      throw new Error("Failed to fetch today's matches");
@@ -76,24 +85,26 @@ export const api = {
    return res.json();
  },
  
- checkAdmin: async (userEmail) => {
+ checkAdmin: async () => {
 
-   const res = await fetch(`${API_URL}/api/admin/checkAdmin?email=${userEmail}`);
+   const res = await fetch(`${API_URL}/api/admin/checkAdmin`, {
+     headers: getAuthHeaders(),
+   });
 
    if (!res.ok) {
      throw new Error("403 - Unauthorized");
    }
    
-	//console.log("res: ",res);
-	
    return res.json();
  },
 	
- generateUnbids: async (matchnumber, userEmail) => {
+ generateUnbids: async (matchnumber) => {
 
-   const res = await fetch(
-     `${API_URL}/api/generateunbids?matchnumber=${matchnumber}&useremail=${userEmail}`
-   );
+   const res = await fetch(`${API_URL}/api/generateunbids`, {
+     method: "POST",
+     headers: getAuthHeaders(),
+     body: JSON.stringify({ matchnumber }),
+   });
 
    if (!res.ok) {
      throw new Error("Failed to generate unbids");
@@ -104,9 +115,11 @@ export const api = {
 
  calculateMatchResult: async (winner, matchnumber) => {
 
-   const res = await fetch(
-     `${API_URL}/api/calculateMatchResult?winner=${winner}&matchnumber=${matchnumber}`
-   );
+   const res = await fetch(`${API_URL}/api/calculateMatchResult`, {
+     method: "POST",
+     headers: getAuthHeaders(),
+     body: JSON.stringify({ winner, matchnumber }),
+   });
 
    if (!res.ok) {
      throw new Error("Failed to calculate match result");

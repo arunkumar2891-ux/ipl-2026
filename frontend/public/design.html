@@ -78,15 +78,14 @@
     .linkedin-post .tag { color: var(--accent); font-weight: 600; }
 
     .mermaid-wrapper {
-      display: flex;
-      justify-content: center;
+      display: block;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       padding: 1.5rem 0;
     }
 
     .mermaid-wrapper svg {
-      min-width: 100%;
-      min-height: 700px;
+      min-height: 500px;
       max-width: none;
     }
 
@@ -217,8 +216,9 @@
     @media (max-width: 768px) {
       body { padding: 1rem 0.5rem; }
       h1 { font-size: 1.5rem; }
-      .section { padding: 1rem; }
-      .mermaid-wrapper svg { min-width: 600px; min-height: 500px; }
+      .section { padding: 1rem; overflow-x: auto; }
+      .mermaid-wrapper svg { min-height: 400px; }
+      .mermaid-wrapper pre { min-width: 600px; }
       .stack-grid { grid-template-columns: 1fr; }
       .feature-grid { grid-template-columns: 1fr; }
       .comparison-table { font-size: 0.75rem; display: block; overflow-x: auto; }
@@ -233,6 +233,8 @@
       .pill { font-size: 0.7rem; padding: 0.2rem 0.6rem; }
       .feature-card p { font-size: 0.75rem; }
       .comparison-table { font-size: 0.7rem; }
+      .mermaid-wrapper svg { min-height: 350px; }
+      .mermaid-wrapper pre { min-width: 500px; }
     }
   </style>
 </head>
@@ -435,8 +437,8 @@ flowchart TD
       <h2>Key Features ù Technical Deep Dive</h2>
       <div class="feature-grid">
         <div class="feature-card">
-          <h4>Masked OTP Authentication</h4>
-          <p>6-digit OTP rendered via password-type inputs with auto-focus progression ù each digit auto-advances to the next field. Auto-submits the moment the 6th digit is entered (useEffect watching OTP length). Full clipboard paste support that distributes digits across all 6 fields. Mobile-optimized with inputMode="numeric" for the number keyboard. OTP validated server-side against a Supabase table; session stored in localStorage.</p>
+          <h4>OTP Auth + JWT Tokens</h4>
+          <p>6-digit OTP rendered via password-type inputs with auto-focus progression and auto-submit on the 6th digit. Clipboard paste distributes digits across all fields. Mobile-optimized with inputMode="numeric". OTP validated server-side against Supabase with a strict rate limit (3 attempts per 15 min). On success, the backend issues a JWT (jsonwebtoken, 4h expiry) returned to the frontend and stored in localStorage. All protected routes (prediction, admin) require the JWT via Authorization: Bearer header. The backend extracts the user email from the token ù no email in the request body ù so identity is server-verified, not client-supplied.</p>
         </div>
         <div class="feature-card">
           <h4>Live Countdown Timers</h4>
@@ -456,7 +458,11 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Admin Console</h4>
-          <p>Email-whitelisted via a Supabase admins table check (GET /api/admin/checkAdmin). Fetches today's match numbers and team names via RPC get_todaymatches. "Generate Unbids" calls RPC insert_unbid_predictions to backfill default entries for users who didn't predict. "Declare Winner" triggers the full scoring pipeline ù matchdata write + leaderboard update ù in one click. The admin can also switch the active user email for testing.</p>
+          <p>Double-gated: JWT authentication + Supabase admins table check via requireAdmin middleware. Admin endpoints switched from GET to POST with JSON bodies to prevent CSRF. Fetches today's match numbers via RPC get_todaymatches. "Generate Unbids" calls RPC insert_unbid_predictions. "Declare Winner" triggers the full scoring pipeline. Admin-specific rate limit: 20 requests per 15 minutes. The admin can also switch the active user email for testing.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Rate Limiting &amp; Security</h4>
+          <p>Three-tier express-rate-limit configuration: general API (100 req/15 min), OTP endpoint (3 req/15 min to prevent brute-force), and admin operations (20 req/15 min). Request body size capped at 10kb via express.json({ limit }). CORS locked to the production domain. All admin endpoints require both JWT auth and admin role verification. Prediction endpoint extracts email from JWT ù not from the request body ù eliminating identity spoofing.</p>
         </div>
         <div class="feature-card">
           <h4>Active User Highlighting</h4>
@@ -472,7 +478,7 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Fixtures DB &amp; Auto-Postpone</h4>
-          <p>Match schedule stored in a Supabase fixtures table ó the single source of truth ó with a matchstarted flag column. The backend prediction endpoint fetches match start time from fixtures rather than trusting client input, making cutoff enforcement fully server-authoritative. A node-cron background job (matchChecker.js) runs every 10 minutes: it queries today's unstarted fixtures (matchstarted = "N"), cross-checks against the live CricAPI to verify whether each match has actually started. If found, it marks the fixture as started (matchstarted = "Y") and automatically triggers unbid generation (insert_unbid_predictions RPC) to backfill default predictions for any users who didn't submit ó fully automating what was previously a manual admin step. If NOT found within the check window, it auto-pushes dateutc forward by 25 minutes ó extending the prediction cutoff for rain delays or late starts. All state is persisted in the DB.</p>
+          <p>Match schedule stored in a Supabase fixtures table ù the single source of truth ù with a matchstarted flag column. The backend prediction endpoint fetches match start time from fixtures rather than trusting client input, making cutoff enforcement fully server-authoritative. A node-cron background job (matchChecker.js) runs every 10 minutes: it queries today's unstarted fixtures (matchstarted = "N"), cross-checks against the live CricAPI to verify whether each match has actually started. If found, it marks the fixture as started (matchstarted = "Y") and automatically triggers unbid generation (insert_unbid_predictions RPC) to backfill default predictions for any users who didn't submit ù fully automating what was previously a manual admin step. If NOT found within the check window, it auto-pushes dateutc forward by 25 minutes ù extending the prediction cutoff for rain delays or late starts. All state is persisted in the DB.</p>
         </div>
       </div>
     </div>
@@ -506,6 +512,8 @@ flowchart TD
             <span class="pill green">RPC Stored Procedures</span>
             <span class="pill green">CORS Lockdown</span>
             <span class="pill green">node-cron</span>
+            <span class="pill green">JWT (jsonwebtoken)</span>
+            <span class="pill green">express-rate-limit</span>
             <span class="pill green">CricAPI Integration</span>
             <span class="pill green">dotenv</span>
           </div>

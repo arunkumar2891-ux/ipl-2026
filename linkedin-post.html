@@ -78,15 +78,14 @@
     .linkedin-post .tag { color: var(--accent); font-weight: 600; }
 
     .mermaid-wrapper {
-      display: flex;
-      justify-content: center;
+      display: block;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       padding: 1.5rem 0;
     }
 
     .mermaid-wrapper svg {
-      min-width: 100%;
-      min-height: 700px;
+      min-height: 500px;
       max-width: none;
     }
 
@@ -353,7 +352,7 @@ flowchart TD
           <tr>
             <td>Authentication</td>
             <td>Plain text email input validated against a hardcoded JS array of allowed emails — no password, no OTP, no security</td>
-            <td>Masked 6-digit OTP input (password-type, auto-submit, paste support) validated server-side against a Supabase table, session persisted in localStorage</td>
+            <td>Masked 6-digit OTP input (password-type, auto-submit, paste support) validated server-side against a Supabase table. On success, backend issues a JWT (4h expiry) stored in localStorage. All protected routes require Bearer token. 3-tier rate limiting (general/OTP/admin)</td>
           </tr>
           <tr>
             <td>Team Selection</td>
@@ -414,8 +413,8 @@ flowchart TD
       <h2>Key Features — Technical Deep Dive</h2>
       <div class="feature-grid">
         <div class="feature-card">
-          <h4>Masked OTP Authentication</h4>
-          <p>6-digit OTP rendered via password-type inputs with auto-focus progression — each digit auto-advances to the next field. Auto-submits the moment the 6th digit is entered (useEffect watching OTP length). Full clipboard paste support that distributes digits across all 6 fields. Mobile-optimized with inputMode="numeric" for the number keyboard. OTP validated server-side against a Supabase table; session stored in localStorage.</p>
+          <h4>OTP Auth + JWT Tokens</h4>
+          <p>6-digit OTP rendered via password-type inputs with auto-focus progression and auto-submit on the 6th digit. Clipboard paste distributes digits across all fields. Mobile-optimized with inputMode="numeric". OTP validated server-side against Supabase with a strict rate limit (3 attempts per 15 min). On success, the backend issues a JWT (jsonwebtoken, 4h expiry) returned to the frontend and stored in localStorage. All protected routes (prediction, admin) require the JWT via Authorization: Bearer header. The backend extracts the user email from the token — no email in the request body — so identity is server-verified, not client-supplied.</p>
         </div>
         <div class="feature-card">
           <h4>Live Countdown Timers</h4>
@@ -435,7 +434,11 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Admin Console</h4>
-          <p>Email-whitelisted via a Supabase admins table check (GET /api/admin/checkAdmin). Fetches today's match numbers and team names via RPC get_todaymatches. "Generate Unbids" calls RPC insert_unbid_predictions to backfill default entries for users who didn't predict. "Declare Winner" triggers the full scoring pipeline — matchdata write + leaderboard update — in one click. The admin can also switch the active user email for testing.</p>
+          <p>Double-gated: JWT authentication + Supabase admins table check via requireAdmin middleware. Admin endpoints switched from GET to POST with JSON bodies to prevent CSRF. Fetches today's match numbers via RPC get_todaymatches. "Generate Unbids" calls RPC insert_unbid_predictions. "Declare Winner" triggers the full scoring pipeline. Admin-specific rate limit: 20 requests per 15 minutes. The admin can also switch the active user email for testing.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Rate Limiting &amp; Security</h4>
+          <p>Three-tier express-rate-limit configuration: general API (100 req/15 min), OTP endpoint (3 req/15 min to prevent brute-force), and admin operations (20 req/15 min). Request body size capped at 10kb via express.json({ limit }). CORS locked to the production domain. All admin endpoints require both JWT auth and admin role verification. Prediction endpoint extracts email from JWT — not from the request body — eliminating identity spoofing.</p>
         </div>
         <div class="feature-card">
           <h4>Active User Highlighting</h4>
@@ -485,6 +488,8 @@ flowchart TD
             <span class="pill green">RPC Stored Procedures</span>
             <span class="pill green">CORS Lockdown</span>
             <span class="pill green">node-cron</span>
+            <span class="pill green">JWT (jsonwebtoken)</span>
+            <span class="pill green">express-rate-limit</span>
             <span class="pill green">CricAPI Integration</span>
             <span class="pill green">dotenv</span>
           </div>
@@ -539,7 +544,7 @@ I didn't write code in the traditional sense. I opened Lovable.dev, described th
 I didn't read the React docs. I didn't learn Express from scratch. I didn't study TanStack Query's API. I described intent, and AI translated it into working code — across the entire stack.
 
 <span class="highlight">The user experience I shipped:</span>
-→ Users pick their name from a dropdown and authenticate with a masked 6-digit OTP — digits render as dots, auto-submit fires the moment the 6th digit is entered, and clipboard paste distributes digits across all fields
+→ Users pick their name and authenticate with a masked 6-digit OTP — auto-submit on completion, clipboard paste support. The backend validates the OTP, issues a JWT (4h expiry), and the frontend attaches it as a Bearer token on all subsequent requests. Rate-limited to 3 OTP attempts per 15 minutes
 → Today's IPL matches appear with live countdown timers ticking to the 15-minute pre-match cutoff
 → Users pick the winning team; the form locks reactively when the timer hits zero — and the backend independently rejects late submissions with a 403
 → Changed your mind? Submit again — only the latest prediction counts
@@ -630,7 +635,7 @@ I didn't write code in the traditional sense. I opened Lovable.dev, described th
 I didn't read the React docs. I didn't learn Express from scratch. I didn't study TanStack Query's API. I described intent, and AI translated it into working code — across the entire stack.
 
 The user experience I shipped:
-→ Users pick their name from a dropdown and authenticate with a masked 6-digit OTP — digits render as dots, auto-submit fires the moment the 6th digit is entered, and clipboard paste distributes digits across all fields
+→ Users pick their name and authenticate with a masked 6-digit OTP — auto-submit on completion, clipboard paste support. The backend validates the OTP, issues a JWT (4h expiry), and the frontend attaches it as a Bearer token on all subsequent requests. Rate-limited to 3 OTP attempts per 15 minutes
 → Today's IPL matches appear with live countdown timers ticking to the 15-minute pre-match cutoff
 → Users pick the winning team; the form locks reactively when the timer hits zero — and the backend independently rejects late submissions with a 403
 → Changed your mind? Submit again — only the latest prediction counts
