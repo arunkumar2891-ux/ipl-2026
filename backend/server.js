@@ -16,6 +16,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "change-this-to-a-real-secret";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(cors({
   origin: ["https://ipl-2026-wx6e.onrender.com", "http://localhost:8080"],
 }));
