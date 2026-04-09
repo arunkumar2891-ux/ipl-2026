@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase.js";
 const CRIC_API_URL =
   "https://api.cricapi.com/v1/currentMatches?apikey=32873d41-895d-4066-8015-c354cc70046f&offset=0";
 
-const CHECK_WINDOW_BEFORE_MS = 20 * 60 * 1000;
+const CHECK_WINDOW_BEFORE_MS = 10 * 60 * 1000;
 const POSTPONE_OFFSET_MS = 25 * 60 * 1000;
 
 async function fetchTodayFixtures() {
@@ -73,6 +73,32 @@ async function markMatchStarted(fixtureId, matchnumber) {
     console.error(
       `[MatchChecker] Failed to mark match ${matchnumber} as started:`,
       error
+    );
+    return;
+  }
+
+  await generateUnbids(matchnumber);
+}
+
+async function generateUnbids(matchnumber) {
+  const useremail = "automated@process.com";
+  console.log(
+    `[MatchChecker] Generating unbids for match ${matchnumber} (useremail: ${useremail})`
+  );
+
+  const { data, error } = await supabase.rpc("insert_unbid_predictions", {
+    p_matchnumber: matchnumber,
+    p_useremail: useremail,
+  });
+
+  if (error) {
+    console.error(
+      `[MatchChecker] Failed to generate unbids for match ${matchnumber}:`,
+      error
+    );
+  } else {
+    console.log(
+      `[MatchChecker] Unbids generated successfully for match ${matchnumber}`
     );
   }
 }

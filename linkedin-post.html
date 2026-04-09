@@ -451,7 +451,7 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Fixtures DB &amp; Auto-Postpone</h4>
-          <p>Match schedule stored in a Supabase fixtures table — the single source of truth — with a matchstarted flag column. The backend prediction endpoint fetches match start time from fixtures rather than trusting client input, making cutoff enforcement fully server-authoritative. A node-cron background job (matchChecker.js) runs every 10 minutes: it queries today's unstarted fixtures (matchstarted = "N"), cross-checks against the live CricAPI to verify whether each match has actually started. If found, it marks the fixture as started (matchstarted = "Y") in the DB. If NOT found within the check window, it auto-pushes dateutc forward by 25 minutes — extending the prediction cutoff for rain delays or late starts. All state is persisted in the DB — no in-memory tracking needed.</p>
+          <p>Match schedule stored in a Supabase fixtures table — the single source of truth — with a matchstarted flag column. The backend prediction endpoint fetches match start time from fixtures rather than trusting client input, making cutoff enforcement fully server-authoritative. A node-cron background job (matchChecker.js) runs every 10 minutes: it queries today's unstarted fixtures (matchstarted = "N"), cross-checks against the live CricAPI to verify whether each match has actually started. If found, it marks the fixture as started (matchstarted = "Y") and automatically triggers unbid generation (insert_unbid_predictions RPC) to backfill default predictions for any users who didn't submit — fully automating what was previously a manual admin step. If NOT found within the check window, it auto-pushes dateutc forward by 25 minutes — extending the prediction cutoff for rain delays or late starts. All state is persisted in the DB.</p>
         </div>
       </div>
     </div>
@@ -551,7 +551,7 @@ I didn't read the React docs. I didn't learn Express from scratch. I didn't stud
 → Playoff escalation: base 20 points for league matches, 50 for qualifiers, 100 for the final
 → One admin click triggers a full server-side pipeline: fetch all predictions from final_prediction → group by league → apply multipliers → compute matchWinAmount per player → write to matchdata → read previous leaderboard → compute cumulative totals → insert new leaderboard rows
 → "No Result" edge case (rain/abandonment) handled separately — carries forward the previous leaderboard with zero points for that match, so cumulative standings remain intact
-→ A background cron job (node-cron, every 10 min) cross-checks today's fixtures against the live CricAPI — if a match hasn't started yet (rain delay, toss delay), it auto-pushes the fixture's dateutc forward by 25 minutes, effectively extending the prediction cutoff without any manual intervention
+→ A background cron job (node-cron, every 10 min) cross-checks today's fixtures against the live CricAPI — if a match hasn't started yet (rain delay, toss delay), it auto-pushes the fixture's dateutc forward by 25 minutes, extending the prediction cutoff. When the match IS detected, it marks it as started and automatically generates default predictions for anyone who didn't submit — fully automating what was previously a manual admin step
 
 <span class="highlight">The dashboard features — all vibecoded:</span>
 → A ranked leaderboard sorted by cumulative points, with gold/silver/bronze left-border accents on the top 3, grouped independently per league (G1, G2). The logged-in user's row is highlighted so you can instantly spot yourself in the standings
@@ -642,7 +642,7 @@ The scoring engine I described into existence:
 → Playoff escalation: base 20 points for league matches, 50 for qualifiers, 100 for the final
 → One admin click triggers a full server-side pipeline: fetch all predictions from final_prediction → group by league → apply multipliers → compute matchWinAmount per player → write to matchdata → read previous leaderboard → compute cumulative totals → insert new leaderboard rows
 → "No Result" edge case (rain/abandonment) handled separately — carries forward the previous leaderboard with zero points for that match, so cumulative standings remain intact
-→ A background cron job (node-cron, every 10 min) cross-checks today's fixtures against the live CricAPI — if a match hasn't started yet (rain delay, toss delay), it auto-pushes the fixture's dateutc forward by 25 minutes, effectively extending the prediction cutoff without any manual intervention
+→ A background cron job (node-cron, every 10 min) cross-checks today's fixtures against the live CricAPI — if a match hasn't started yet (rain delay, toss delay), it auto-pushes the fixture's dateutc forward by 25 minutes, extending the prediction cutoff. When the match IS detected, it marks it as started and automatically generates default predictions for anyone who didn't submit — fully automating what was previously a manual admin step
 
 The dashboard features — all vibecoded:
 → A ranked leaderboard sorted by cumulative points, with gold/silver/bronze left-border accents on the top 3, grouped independently per league (G1, G2). The logged-in user's row is highlighted so you can instantly spot yourself in the standings
