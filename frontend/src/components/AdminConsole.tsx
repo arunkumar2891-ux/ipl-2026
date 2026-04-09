@@ -1,11 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
 import { api } from "@/api/api";
-import { validateEmail } from "@/lib/utils";
-import OtpInput from "@/components/OtpInput";
-import { useQueryClient } from "@tanstack/react-query";
-import { members } from "@/data/members";
 
 type Match = {
   matchnumber: number;
@@ -21,28 +15,16 @@ export default function AdminConsole() {
 
   const [loadingMatches, setLoadingMatches] = useState(true);
   const [processing, setProcessing] = useState(false);
-
-  const [selectedEmail, setSelectedEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpValidated, setOtpValidated] = useState(false);
   
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  
-  const userEmail = localStorage.getItem("email");
-  
-  const uniqueMembers = Array.from(
-	new Map(members.map((m) => [m.Email, m])).values()
-  );
   
   useEffect(() => {
 
 	  const checkAdmin = async () => {
 
-	  //const userEmail = localStorage.getItem("email");
+	  const token = localStorage.getItem("auth_token");
 
-	  //console.log(`local email: ${userEmail}`);
-
-	  if (!userEmail) {
+	  if (!token) {
 		setIsAdmin(false);
 		return;
 	  }
@@ -50,7 +32,6 @@ export default function AdminConsole() {
 	  try {
 
 		const res = await api.checkAdmin();
-	    //console.log(`res.isadmin ${res.isAdmin}`);
 		setIsAdmin(res.isAdmin);
 
 	  } catch (err) {
@@ -266,28 +247,6 @@ export default function AdminConsole() {
           </div>
         ))}
       </section>
-	  {/* Change Active emails */}
-
-      <section style={styles.section}>
-
-        <h3>Change Active Email</h3>
-	 <select
-  value={selectedEmail}
-  onChange={(e) => {
-    const tempEmail = e.target.value;
-    localStorage.setItem("email", tempEmail);
-    setSelectedEmail(tempEmail);
-  }}
-  className="w-full border rounded-md px-3 py-2 bg-background"
->
-  <option value="">Select your name</option>
-  {uniqueMembers.map((member) => (
-    <option key={`${member.Email}-${member.Group}`} value={member.Email}>
-      {member.Name}
-    </option>
-  ))}
-</select>
-</section>
     </div>
   );
   }

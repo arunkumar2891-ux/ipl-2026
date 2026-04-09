@@ -1,3 +1,6 @@
+//process.env.NODE_TLS_REJECT_UNAUTHORIZED=0;
+//process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -299,7 +302,7 @@ app.post("/api/otp", otpLimiter, async (req, res) => {
 	const token = jwt.sign(
 	  { email: normalizedEmail },
 	  JWT_SECRET,
-	  { expiresIn: "4h" }
+	  { expiresIn: "15m" }
 	);
 	
 	return res.json({
