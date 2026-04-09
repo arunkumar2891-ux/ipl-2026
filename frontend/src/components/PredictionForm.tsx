@@ -77,8 +77,8 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled }: PredictionFor
 
       setOtpValidated(true);
 
-    } catch {
-      setError("Invalid OTP.");
+    } catch (err: any) {
+      setError(err?.message || "Invalid OTP.");
     } finally {
       setLoading(false);
     }

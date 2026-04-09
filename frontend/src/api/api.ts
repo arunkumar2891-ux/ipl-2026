@@ -50,9 +50,10 @@ export const api = {
      headers: { "Content-Type": "application/json" },
      body: JSON.stringify(payload)
    });
-	if (res.status !== 200) {
-    throw new Error("OTP validation failed");
-  }
+   if (!res.ok) {
+     const body = await res.json().catch(() => ({}));
+     throw new Error(body.error || `OTP validation failed (${res.status})`);
+   }
    const data = await res.json();
    if (data.token) {
      localStorage.setItem("auth_token", data.token);
@@ -71,6 +72,14 @@ export const api = {
  },
 
  /* ---------------- ADMIN APIS ---------------- */
+
+ getAdminList: async () => {
+   const res = await fetch(`${API_URL}/api/admin/list`);
+   if (!res.ok) {
+     throw new Error("Failed to fetch admin list");
+   }
+   return res.json();
+ },
 
  getTodayMatches: async () => {
 

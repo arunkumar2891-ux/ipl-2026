@@ -26,16 +26,16 @@ app.use(express.json({ limit: "10kb" }));
 /* ---------- Rate Limiters ---------- */
 
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 1 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many requests, please try again later" },
+  message: { error: "Too many requests to validate OTP, please try again in a minute" },
 });
 
 const otpLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 3,
+  max: 15,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many OTP attempts, please try again after 15 minutes" },
@@ -120,7 +120,8 @@ app.post("/api/prediction", authenticateToken, async (req, res) => {
         error: "Predictions closed 15 minutes before match start"
       });
     }
-	console.log("selectedWinner", selectedTeam);
+	console.log("selectedWinner: ", selectedTeam);
+  console.log("email: ", email);
     const { data: member, error: memberError } = await supabase
       .from("members")
       .select("name, bgroup, amount")
@@ -700,6 +701,26 @@ app.get("/api/admin/todayMatches", authenticateToken, requireAdmin, async (req, 
 		res.status(500).json({ error: "Server error" });
 	}
 	
+});
+
+/* ---------- Admin List (names only, for login dropdown) ---------- */
+
+app.get("/api/admin/list", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("admins")
+      .select("name, email");
+
+    if (error) {
+      console.error("Admin list DB error:", error);
+      return res.status(500).json({ error: "DB error" });
+    }
+
+    res.json(data || []);
+  } catch (err) {
+    console.error("Admin list failed:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 /* ---------- Admin Validation ---------- */
