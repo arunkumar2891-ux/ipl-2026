@@ -8,7 +8,6 @@ dotenv.config();
 import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 import { supabase } from "./src/lib/supabase.js";
-import { getMemberDetails } from "./src/utils/memberUtils.js";
 import { startMatchChecker } from "./src/jobs/matchChecker.js";
 
 const PORT = process.env.PORT || 3001;
@@ -27,7 +26,7 @@ app.use(express.json({ limit: "10kb" }));
 
 const generalLimiter = rateLimit({
   windowMs: 1 * 60 * 1000,
-  max: 100,
+  max: 25,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many requests to validate OTP, please try again in a minute" },
@@ -35,7 +34,7 @@ const generalLimiter = rateLimit({
 
 const otpLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 15,
+  max: 5,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many OTP attempts, please try again after 15 minutes" },
@@ -286,11 +285,14 @@ app.post("/api/otp", otpLimiter, async (req, res) => {
     }
     const normalizedEmail = email.trim().toLowerCase();
 	const otpNumber = Number(otp);
+    if (isNaN(otpNumber)) {
+      return res.status(400).json({ error: "OTP must be a valid number" });
+    }
     const { data, error } = await supabase
 	  .from("otp")
 	  .select("id")
 	  .eq("email", normalizedEmail)
-	  .eq("otp", otp)
+	  .eq("otp", otpNumber)
 	  .maybeSingle();
 
     if (error) {
