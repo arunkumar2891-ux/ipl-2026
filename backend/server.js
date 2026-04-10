@@ -332,6 +332,16 @@ app.post("/api/generateunbids", authenticateToken, requireAdmin, adminLimiter, a
     return res.status(400).json({ error: "matchnumber is required" });
   }
 
+  const { error: startError } = await supabase
+    .from("fixtures")
+    .update({ matchstarted: "Y" })
+    .eq("matchnumber", matchnumber);
+
+  if (startError) {
+    console.error("Failed to mark matchstarted:", startError);
+    return res.status(500).json({ error: "Failed to mark match as started" });
+  }
+
   const { data, error } = await supabase.rpc("insert_unbid_predictions", {
     p_matchnumber: matchnumber,
 	p_useremail: useremail
@@ -342,7 +352,7 @@ app.post("/api/generateunbids", authenticateToken, requireAdmin, adminLimiter, a
     return res.status(500).json({ error: "Failed to generate unbids" });
   }
 
-  res.json({ message: "Unbid predictions inserted" });
+  res.json({ message: "Unbid predictions inserted, match marked as started" });
 });
 
 
