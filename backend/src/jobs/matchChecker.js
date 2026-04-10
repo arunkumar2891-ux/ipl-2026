@@ -6,8 +6,6 @@ const CRIC_API_URL = `https://api.cricapi.com/v1/currentMatches?apikey=${CRIC_AP
 
 const CHECK_WINDOW_BEFORE_MS = 10 * 60 * 1000;
 const POSTPONE_OFFSET_MS = 25 * 60 * 1000;
-const RESULT_CHECK_HOUR_UTC = 17;
-const RESULT_CHECK_MINUTE_UTC = 30;
 const RESULT_RETRY_MS = 30 * 60 * 1000;
 
 /* ================================================================
@@ -183,9 +181,29 @@ async function checkMatches() {
 
 /* ================================================================
    PART 2 — Match-result detection (new logic)
-   After 17:30 UTC (11:00 PM IST), for fixtures with matchstarted='Y',
-   check the CricAPI for final results and call calculateMatchResult.
+   For double-header days: starts at 13:30 UTC (7:00 PM IST)
+   For single-match days:  starts at 18:00 UTC (11:30 PM IST)
    ================================================================ */
+
+async function getTodayStartedCount() {
+  const todayStart = new Date().toISOString().split("T")[0] + "T00:00:00Z";
+  const tomorrowStart = new Date(
+    new Date(todayStart).getTime() + 24 * 60 * 60 * 1000
+  ).toISOString();
+
+  const { count, error } = await supabase
+    .from("fixtures")
+    .select("id", { count: "exact", head: true })
+    .gte("dateutc", todayStart)
+    .lt("dateutc", tomorrowStart)
+    .eq("matchstarted", "Y");
+
+  if (error) {
+    console.error("[ResultChecker] Failed to count started fixtures:", error);
+    return 0;
+  }
+  return count || 0;
+}
 
 async function fetchStartedTodayFixtures() {
   const todayStart = new Date().toISOString().split("T")[0] + "T00:00:00Z";
@@ -348,12 +366,24 @@ async function checkMatchResults() {
   const utcHour = now.getUTCHours();
   const utcMin = now.getUTCMinutes();
 
+  const totalStarted = await getTodayStartedCount();
+  if (totalStarted === 0) {
+    console.log("[ResultChecker] No started fixtures today, skipping.");
+    return;
+  }
+
+  const isDoubleHeader = totalStarted >= 2;
+  const gateHour = isDoubleHeader ? 13 : 18;
+  const gateMin = isDoubleHeader ? 30 : 0;
+
   if (
-    utcHour < RESULT_CHECK_HOUR_UTC ||
-    (utcHour === RESULT_CHECK_HOUR_UTC && utcMin < RESULT_CHECK_MINUTE_UTC)
+    utcHour < gateHour ||
+    (utcHour === gateHour && utcMin < gateMin)
   ) {
     console.log(
-      `[ResultChecker] Too early (${utcHour}:${String(utcMin).padStart(2, "0")} UTC). Waiting until ${RESULT_CHECK_HOUR_UTC}:${String(RESULT_CHECK_MINUTE_UTC).padStart(2, "0")} UTC.`
+      `[ResultChecker] Too early for ${isDoubleHeader ? "double" : "single"} match day ` +
+      `(${utcHour}:${String(utcMin).padStart(2, "0")} UTC). ` +
+      `Gate: ${gateHour}:${String(gateMin).padStart(2, "0")} UTC.`
     );
     return;
   }
@@ -465,13 +495,13 @@ function scheduleResultRetry() {
    ================================================================ */
 
 export function startMatchChecker() {
-  cron.schedule("*/10 * * * *", () => {
+  cron.schedule("*/10 10-23 * * *", () => {
     checkMatches().catch((err) =>
       console.error("[MatchChecker] Unhandled error:", err)
     );
   });
 
-  cron.schedule("*/30 17-23 * * *", () => {
+  cron.schedule("*/30 13-23 * * *", () => {
     checkMatchResults().catch((err) =>
       console.error("[ResultChecker] Unhandled error:", err)
     );
@@ -479,6 +509,6 @@ export function startMatchChecker() {
 
   console.log("[MatchChecker] Scheduled — match-start checks every 10 minutes.");
   console.log(
-    "[ResultChecker] Scheduled — result checks every 30 min between 17:30–23:59 UTC."
+    "[ResultChecker] Scheduled — result checks every 30 min between 13:30–23:59 UTC (dynamic gate: double-header 7 PM IST, single 11:30 PM IST)."
   );
 }
