@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase.js";
 const CRIC_API_KEY = process.env.CRIC_API_KEY;
 const CRIC_API_URL = `https://api.cricapi.com/v1/currentMatches?apikey=${CRIC_API_KEY}&offset=0`;
 
-const CHECK_WINDOW_BEFORE_MS = 10 * 60 * 1000;
+const CHECK_WINDOW_BEFORE_MS = 15 * 60 * 1000;
 const POSTPONE_OFFSET_MS = 25 * 60 * 1000;
 const RESULT_RETRY_MS = 30 * 60 * 1000;
 
