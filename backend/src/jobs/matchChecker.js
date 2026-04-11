@@ -495,7 +495,7 @@ function scheduleResultRetry() {
    ================================================================ */
 
 export function startMatchChecker() {
-  cron.schedule("*/10 10-23 * * *", () => {
+  cron.schedule("*/10 9-23 * * *", () => {
     checkMatches().catch((err) =>
       console.error("[MatchChecker] Unhandled error:", err)
     );
