@@ -312,7 +312,7 @@ async function callCalculateMatchResult(matchnumber, winner) {
     },
     body: JSON.stringify({ matchnumber, winner }),
   });
-
+console.log(`[ResultChecker] API response status: ${res.status}`);
   const body = await res.json();
   if (!res.ok) {
     console.error(
