@@ -303,7 +303,7 @@ async function callCalculateMatchResult(matchnumber, winner) {
   console.log(
     `[ResultChecker] Calling calculateMatchResult — match: ${matchnumber}, winner: ${winner}`
   );
-
+console.log("Request payload:", { matchnumber, winner });
   const res = await fetch(`${BASE_URL}/api/calculateMatchResult`, {
     method: "POST",
     headers: {
@@ -312,8 +312,8 @@ async function callCalculateMatchResult(matchnumber, winner) {
     },
     body: JSON.stringify({ matchnumber, winner }),
   });
-console.log(`[ResultChecker] API response status: ${res.status}`);
-  const body = await res.json();
+//console.log(`[ResultChecker] API response status: ${res.status}`);
+/*  const body = await res.json();
   if (!res.ok) {
     console.error(
       `[ResultChecker] calculateMatchResult failed (${res.status}):`,
@@ -326,7 +326,40 @@ console.log(`[ResultChecker] API response status: ${res.status}`);
     `[ResultChecker] calculateMatchResult succeeded for match ${matchnumber}:`,
     body
   );
-  return true;
+  return true;*/
+console.log(
+  `[ResultChecker] API response status: ${res.status} ${res.statusText}`
+);
+
+let body = null;
+let rawResponse = "";
+
+try {
+  rawResponse = await res.text();
+  console.log("[ResultChecker] Raw API response:", rawResponse);
+
+  body = rawResponse ? JSON.parse(rawResponse) : {};
+} catch (err) {
+  console.error(
+    "[ResultChecker] Failed to parse JSON response:",
+    err.message
+  );
+}
+
+if (!res.ok) {
+  console.error(
+    `[ResultChecker] calculateMatchResult failed (${res.status})`,
+    body
+  );
+  return false;
+}
+
+console.log(
+  `[ResultChecker] calculateMatchResult succeeded for match ${matchnumber}`,
+  body
+);
+
+return true;
 }
 
 async function markResultProcessed(fixtureId, matchnumber) {
