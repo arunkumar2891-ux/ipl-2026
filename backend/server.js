@@ -71,6 +71,7 @@ function authenticateToken(req, res, next) {
 
 async function requireAdmin(req, res, next) {
   const email = req.user?.email;
+	console.log("require admin email: ",email);
   if (!email) {
     return res.status(403).json({ error: "Forbidden" });
   }
@@ -361,7 +362,7 @@ app.post("/api/generateunbids", authenticateToken, requireAdmin, adminLimiter, a
 app.post("/api/calculateMatchResult", authenticateToken, requireAdmin, adminLimiter, async (req, res) => {
   try {
 	const { winner, matchnumber } = req.body;
-
+console.log("into calculateMatchResult");
 	const userMultipliers = {
 	  "vinay.baskie@gmail.com": 5,
 	  "kishorezum07@gmail.com": 5,
@@ -443,7 +444,7 @@ app.post("/api/calculateMatchResult", authenticateToken, requireAdmin, adminLimi
 	}
 
 	const shortName = winner?.toString().toUpperCase();
-	
+	console.log("winner short name: ",shortName);
 	const { data: team, error: teamError } = await supabase
       .from("teams")
       .select("fullname")
@@ -529,7 +530,7 @@ app.post("/api/calculateMatchResult", authenticateToken, requireAdmin, adminLimi
 		  };
 	  });
 	  
-	  const { data, error } = await supabase
+	  /*const { data, error } = await supabase
 		  .from("matchdata")
 		  .delete()
 		  .eq("matchnumber", matchNum);
@@ -538,7 +539,7 @@ app.post("/api/calculateMatchResult", authenticateToken, requireAdmin, adminLimi
 		  console.error("Delete error:", error);
 		} else {
 		  console.log("Rows deleted:", data);
-	  }
+	  }*/
 	  
 	  
       const { error: insertError } = await supabase
