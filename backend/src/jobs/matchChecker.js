@@ -534,7 +534,7 @@ export function startMatchChecker() {
     );
   });
 
-  cron.schedule("*/05 13-23 * * *", () => {
+  cron.schedule("*/30 13-23 * * *", () => {
     checkMatchResults().catch((err) =>
       console.error("[ResultChecker] Unhandled error:", err)
     );
