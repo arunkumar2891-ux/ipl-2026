@@ -7,7 +7,7 @@ const CRIC_API_URL = `https://api.cricapi.com/v1/currentMatches?apikey=${CRIC_AP
 
 const CHECK_WINDOW_BEFORE_MS = 10 * 60 * 1000;
 const POSTPONE_OFFSET_MS = 25 * 60 * 1000;
-const RESULT_RETRY_MS = 10 * 60 * 1000;
+const RESULT_RETRY_MS = 30 * 60 * 1000;
 
 /* ================================================================
    PART 1 — Match-start detection (existing logic)
@@ -518,7 +518,7 @@ export function startMatchChecker() {
     );
   });
 
-  cron.schedule("*/10 13-23 * * *", () => {
+  cron.schedule("*/30 13-23 * * *", () => {
     checkMatchResults().catch((err) =>
       console.error("[ResultChecker] Unhandled error:", err)
     );
@@ -526,6 +526,6 @@ export function startMatchChecker() {
 
   console.log("[MatchChecker] Scheduled — match-start checks every 10 minutes.");
   console.log(
-    "[ResultChecker] Scheduled — result checks every 10 min between 13:00–23:59 UTC (dynamic gate: double-header 7 PM IST, single 11:30 PM IST)."
+    "[ResultChecker] Scheduled — result checks every 30 min between 13:00–23:59 UTC (dynamic gate: double-header 7 PM IST, single 11:30 PM IST)."
   );
 }
