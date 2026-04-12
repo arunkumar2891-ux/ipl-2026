@@ -1,12 +1,13 @@
 import cron from "node-cron";
 import { supabase } from "../lib/supabase.js";
+import { calculateMatchResult } from "../services/calculateMatchResult.js";
 
 const CRIC_API_KEY = process.env.CRIC_API_KEY;
 const CRIC_API_URL = `https://api.cricapi.com/v1/currentMatches?apikey=${CRIC_API_KEY}&offset=0`;
 
 const CHECK_WINDOW_BEFORE_MS = 10 * 60 * 1000;
 const POSTPONE_OFFSET_MS = 25 * 60 * 1000;
-const RESULT_RETRY_MS = 30 * 60 * 1000;
+const RESULT_RETRY_MS = 10 * 60 * 1000;
 
 /* ================================================================
    PART 1 — Match-start detection (existing logic)
@@ -291,58 +292,33 @@ function parseWinnerFromStatus(status, homeTeam, awayTeam, teamsMap) {
 }
 
 async function callCalculateMatchResult(matchnumber, winner) {
-  const BASE_URL = process.env.BASE_URL || "http://localhost:3001";
-  const ADMIN_EMAIL = process.env.AUTO_ADMIN_EMAIL || "automated@process.com";
-  const JWT_SECRET = process.env.JWT_SECRET || "change-this-to-a-real-secret";
-
-  const { default: jwt } = await import("jsonwebtoken");
-  const token = jwt.sign({ email: ADMIN_EMAIL }, JWT_SECRET, {
-    expiresIn: "5m",
-  });
-
   console.log(
-    `[ResultChecker] Calling calculateMatchResult — match: ${matchnumber}, winner: ${winner}`
+    `[ResultChecker] Calling calculateMatchResult directly — match: ${matchnumber}, winner: ${winner}`
   );
 
-  const res = await fetch(`${BASE_URL}/api/calculateMatchResult`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ matchnumber, winner }),
-  });
-
-  console.log(
-    `[ResultChecker] API response status: ${res.status} ${res.statusText}`
-  );
-
-  let body = null;
   try {
-    const rawResponse = await res.text();
-    console.log("[ResultChecker] Raw API response:", rawResponse);
-    body = rawResponse ? JSON.parse(rawResponse) : {};
+    const result = await calculateMatchResult(matchnumber, winner);
+
+    if (!result.success) {
+      console.error(
+        `[ResultChecker] calculateMatchResult failed for match ${matchnumber}:`,
+        result.error || result.message
+      );
+      return false;
+    }
+
+    console.log(
+      `[ResultChecker] calculateMatchResult succeeded for match ${matchnumber}`,
+      result
+    );
+    return true;
   } catch (err) {
     console.error(
-      "[ResultChecker] Failed to parse JSON response:",
+      `[ResultChecker] calculateMatchResult threw for match ${matchnumber}:`,
       err.message
-    );
-  }
-
-  if (!res.ok) {
-    console.error(
-      `[ResultChecker] calculateMatchResult failed (${res.status})`,
-      body
     );
     return false;
   }
-
-  console.log(
-    `[ResultChecker] calculateMatchResult succeeded for match ${matchnumber}`,
-    body
-  );
-
-  return true;
 }
 
 async function markResultProcessed(fixtureId, matchnumber) {
@@ -542,7 +518,7 @@ export function startMatchChecker() {
     );
   });
 
-  cron.schedule("*/30 13-23 * * *", () => {
+  cron.schedule("*/10 13-23 * * *", () => {
     checkMatchResults().catch((err) =>
       console.error("[ResultChecker] Unhandled error:", err)
     );
@@ -550,6 +526,6 @@ export function startMatchChecker() {
 
   console.log("[MatchChecker] Scheduled — match-start checks every 10 minutes.");
   console.log(
-    "[ResultChecker] Scheduled — result checks every 30 min between 13:30–23:59 UTC (dynamic gate: double-header 7 PM IST, single 11:30 PM IST)."
+    "[ResultChecker] Scheduled — result checks every 10 min between 13:00–23:59 UTC (dynamic gate: double-header 7 PM IST, single 11:30 PM IST)."
   );
 }
