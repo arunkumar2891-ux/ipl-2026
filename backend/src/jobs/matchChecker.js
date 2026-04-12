@@ -6,7 +6,7 @@ const CRIC_API_URL = `https://api.cricapi.com/v1/currentMatches?apikey=${CRIC_AP
 
 const CHECK_WINDOW_BEFORE_MS = 10 * 60 * 1000;
 const POSTPONE_OFFSET_MS = 25 * 60 * 1000;
-const RESULT_RETRY_MS = 5 * 60 * 1000;
+const RESULT_RETRY_MS = 30 * 60 * 1000;
 
 /* ================================================================
    PART 1 — Match-start detection (existing logic)
