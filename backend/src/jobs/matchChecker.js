@@ -303,7 +303,7 @@ async function callCalculateMatchResult(matchnumber, winner) {
   console.log(
     `[ResultChecker] Calling calculateMatchResult — match: ${matchnumber}, winner: ${winner}`
   );
-console.log("Request payload:", { matchnumber, winner });
+
   const res = await fetch(`${BASE_URL}/api/calculateMatchResult`, {
     method: "POST",
     headers: {
@@ -312,54 +312,37 @@ console.log("Request payload:", { matchnumber, winner });
     },
     body: JSON.stringify({ matchnumber, winner }),
   });
-//console.log(`[ResultChecker] API response status: ${res.status}`);
-/*  const body = await res.json();
+
+  console.log(
+    `[ResultChecker] API response status: ${res.status} ${res.statusText}`
+  );
+
+  let body = null;
+  try {
+    const rawResponse = await res.text();
+    console.log("[ResultChecker] Raw API response:", rawResponse);
+    body = rawResponse ? JSON.parse(rawResponse) : {};
+  } catch (err) {
+    console.error(
+      "[ResultChecker] Failed to parse JSON response:",
+      err.message
+    );
+  }
+
   if (!res.ok) {
     console.error(
-      `[ResultChecker] calculateMatchResult failed (${res.status}):`,
+      `[ResultChecker] calculateMatchResult failed (${res.status})`,
       body
     );
     return false;
   }
 
   console.log(
-    `[ResultChecker] calculateMatchResult succeeded for match ${matchnumber}:`,
+    `[ResultChecker] calculateMatchResult succeeded for match ${matchnumber}`,
     body
   );
-  return true;*/
-console.log(
-  `[ResultChecker] API response status: ${res.status} ${res.statusText}`
-);
 
-let body = null;
-let rawResponse = "";
-
-try {
-  rawResponse = await res.text();
-  console.log("[ResultChecker] Raw API response:", rawResponse);
-
-  body = rawResponse ? JSON.parse(rawResponse) : {};
-} catch (err) {
-  console.error(
-    "[ResultChecker] Failed to parse JSON response:",
-    err.message
-  );
-}
-
-if (!res.ok) {
-  console.error(
-    `[ResultChecker] calculateMatchResult failed (${res.status})`,
-    body
-  );
-  return false;
-}
-
-console.log(
-  `[ResultChecker] calculateMatchResult succeeded for match ${matchnumber}`,
-  body
-);
-
-return true;
+  return true;
 }
 
 async function markResultProcessed(fixtureId, matchnumber) {
@@ -393,8 +376,23 @@ async function isLeaderboardPopulated(matchnumber) {
 }
 
 let resultRetryTimer = null;
+let resultCheckRunning = false;
 
 async function checkMatchResults() {
+  if (resultCheckRunning) {
+    console.log("[ResultChecker] Already running, skipping duplicate invocation.");
+    return;
+  }
+  resultCheckRunning = true;
+
+  try {
+    await _checkMatchResultsInner();
+  } finally {
+    resultCheckRunning = false;
+  }
+}
+
+async function _checkMatchResultsInner() {
   const now = new Date();
   const utcHour = now.getUTCHours();
   const utcMin = now.getUTCMinutes();
@@ -494,10 +492,18 @@ async function checkMatchResults() {
     );
 
     if (success) {
-      await markResultProcessed(fixture.id, fixture.matchnumber);
-      console.log(
-        `[ResultChecker] Match #${fixture.matchnumber} result processed — winner: ${result.winner}`
-      );
+      const leaderboardOk = await isLeaderboardPopulated(fixture.matchnumber);
+      if (leaderboardOk) {
+        await markResultProcessed(fixture.id, fixture.matchnumber);
+        console.log(
+          `[ResultChecker] Match #${fixture.matchnumber} result processed — winner: ${result.winner}`
+        );
+      } else {
+        console.error(
+          `[ResultChecker] Match #${fixture.matchnumber} API returned 200 but leaderboard is EMPTY. Will retry.`
+        );
+        pendingResults = true;
+      }
     } else {
       pendingResults = true;
     }
@@ -513,7 +519,9 @@ async function checkMatchResults() {
 }
 
 function scheduleResultRetry() {
-  if (resultRetryTimer) return;
+  if (resultRetryTimer) {
+    clearTimeout(resultRetryTimer);
+  }
   console.log("[ResultChecker] Scheduling retry in 30 minutes.");
   resultRetryTimer = setTimeout(() => {
     resultRetryTimer = null;

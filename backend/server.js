@@ -71,7 +71,7 @@ function authenticateToken(req, res, next) {
 
 async function requireAdmin(req, res, next) {
   const email = req.user?.email;
-	console.log("require admin email: ",email);
+  console.log("[requireAdmin] Checking:", email);
   if (!email) {
     return res.status(403).json({ error: "Forbidden" });
   }
@@ -83,6 +83,7 @@ async function requireAdmin(req, res, next) {
     .limit(1);
 
   if (error || !data || data.length === 0) {
+    console.log("[requireAdmin] Denied for:", email, error?.message || "not in admins table");
     return res.status(403).json({ error: "Forbidden" });
   }
 
@@ -362,7 +363,7 @@ app.post("/api/generateunbids", authenticateToken, requireAdmin, adminLimiter, a
 app.post("/api/calculateMatchResult", authenticateToken, requireAdmin, adminLimiter, async (req, res) => {
   try {
 	const { winner, matchnumber } = req.body;
-console.log("into calculateMatchResult");
+	console.log(`[calculateMatchResult] Called — matchnumber: ${matchnumber}, winner: ${winner}, by: ${req.user?.email}`);
 	const userMultipliers = {
 	  "vinay.baskie@gmail.com": 5,
 	  "kishorezum07@gmail.com": 5,
@@ -567,8 +568,7 @@ console.log("into calculateMatchResult");
 
 	const matchWinAmount = r.winamount;
 	
-	console.log("Name:",r.name);
-	console.log("Win Amount", matchWinAmount);
+	console.log("Name:",r.name, "Win Amount:", matchWinAmount, "Prev:", prevTotal);
 	
 	  return {
 		name: r.name,
@@ -579,11 +579,16 @@ console.log("into calculateMatchResult");
 	  };
 	});
 	
+	console.log(`[calculateMatchResult] Inserting ${leaderboardRows.length} leaderboard rows for group ${group}`);
 	const { error: leaderboardError } = await supabase
 	  .from("leaderboard")
 	  .insert(leaderboardRows);
 
-	if (leaderboardError) throw leaderboardError;
+	if (leaderboardError) {
+	  console.error(`[calculateMatchResult] Leaderboard insert failed for group ${group}:`, leaderboardError);
+	  throw leaderboardError;
+	}
+	console.log(`[calculateMatchResult] Leaderboard insert succeeded for group ${group}`);
 	  
     };
 
@@ -599,6 +604,7 @@ console.log("into calculateMatchResult");
 	  console.error("Failed to mark resultprocessed:", rpError);
 	}
 
+	console.log(`[calculateMatchResult] Completed successfully for match ${matchNum}`);
     res.json({
       success: true,
       matchnumber
