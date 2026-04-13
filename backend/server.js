@@ -474,6 +474,8 @@ app.get("/api/fixtures/today", async (req, res) => {
 /* ---------- Health check (for keeping Render awake) ---------- */
 
 app.get("/api/health", (req, res) => {
+	const source = req.query.source;
+	console.log("source: ",source);
   res.json({ status: "ok" });
 });
 
