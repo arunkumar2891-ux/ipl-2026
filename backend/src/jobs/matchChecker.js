@@ -257,16 +257,32 @@ function findApiMatch(apiMatches, homeTeam, awayTeam) {
 function parseWinnerFromStatus(status, homeTeam, awayTeam, teamsMap) {
   if (!status) return null;
 
-  const noResultPattern = /no result/i;
+  const noResultPattern = /no result|match abandoned/i;
   if (noResultPattern.test(status)) {
     return { winner: "No Result", resolved: true };
   }
 
-  const wonByPattern = /^(.+?)\s+won\s+by\s+/i;
-  const match = status.match(wonByPattern);
-  if (!match) return null;
+  const tiedPattern = /match tied/i;
+  if (tiedPattern.test(status) && !/won the super over/i.test(status)) {
+    return { winner: "No Result", resolved: true };
+  }
 
-  const winningTeamFull = match[1].trim();
+  let winningTeamFull = null;
+
+  const wonByMatch = status.match(/^(.+?)\s+won\s+by\s+/i);
+  if (wonByMatch) {
+    winningTeamFull = wonByMatch[1].trim();
+  }
+
+  if (!winningTeamFull) {
+    const superOverMatch = status.match(/\((.+?)\s+won\s+the\s+super\s+over\)/i);
+    if (superOverMatch) {
+      winningTeamFull = superOverMatch[1].trim();
+    }
+  }
+
+  if (!winningTeamFull) return null;
+
   const winnerLower = winningTeamFull.toLowerCase();
 
   const shortname = teamsMap[winnerLower];
