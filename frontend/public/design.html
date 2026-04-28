@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IPL Predictor 2026 ? Design</title>
+  <title>IPL Predictor 2026 — Design</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
     :root {
@@ -250,48 +250,48 @@
         <pre class="mermaid">
 %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#3b82f6', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#60a5fa', 'lineColor': '#475569', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0f172a', 'background': '#0f172a', 'mainBkg': '#1e293b', 'nodeBorder': '#60a5fa', 'clusterBkg': '#1e293b', 'clusterBorder': '#334155', 'edgeLabelBackground': '#1e293b' }}}%%
 flowchart TD
-    subgraph FE ["Frontend ? React 18 + TypeScript SPA"]
-        A["?? User Opens App"] --> B["?? Select Name from\nRegistered Members"]
-        B --> B2["?? Enter Masked 6-digit OTP\n(password input + paste support)"]
+    subgraph FE ["Frontend — React 18 + TypeScript SPA"]
+        A["👤 User Opens App"] --> B["📋 Select Name from\nRegistered Members"]
+        B --> B2["🔒 Enter Masked 6-digit OTP\n(password input + paste support)"]
         B2 -->|auto-submit on 6 digits| C{"OTP Valid?"}
         C -- Invalid OTP --> B2
-        C -- Valid OTP --> D["?? View Today's Matches\nw/ Live Countdown Timer"]
-        D --> E["?? Pick Winner\n(locks 15 min before start)"]
-        E --> F["?? View Dashboard"]
-        F --> F1["?? Leaderboard\nRanked by points ? Gold/Silver/Bronze"]
-        F --> F2["???? Last 5 Form Guide\nDynamic W/L dots per user"]
-        F --> F3["?? Prediction Details\nPer-match breakdown"]
-        F --> F4["?? Upcoming Schedule\n70+ matches with times"]
+        C -- Valid OTP --> D["🏏 View Today's Matches\nw/ Live Countdown Timer"]
+        D --> E["🎯 Pick Winner\n(locks 15 min before start)"]
+        E --> F["📊 View Dashboard"]
+        F --> F1["🏆 Leaderboard\nRanked by points · Gold/Silver/Bronze"]
+        F --> F2["🟢🔴 Last 5 Form Guide\nDynamic W/L dots per user"]
+        F --> F3["📝 Prediction Details\nPer-match breakdown"]
+        F --> F4["📅 Upcoming Schedule\n70+ matches with times"]
     end
 
-    subgraph BE ["Backend ? Node.js + Express REST API"]
-        G["POST /api/otp\nValidate OTP ? issue JWT (15 min)"]
+    subgraph BE ["Backend — Node.js + Express REST API"]
+        G["POST /api/otp\nValidate OTP · issue JWT (15 min)"]
         H["POST /api/prediction\n15-min cutoff enforced"]
         I["GET /api/leaderboard\nLatest match cumulative standings"]
         J["GET /api/leaderboard/form\nLast 5 match W/L per user"]
         K["GET /api/bids?email=\nPer-user prediction history"]
     end
 
-    subgraph CRON ["Background Jobs ? node-cron"]
-        CR1["Match-Start Checker\nEvery 10 min ? CricAPI poll\nAuto-postpone if delayed"]
+    subgraph CRON ["Background Jobs — node-cron"]
+        CR1["Match-Start Checker\nEvery 10 min · CricAPI poll\nAuto-postpone if delayed"]
         CR1 --> CR2["Mark fixture started\n+ auto-generate unbids"]
-        CR3["Result Checker\nEvery 30 min ? parse winner\nfrom CricAPI status"]
+        CR3["Result Checker\nEvery 30 min · parse winner\nfrom CricAPI status"]
         CR3 --> CR4["calculateMatchResult\nShared scoring service\nAuto-trigger leaderboard"]
     end
 
-    subgraph ADMIN ["Admin Console ? Protected by JWT + Admin Table"]
-        AA["?? Display Match Number\n& Playing Teams"]
-        AA --> L["?? Generate Default\nPredictions for\nNon-Participants"]
-        AA --> M["?? Declare Match Winner"]
+    subgraph ADMIN ["Admin Console — Protected by JWT + Admin Table"]
+        AA["📋 Display Match Number\n& Playing Teams"]
+        AA --> L["⚙️ Generate Default\nPredictions for\nNon-Participants"]
+        AA --> M["🏆 Declare Match Winner"]
         M --> N["calculateMatchResult\nShared scoring service"]
         N --> N1["Fetch all predictions\nfor that match"]
         N1 --> N2["Apply user multipliers\n(1x, 2x, 5x)"]
-        N2 --> N3["Losers' points pooled\n? among winners"]
+        N2 --> N3["Losers' points pooled\n÷ among winners"]
         N3 --> N4["Write to matchdata\n+ update leaderboard\n+ mark resultprocessed"]
     end
 
-    subgraph DB ["Supabase ? PostgreSQL + RPC"]
-        O[("members ? otp ? prediction\nfinal_prediction ? matchdata\nleaderboard ? teams ? admins\nfixtures (matchstarted + resultprocessed)")]
+    subgraph DB ["Supabase — PostgreSQL + RPC"]
+        O[("members · otp · prediction\nfinal_prediction · matchdata\nleaderboard · teams · admins\nfixtures (matchstarted + resultprocessed)")]
         P1["RPC: get_todaymatches"]
         P2["RPC: get_bids_today"]
         P3["RPC: insert_unbid_predictions"]
@@ -313,19 +313,19 @@ flowchart TD
     CR2 --> O
     CR4 --> O
 
-    %% Frontend internal arrows ? blue
+    %% Frontend internal arrows — blue
     linkStyle 0,1,2,3,4,5,6,7,8,9,10 stroke:#60a5fa,stroke-width:2px
-    %% Cron internal arrows ? green
+    %% Cron internal arrows — green
     linkStyle 11,12 stroke:#4ade80,stroke-width:2px
-    %% Admin internal arrows ? purple
+    %% Admin internal arrows — purple
     linkStyle 13,14,15,16,17,18,19 stroke:#c084fc,stroke-width:2px
-    %% Frontend ? Backend arrows ? cyan
+    %% Frontend → Backend arrows — cyan
     linkStyle 20,21,22,23,24 stroke:#22d3ee,stroke-width:2.5px
-    %% Backend ? DB arrows ? cyan
+    %% Backend → DB arrows — cyan
     linkStyle 25,26,27,28,29 stroke:#22d3ee,stroke-width:2.5px
-    %% Admin ? DB arrows ? purple
+    %% Admin → DB arrows — purple
     linkStyle 30,31,32 stroke:#c084fc,stroke-width:2.5px
-    %% Cron ? DB arrows ? green
+    %% Cron → DB arrows — green
     linkStyle 33,34 stroke:#4ade80,stroke-width:2.5px
 
     style FE fill:#0f172a,stroke:#3b82f6,color:#e2e8f0
@@ -347,12 +347,12 @@ flowchart TD
     style G fill:#164e63,stroke:#22d3ee,color:#e2e8f0
     style H fill:#164e63,stroke:#22d3ee,color:#e2e8f0
     style I fill:#164e63,stroke:#22d3ee,color:#e2e8f0
-    style J fill:#164e63,stroke:#22d3ee,color:#e2e8f0
-    style K fill:#164e63,stroke:#22d3ee,color:#e2e8f0
     style CR1 fill:#14532d,stroke:#4ade80,color:#e2e8f0
     style CR2 fill:#14532d,stroke:#4ade80,color:#e2e8f0
     style CR3 fill:#14532d,stroke:#4ade80,color:#e2e8f0
     style CR4 fill:#14532d,stroke:#4ade80,color:#e2e8f0
+    style J fill:#164e63,stroke:#22d3ee,color:#e2e8f0
+    style K fill:#164e63,stroke:#22d3ee,color:#e2e8f0
     style AA fill:#4a1d6a,stroke:#c084fc,color:#e2e8f0
     style L fill:#4a1d6a,stroke:#c084fc,color:#e2e8f0
     style M fill:#4a1d6a,stroke:#c084fc,color:#e2e8f0
@@ -377,14 +377,14 @@ flowchart TD
           <tr>
             <th>Aspect</th>
             <th>Existing Webapp (2025)</th>
-            <th>New App ? Vibecoded (2026)</th>
+            <th>New App — Vibecoded (2026)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>Architecture</td>
-            <td>Single HTML file (~590 lines) with inline CSS, inline JS, and hardcoded JSON data ? all in one monolith</td>
-            <td>Separated frontend (React SPA) + backend (Express REST API) + database (Supabase PostgreSQL) ? clean 3-tier architecture</td>
+            <td>Single HTML file (~590 lines) with inline CSS, inline JS, and hardcoded JSON data — all in one monolith</td>
+            <td>Separated frontend (React SPA) + backend (Express REST API) + database (Supabase PostgreSQL) — clean 3-tier architecture</td>
           </tr>
           <tr>
             <td>UI / Design</td>
@@ -393,7 +393,7 @@ flowchart TD
           </tr>
           <tr>
             <td>Authentication</td>
-            <td>Plain text email input validated against a hardcoded JS array of allowed emails ? no password, no OTP, no security</td>
+            <td>Plain text email input validated against a hardcoded JS array of allowed emails — no password, no OTP, no security</td>
             <td>Masked 6-digit OTP input (password-type, auto-submit, paste support) validated server-side against a Supabase table. On success, backend issues a short-lived JWT (15-min expiry) stored in localStorage. All protected routes require Bearer token. 3-tier rate limiting (25 req/min general, 5 OTP/15 min, 20 admin/15 min)</td>
           </tr>
           <tr>
@@ -428,8 +428,8 @@ flowchart TD
           </tr>
           <tr>
             <td>Scoring</td>
-            <td>Handled entirely by the external backend APIs ? no client-side visibility into the logic</td>
-            <td>Full pari-mutuel scoring engine extracted into a shared calculateMatchResult service: fetch predictions ? apply weighted multipliers ? compute point redistribution ? write matchdata + update cumulative leaderboard + mark resultprocessed ? triggered by admin OR auto-detected from CricAPI via background cron</td>
+            <td>Handled entirely by the external backend APIs — no client-side visibility into the logic</td>
+            <td>Full pari-mutuel scoring engine extracted into a shared calculateMatchResult service: fetch predictions → apply weighted multipliers → compute point redistribution → write matchdata + update cumulative leaderboard + mark resultprocessed — triggered by admin OR auto-detected from CricAPI via background cron</td>
           </tr>
           <tr>
             <td>State Management</td>
@@ -438,7 +438,7 @@ flowchart TD
           </tr>
           <tr>
             <td>Admin Tools</td>
-            <td>None ? all admin operations handled outside the webapp</td>
+            <td>None — all admin operations handled outside the webapp</td>
             <td>JWT + Supabase admins-table-gated admin console with match display, unbid generation, winner declaration, and scoring trigger. Background cron jobs auto-detect match starts and results from CricAPI, making most admin operations fully hands-off</td>
           </tr>
           <tr>
@@ -452,23 +452,23 @@ flowchart TD
 
     <!-- KEY FEATURES -->
     <div class="section">
-      <h2>Key Features ? Technical Deep Dive</h2>
+      <h2>Key Features — Technical Deep Dive</h2>
       <div class="feature-grid">
         <div class="feature-card">
           <h4>OTP Auth + JWT Tokens</h4>
-          <p>6-digit OTP rendered via password-type inputs with auto-focus progression and auto-submit on the 6th digit. Clipboard paste distributes digits across all fields. Mobile-optimized with inputMode="numeric". OTP validated server-side against Supabase with a strict rate limit (5 attempts per 15 min). On success, the backend issues a short-lived JWT (jsonwebtoken, 15-min expiry) returned to the frontend and stored in localStorage. All protected routes (prediction, admin) require the JWT via Authorization: Bearer header. The backend extracts the user email from the token ? no email in the request body ? so identity is server-verified, not client-supplied.</p>
+          <p>6-digit OTP rendered via password-type inputs with auto-focus progression and auto-submit on the 6th digit. Clipboard paste distributes digits across all fields. Mobile-optimized with inputMode="numeric". OTP validated server-side against Supabase with a strict rate limit (5 attempts per 15 min). On success, the backend issues a short-lived JWT (jsonwebtoken, 15-min expiry) returned to the frontend and stored in localStorage. All protected routes (prediction, admin) require the JWT via Authorization: Bearer header. The backend extracts the user email from the token — no email in the request body — so identity is server-verified, not client-supplied.</p>
         </div>
         <div class="feature-card">
           <h4>Live Countdown Timers</h4>
-          <p>Two timer systems: a per-match countdown computing the delta between now and the match's dateutc minus 15 minutes (the cutoff), and a global next-match countdown derived from the upcoming fixtures API. Match schedule is fetched from the Supabase fixtures table ? the single source of truth ? via React Query with 5-minute auto-refetch. The prediction form disables itself reactively when the countdown hits zero ? and the backend independently verifies the cutoff by querying the fixtures table before accepting any prediction.</p>
+          <p>Two timer systems: a per-match countdown computing the delta between now and the match's dateutc minus 15 minutes (the cutoff), and a global next-match countdown derived from the upcoming fixtures API. Match schedule is fetched from the Supabase fixtures table — the single source of truth — via React Query with 5-minute auto-refetch. The prediction form disables itself reactively when the countdown hits zero — and the backend independently verifies the cutoff by querying the fixtures table before accepting any prediction.</p>
         </div>
         <div class="feature-card">
           <h4>Pari-Mutuel Points Engine</h4>
-          <p>Scoring logic extracted into a shared calculateMatchResult service (used by both the admin API and the auto-result cron job): fetches all rows from final_prediction for the match number, groups by bgroup, applies per-user multipliers (configurable map ? 1x default, 2x and 5x for specific users), counts weighted winners vs losers, computes matchWinAmount = (losersCount ? bidValue) / winnersCount, then writes per-player rows to matchdata. Cumulative leaderboard is built by fetching the previous match's leaderboard and adding the new matchWinAmount. Playoff escalation: base 20 ? 50 for qualifiers ? 100 for the final. "No Result" handling (rain/abandonment) carries forward the previous leaderboard with matchwinamount: 0 and deletes stale rows before re-inserting.</p>
+          <p>Scoring logic extracted into a shared calculateMatchResult service (used by both the admin API and the auto-result cron job): fetches all rows from final_prediction for the match number, groups by bgroup, applies per-user multipliers (configurable map — 1x default, 2x and 5x for specific users), counts weighted winners vs losers, computes matchWinAmount = (losersCount × bidValue) / winnersCount, then writes per-player rows to matchdata. Cumulative leaderboard is built by fetching the previous match's leaderboard and adding the new matchWinAmount. Playoff escalation: base 20 → 50 for qualifiers → 100 for the final. "No Result" handling (rain/abandonment) carries forward the previous leaderboard with matchwinamount: 0 and deletes stale rows before re-inserting.</p>
         </div>
         <div class="feature-card">
           <h4>Last 5 Form Guide</h4>
-          <p>Dedicated GET /api/leaderboard/form endpoint queries the leaderboard table, extracts the 5 most recent distinct match numbers via Set + sort + slice, fetches matchwinamount for each user across those matches, and classifies: positive = "W", zero = "NR" (no result), negative = "L". Frontend renders three dot colors ? glowing green for wins, orange for no-result, red for losses (CSS box-shadow with rgba glow) ? with hover tooltips showing "Match N: Won/Lost/No Result". The sliding window advances automatically ? zero manual config needed.</p>
+          <p>Dedicated GET /api/leaderboard/form endpoint queries the leaderboard table, extracts the 5 most recent distinct match numbers via Set + sort + slice, fetches matchwinamount for each user across those matches, and classifies: positive = "W", zero = "NR" (no result), negative = "L". Frontend renders three dot colors — glowing green for wins, orange for no-result, red for losses (CSS box-shadow with rgba glow) — with hover tooltips showing "Match N: Won/Lost/No Result". The sliding window advances automatically — zero manual config needed.</p>
         </div>
         <div class="feature-card">
           <h4>Multi-Group Prediction</h4>
@@ -480,11 +480,11 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Rate Limiting &amp; Security</h4>
-          <p>Three-tier express-rate-limit configuration: general API (25 req/1 min), OTP endpoint (5 req/15 min to prevent brute-force), and admin operations (20 req/15 min). Request body size capped at 10kb via express.json({ limit }). CORS locked to the production domain. All admin endpoints require both JWT auth and admin role verification (checked against a Supabase admins table, not just an email whitelist). Prediction endpoint extracts email from JWT ? not from the request body ? eliminating identity spoofing.</p>
+          <p>Three-tier express-rate-limit configuration: general API (25 req/1 min), OTP endpoint (5 req/15 min to prevent brute-force), and admin operations (20 req/15 min). Request body size capped at 10kb via express.json({ limit }). CORS locked to the production domain. All admin endpoints require both JWT auth and admin role verification (checked against a Supabase admins table, not just an email whitelist). Prediction endpoint extracts email from JWT — not from the request body — eliminating identity spoofing.</p>
         </div>
         <div class="feature-card">
           <h4>Active User Highlighting</h4>
-          <p>The logged-in user's row is highlighted across both the leaderboard and bid details tables. A custom useLoggedInUser hook reads the email from localStorage, maps it against the members array to resolve name(s) and group memberships, and a Set lookup applies bg-primary/10 + font-semibold to matching rows ? so users can instantly spot themselves in the standings and prediction logs.</p>
+          <p>The logged-in user's row is highlighted across both the leaderboard and bid details tables. A custom useLoggedInUser hook reads the email from localStorage, maps it against the members array to resolve name(s) and group memberships, and a Set lookup applies bg-primary/10 + font-semibold to matching rows — so users can instantly spot themselves in the standings and prediction logs.</p>
         </div>
         <div class="feature-card">
           <h4>Dark-Mode UI with Animations</h4>
@@ -492,7 +492,7 @@ flowchart TD
         </div>
         <div class="feature-card">
           <h4>Data Layer &amp; Caching</h4>
-          <p>TanStack React Query v5 manages all server state with declarative queryKey-based caching. Leaderboard and form guide queries run in parallel on mount. Today's fixtures are fetched with staleTime: 0 and refetchOnMount: "always" to ensure fresh data, plus a 5-minute auto-refetch interval. After a prediction submission, queryClient.refetchQueries invalidates the bids cache so the prediction log updates instantly. The backend uses Supabase JS client with .select(), .eq(), .in(), .order(), .maybeSingle() for type-safe query building, and .rpc() for stored procedures. API inputs are validated and sanitized on both ends ? email params are encodeURIComponent'd on the client and trimmed on the server, with proper Array.isArray() safety checks on all RPC responses.</p>
+          <p>TanStack React Query v5 manages all server state with declarative queryKey-based caching. Leaderboard and form guide queries run in parallel on mount. Today's fixtures are fetched with staleTime: 0 and refetchOnMount: "always" to ensure fresh data, plus a 5-minute auto-refetch interval. After a prediction submission, queryClient.refetchQueries invalidates the bids cache so the prediction log updates instantly. The backend uses Supabase JS client with .select(), .eq(), .in(), .order(), .maybeSingle() for type-safe query building, and .rpc() for stored procedures. API inputs are validated and sanitized on both ends — email params are encodeURIComponent'd on the client and trimmed on the server, with proper Array.isArray() safety checks on all RPC responses.</p>
         </div>
         <div class="feature-card">
           <h4>Fixtures DB, Auto-Postpone &amp; Auto-Result</h4>
@@ -551,7 +551,7 @@ flowchart TD
       </div>
     </div>
 
-    <p class="footer">Built with vibecoding ? Cursor AI + Lovable.dev</p>
+    <p class="footer">Built with vibecoding — Cursor AI + Lovable.dev</p>
   </div>
 
   <script>
