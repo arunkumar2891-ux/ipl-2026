@@ -44,6 +44,22 @@ function findMatchInCricScore(cricScoreData, homeTeam, awayTeam) {
   });
 }
 
+function isStartedState(scoreMatch) {
+  if (!scoreMatch) return false;
+
+  const ms = (scoreMatch.ms || "").toLowerCase();
+  if (ms === "live" || ms === "result") return true;
+
+  // CricAPI can still report ms="fixture" right after toss.
+  // Treat toss-declared status as started to avoid postponing active matches.
+  const status = (scoreMatch.status || "").toLowerCase();
+  if (ms === "fixture" && /opt to bat|opt to bowl|opt to field|won the toss/.test(status)) {
+    return true;
+  }
+
+  return false;
+}
+
 /* ================================================================
    PART 1 — Match-start detection
    ================================================================ */
@@ -175,7 +191,7 @@ async function checkMatches() {
 
   for (const fixture of fixturesToCheck) {
     const scoreMatch = findMatchInCricScore(cricScoreData, fixture.home, fixture.away);
-    const found = scoreMatch != null && (scoreMatch.ms === "live" || scoreMatch.ms === "result");
+    const found = isStartedState(scoreMatch);
 
     if (found) {
       await markMatchStarted(fixture.id, fixture.matchnumber);
@@ -183,6 +199,11 @@ async function checkMatches() {
         `[MatchChecker] Match #${fixture.matchnumber} (${fixture.home} vs ${fixture.away}) FOUND in cricScore (ms=${scoreMatch.ms}) — marked as started.`
       );
     } else {
+      if (scoreMatch) {
+        console.log(
+          `[MatchChecker] Match #${fixture.matchnumber} matched in cricScore but not started yet (ms=${scoreMatch.ms}, status="${scoreMatch.status}").`
+        );
+      }
       await updateFixtureTime(fixture.id, fixture.matchnumber, fixture.dateutc);
     }
   }
