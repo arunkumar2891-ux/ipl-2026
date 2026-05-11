@@ -530,83 +530,48 @@ flowchart TD
     <!-- LINKEDIN POST -->
     <div class="section">
       <h2>LinkedIn Post</h2>
-      <div class="linkedin-post" id="post-content">I built a full-stack IPL Prediction app for 30+ friends — and I hadn't touched JavaScript since Angular 1.5 in 2016.
+      <div class="linkedin-post" id="post-content">I took a simple single-page HTML webapp and turned it into a fully automated, production-grade prediction platform — using vibecoding, system architecture thinking, and Gen AI tooling.
 
-Back then, jQuery was the default, two-way data binding in Angular felt like magic, and "npm install" was the most advanced thing in my workflow. Fast forward a decade — I haven't written a single line of modern JS, React, or Node.js in between.
+<span class="highlight">The starting point:</span>
+Last year I built an IPL prediction game for 30+ friends. Basic HTML, CSS, vanilla JS, backend APIs — a single ~590-line HTML file that got the job done. Hardcoded match data, plain email validation, radio buttons, innerHTML manipulation, manual admin operations. It worked, but scaling it meant rewriting everything.
 
-Then IPL 2026 was around the corner, and I thought: what if I just... described what I wanted and let AI build it?
+<span class="highlight">The challenge I set myself for 2026:</span>
+Rather than learn React/Node from scratch (my last JS was Angular 1.5 in 2016), I wanted to prove that my existing skills — system architecture, integration design, and Gen AI fluency — could drive a complete platform transformation through vibecoding alone.
 
-<span class="highlight">Some context — the existing webapp I was replacing:</span>
-Last year, I built an IPL prediction webapp with what I knew — basic HTML, CSS, vanilla JS, and backend APIs. It was a single ~590-line HTML file: inline styles, inline scripts, match data hardcoded as a giant JSON array in a &lt;script&gt; tag, plain text email validation against a JS array, radio buttons for team selection, raw DOM manipulation (document.createElement, innerHTML concatenation), sections toggled via display:none/block, and a next-match countdown timer with a manually hardcoded date. It worked — but it was fragile, hard to extend, and looked like it was built in 2010.
+🏏 <span class="highlight">IPL Predictor 2026</span> — the result: a private prediction league where 30+ friends pick IPL match winners, earn/lose points via a pari-mutuel engine, and compete on a live leaderboard across the entire tournament. Fully automated. Zero daily admin intervention needed.
 
-<span class="highlight">What vibecoding turned it into:</span>
-I fed the existing webapp into Lovable.dev as context and described what I wanted the modernized version to look like. Here's what changed — every single upgrade vibecoded:
+<span class="highlight">What I brought to the table (not AI — me):</span>
+→ System architecture decisions: separating concerns into a React SPA, Express REST API, and Supabase PostgreSQL — the 3-tier design was my call
+→ Integration thinking: identifying CricAPI as the live data source, designing the polling strategy (10-min match start detection, 30-min result detection), handling edge cases (delayed starts, super overs, no results, abandoned matches)
+→ Data modeling: 9 Supabase tables with lifecycle flags (matchstarted, resultprocessed), RPC stored procedures for complex queries, cumulative leaderboard built from per-match deltas
+→ Security architecture: JWT-based auth flow, 3-tier rate limiting, server-authoritative cutoff enforcement (never trust the client), admin middleware chaining
+→ Scoring engine design: the pari-mutuel redistribution model, weighted multipliers, playoff escalation — I designed the algorithm, described the edge cases, AI implemented it
+→ Automation strategy: two cron jobs that manage the entire match lifecycle — from prediction cutoff → unbid generation → result detection → scoring → leaderboard update — without anyone touching the admin console
 
-→ Single HTML monolith → separated React SPA + Express REST API + Supabase PostgreSQL (3-tier architecture)
-→ Blue background with Arial font → dark-mode-first UI with Tailwind CSS, shadcn/ui components, and Framer Motion animations
-→ Plain text email input → masked 6-digit OTP (password-type, auto-submit on 6 digits, clipboard paste, server-side validation)
-→ Radio buttons → styled interactive team cards with active-state glow and disabled states
-→ Global JS variables and innerHTML → TanStack React Query for server state, React hooks for local state, declarative caching
-→ String-concatenated HTML tables → sortable leaderboard with gold/silver/bronze accents, grouped by league, with a "Last 5" W/L form guide
-→ Manual hardcoded countdown date → auto-computed next-match countdown scanning the full schedule, per-match cutoff timers
-→ onclick + display:none navigation → Framer Motion tab transitions with layoutId animated indicator
-→ No admin tools → full admin console gated by JWT + admins DB table, with unbid generation, winner declaration, and scoring trigger
-→ External backend API calls → dedicated Express.js backend with 12 endpoints, server-side cutoff enforcement, CORS lockdown, and a pari-mutuel scoring engine
-→ Manual admin operations → two background cron jobs auto-detect match starts and results from CricAPI, auto-generate unbids, auto-trigger scoring — fully hands-off
+<span class="highlight">What vibecoding handled (the implementation):</span>
+→ React components, TypeScript types, Tailwind styling, Framer Motion animations — I described behaviours, AI wrote the JSX
+→ Express routes, Supabase queries, JWT middleware — I described the data flow, AI generated the code
+→ TanStack React Query caching, cache invalidation patterns — I described what should refetch when, AI wired it up
+→ The entire frontend-to-backend integration — I described the contract, AI implemented both sides
 
-Here's what I vibecoded in under a week:
+<span class="highlight">The transformation — from SPA to platform:</span>
+→ Single HTML monolith → 3-tier architecture (React + Express + PostgreSQL)
+→ Plain email validation → masked OTP + JWT + rate limiting
+→ Manual admin clicks → fully automated cron-driven lifecycle
+→ Hardcoded match data → Supabase fixtures table as single source of truth with live CricAPI cross-checking
+→ Static leaderboard → real-time ranked standings with W/L/NR form guide
+→ No security → JWT auth, CORS lockdown, server-authoritative validation, admin role gates
 
-🏏 <span class="highlight">IPL Predictor 2026</span> — a private prediction league where 30+ friends pick IPL match winners, earn or lose points based on outcomes, and compete on a live leaderboard across the entire tournament.
+<span class="highlight">Key takeaway:</span>
+Vibecoding isn't about not knowing how to code. It's about applying architectural thinking, integration expertise, and Gen AI fluency to build faster than the traditional write-debug-deploy cycle allows.
 
-<span class="highlight">What vibecoding looked like in practice:</span>
-I didn't write code in the traditional sense. I opened Lovable.dev, described the app I wanted for modernizing the existing webapp I created using my limited HTML, CSS, JS and DB knowledge for last year — and it scaffolded a full React + TypeScript + Tailwind project in minutes. And added all the additional features on top of this basic working template. All by vibecoding. From there, every feature was built in Cursor AI's agent mode: I described what I needed in plain English, the AI generated the implementation, I reviewed the logic, tested it, and iterated. When something broke, I pasted the error back and said "fix this." When I wanted a new feature, I described the behaviour and the AI wired up the frontend component, the Express route, and the Supabase query together.
+I didn't need to learn React's useEffect or Express middleware syntax. I needed to know *why* the system should work a certain way — the AI handled the *how*.
 
-I didn't read the React docs. I didn't learn Express from scratch. I didn't study TanStack Query's API. I described intent, and AI translated it into working code — across the entire stack.
+The skills that made this possible: system design, API integration patterns, data modeling, security thinking, and knowing how to decompose complex problems into precise prompts. Those are the skills that transfer directly from enterprise integration work to vibecoding.
 
-<span class="highlight">The user experience I shipped:</span>
-→ Users pick their name and authenticate with a masked 6-digit OTP — auto-submit on completion, clipboard paste support. The backend validates the OTP, issues a short-lived JWT (15-min expiry), and the frontend attaches it as a Bearer token on all subsequent requests. Rate-limited to 5 OTP attempts per 15 minutes
-→ Today's IPL matches appear with live countdown timers ticking to the 15-minute pre-match cutoff
-→ Users pick the winning team; the form locks reactively when the timer hits zero — and the backend independently rejects late submissions with a 403
-→ Changed your mind? Submit again — only the latest prediction counts
-→ Missed a match? The admin auto-generates default predictions so everyone stays in the standings
+10 years away from JS. One week of vibecoding. A production app serving 30+ daily active users with zero manual intervention.
 
-<span class="highlight">The scoring engine I described into existence:</span>
-→ Pari-mutuel model: incorrect predictors lose their points, and the combined total is pooled and redistributed equally among the correct predictors
-→ Weighted user multipliers (1x, 2x, 5x) — configured in a server-side map — scale both stakes and rewards proportionally
-→ Playoff escalation: base 20 points for league matches, 50 for qualifiers, 100 for the final
-→ One admin click triggers a full server-side pipeline: fetch all predictions from final_prediction → group by league → apply multipliers → compute matchWinAmount per player → write to matchdata → read previous leaderboard → compute cumulative totals → insert new leaderboard rows
-→ "No Result" edge case (rain/abandonment) handled separately — carries forward the previous leaderboard with zero points for that match, so cumulative standings remain intact
-→ A background cron job (node-cron, every 10 min) cross-checks today's fixtures against the live CricAPI — if a match hasn't started yet (rain delay, toss delay), it auto-pushes the fixture's dateutc forward by 25 minutes, extending the prediction cutoff. When the match IS detected, it marks it as started and automatically generates default predictions for anyone who didn't submit — fully automating what was previously a manual admin step
-→ A second cron job (every 30 min) auto-detects match results from CricAPI — it parses the winner from the match status string (handling "won by", super overs, no results, and abandoned matches), maps team names to shortnames via a DB lookup, then auto-triggers the full scoring pipeline and leaderboard generation. Dynamic time gate: double-header days start checking at 7 PM IST, single-match days at 11:30 PM IST. Retry every 30 minutes for pending results. The entire match lifecycle — from prediction cutoff → unbid generation → result detection → scoring — runs fully automated
-
-<span class="highlight">The dashboard features — all vibecoded:</span>
-→ A ranked leaderboard sorted by cumulative points, with gold/silver/bronze left-border accents on the top 3, grouped independently per league (G1, G2). The logged-in user's row is highlighted so you can instantly spot yourself in the standings
-→ A "Last 5" form guide column — glowing green dots for wins, red for losses, orange for no-result (rain/abandonment) — dynamically computed by querying the 5 most recent distinct match numbers from the leaderboard table. No hardcoded match IDs, no manual config — it's a sliding window that advances automatically
-→ A detailed prediction log per match showing who picked which team after the cutoff.
-→ A detailed prediction log per player showing the list of all predictions for the match before the cutoff.
-→ A full schedule of 70+ remaining IPL 2026 matches
-
-<span class="highlight">The technical stack — all new to me, all vibecoded:</span>
-→ React 18 + TypeScript + Vite 5 (SWC plugin) as the frontend SPA with React Router v6 for routing
-→ Tailwind CSS 3 + shadcn/ui (Radix UI primitives) + Framer Motion for a dark-mode UI with animated tab transitions, row fade-ins, and layout animations
-→ TanStack React Query v5 for declarative data fetching with queryKey caching, parallel queries, and cache invalidation after mutations
-→ Node.js (ES Modules) + Express.js backend with 12 REST endpoints, input validation on all routes, and CORS locked to the production domain
-→ Supabase (PostgreSQL) with 9 tables (including a fixtures table with matchstarted/resultprocessed flags as the single source of truth for match lifecycle) and 3 RPC stored procedures for complex server-side queries
-→ Deployed as two separate services on Render.com with a health-check keep-alive endpoint, Vite dev proxy for local development, and background cron jobs running inside the backend process
-
-<span class="highlight">What I learned about vibecoding:</span>
-→ It's not "no-code" — you still need to understand what you're building, why a pari-mutuel model works, how cutoff enforcement should work on both client and server, why you need cache invalidation after a mutation
-→ The skill isn't writing syntax — it's decomposing problems clearly enough that AI can generate correct implementations
-→ When it breaks, you debug by describing the symptom. When you want a feature, you describe the behaviour. The feedback loop is: intent → generation → review → iterate
-→ I went from "I don't know what useEffect does" to shipping a production app with React hooks, TanStack Query, Framer Motion animations, and Express middleware — in days, not months
-
-10 years away from JavaScript. Zero modern JS experience going in. One week of vibecoding. A production app used by 30+ people every single day of IPL 2026.
-
-The barrier to building software has fundamentally shifted. You don't need to mass every framework. You need the ability to think clearly about what you're building — and the tools will meet you there.
-
-If you've been away from coding and think you've "fallen behind" — you haven't. The tools have caught up to you.
-
-<span class="tag">#Vibecoding</span> <span class="tag">#AI</span> <span class="tag">#BuildInPublic</span> <span class="tag">#CursorAI</span> <span class="tag">#Lovable</span> <span class="tag">#IPL2026</span> <span class="tag">#React</span> <span class="tag">#Supabase</span> <span class="tag">#FullStack</span> <span class="tag">#SoftwareEngineering</span> <span class="tag">#JavaScript</span></div>
+<span class="tag">#Vibecoding</span> <span class="tag">#GenAI</span> <span class="tag">#SystemArchitecture</span> <span class="tag">#CursorAI</span> <span class="tag">#Lovable</span> <span class="tag">#IPL2026</span> <span class="tag">#Integration</span> <span class="tag">#Supabase</span> <span class="tag">#FullStack</span> <span class="tag">#BuildInPublic</span> <span class="tag">#SoftwareEngineering</span></div>
       <div class="divider"></div>
       <button class="copy-btn" onclick="copyPost()">📋 Copy Plain Text for LinkedIn</button>
     </div>
@@ -623,83 +588,48 @@ If you've been away from coding and think you've "fallen behind" — you haven't
     });
 
     function copyPost() {
-      const text = `I built a full-stack IPL Prediction app for 30+ friends — and I hadn't touched JavaScript since Angular 1.5 in 2016.
+      const text = `I took a simple single-page HTML webapp and turned it into a fully automated, production-grade prediction platform — using vibecoding, system architecture thinking, and Gen AI tooling.
 
-Back then, jQuery was the default, two-way data binding in Angular felt like magic, and "npm install" was the most advanced thing in my workflow. Fast forward a decade — I haven't written a single line of modern JS, React, or Node.js in between.
+The starting point:
+Last year I built an IPL prediction game for 30+ friends. Basic HTML, CSS, vanilla JS, backend APIs — a single ~590-line HTML file that got the job done. Hardcoded match data, plain email validation, radio buttons, innerHTML manipulation, manual admin operations. It worked, but scaling it meant rewriting everything.
 
-Then IPL 2026 was around the corner, and I thought: what if I just... described what I wanted and let AI build it?
+The challenge I set myself for 2026:
+Rather than learn React/Node from scratch (my last JS was Angular 1.5 in 2016), I wanted to prove that my existing skills — system architecture, integration design, and Gen AI fluency — could drive a complete platform transformation through vibecoding alone.
 
-Some context — the existing webapp I was replacing:
-Last year, I built an IPL prediction webapp with what I knew — basic HTML, CSS, vanilla JS, and backend APIs. It was a single ~590-line HTML file: inline styles, inline scripts, match data hardcoded as a giant JSON array in a <script> tag, plain text email validation against a JS array, radio buttons for team selection, raw DOM manipulation (document.createElement, innerHTML concatenation), sections toggled via display:none/block, and a next-match countdown timer with a manually hardcoded date. It worked — but it was fragile, hard to extend, and looked like it was built in 2010.
+🏏 IPL Predictor 2026 — the result: a private prediction league where 30+ friends pick IPL match winners, earn/lose points via a pari-mutuel engine, and compete on a live leaderboard across the entire tournament. Fully automated. Zero daily admin intervention needed.
 
-What vibecoding turned it into:
-I fed the existing webapp into Lovable.dev as context and described what I wanted the modernized version to look like. Here's what changed — every single upgrade vibecoded:
+What I brought to the table (not AI — me):
+→ System architecture decisions: separating concerns into a React SPA, Express REST API, and Supabase PostgreSQL — the 3-tier design was my call
+→ Integration thinking: identifying CricAPI as the live data source, designing the polling strategy (10-min match start detection, 30-min result detection), handling edge cases (delayed starts, super overs, no results, abandoned matches)
+→ Data modeling: 9 Supabase tables with lifecycle flags (matchstarted, resultprocessed), RPC stored procedures for complex queries, cumulative leaderboard built from per-match deltas
+→ Security architecture: JWT-based auth flow, 3-tier rate limiting, server-authoritative cutoff enforcement (never trust the client), admin middleware chaining
+→ Scoring engine design: the pari-mutuel redistribution model, weighted multipliers, playoff escalation — I designed the algorithm, described the edge cases, AI implemented it
+→ Automation strategy: two cron jobs that manage the entire match lifecycle — from prediction cutoff → unbid generation → result detection → scoring → leaderboard update — without anyone touching the admin console
 
-→ Single HTML monolith → separated React SPA + Express REST API + Supabase PostgreSQL (3-tier architecture)
-→ Blue background with Arial font → dark-mode-first UI with Tailwind CSS, shadcn/ui components, and Framer Motion animations
-→ Plain text email input → masked 6-digit OTP (password-type, auto-submit on 6 digits, clipboard paste, server-side validation)
-→ Radio buttons → styled interactive team cards with active-state glow and disabled states
-→ Global JS variables and innerHTML → TanStack React Query for server state, React hooks for local state, declarative caching
-→ String-concatenated HTML tables → sortable leaderboard with gold/silver/bronze accents, grouped by league, with a "Last 5" W/L form guide
-→ Manual hardcoded countdown date → auto-computed next-match countdown scanning the full schedule, per-match cutoff timers
-→ onclick + display:none navigation → Framer Motion tab transitions with layoutId animated indicator
-→ No admin tools → full admin console gated by JWT + admins DB table, with unbid generation, winner declaration, and scoring trigger
-→ External backend API calls → dedicated Express.js backend with 12 endpoints, server-side cutoff enforcement, CORS lockdown, and a pari-mutuel scoring engine
-→ Manual admin operations → two background cron jobs auto-detect match starts and results from CricAPI, auto-generate unbids, auto-trigger scoring — fully hands-off
+What vibecoding handled (the implementation):
+→ React components, TypeScript types, Tailwind styling, Framer Motion animations — I described behaviours, AI wrote the JSX
+→ Express routes, Supabase queries, JWT middleware — I described the data flow, AI generated the code
+→ TanStack React Query caching, cache invalidation patterns — I described what should refetch when, AI wired it up
+→ The entire frontend-to-backend integration — I described the contract, AI implemented both sides
 
-Here's what I vibecoded in under a week:
+The transformation — from SPA to platform:
+→ Single HTML monolith → 3-tier architecture (React + Express + PostgreSQL)
+→ Plain email validation → masked OTP + JWT + rate limiting
+→ Manual admin clicks → fully automated cron-driven lifecycle
+→ Hardcoded match data → Supabase fixtures table as single source of truth with live CricAPI cross-checking
+→ Static leaderboard → real-time ranked standings with W/L/NR form guide
+→ No security → JWT auth, CORS lockdown, server-authoritative validation, admin role gates
 
-🏏 IPL Predictor 2026 — a private prediction league where 30+ friends pick IPL match winners, earn or lose points based on outcomes, and compete on a live leaderboard across the entire tournament.
+Key takeaway:
+Vibecoding isn't about not knowing how to code. It's about applying architectural thinking, integration expertise, and Gen AI fluency to build faster than the traditional write-debug-deploy cycle allows.
 
-What vibecoding looked like in practice:
-I didn't write code in the traditional sense. I opened Lovable.dev, described the app I wanted based for modernizing the existing webapp I created using my limited HTML, CSS, JS and DB knowledge for last year — and it scaffolded a full React + TypeScript + Tailwind project in minutes. And added all the additional features on top of this basic working template. All by vibecoding. From there, every feature was built in Cursor AI's agent mode: I described what I needed in plain English, the AI generated the implementation, I reviewed the logic, tested it, and iterated. When something broke, I pasted the error back and said "fix this." When I wanted a new feature, I described the behaviour and the AI wired up the frontend component, the Express route, and the Supabase query together.
+I didn't need to learn React's useEffect or Express middleware syntax. I needed to know *why* the system should work a certain way — the AI handled the *how*.
 
-I didn't read the React docs. I didn't learn Express from scratch. I didn't study TanStack Query's API. I described intent, and AI translated it into working code — across the entire stack.
+The skills that made this possible: system design, API integration patterns, data modeling, security thinking, and knowing how to decompose complex problems into precise prompts. Those are the skills that transfer directly from enterprise integration work to vibecoding.
 
-The user experience I shipped:
-→ Users pick their name and authenticate with a masked 6-digit OTP — auto-submit on completion, clipboard paste support. The backend validates the OTP, issues a short-lived JWT (15-min expiry), and the frontend attaches it as a Bearer token on all subsequent requests. Rate-limited to 5 OTP attempts per 15 minutes
-→ Today's IPL matches appear with live countdown timers ticking to the 15-minute pre-match cutoff
-→ Users pick the winning team; the form locks reactively when the timer hits zero — and the backend independently rejects late submissions with a 403
-→ Changed your mind? Submit again — only the latest prediction counts
-→ Missed a match? The admin auto-generates default predictions so everyone stays in the standings
+10 years away from JS. One week of vibecoding. A production app serving 30+ daily active users with zero manual intervention.
 
-The scoring engine I described into existence:
-→ Pari-mutuel model: incorrect predictors lose their points, and the combined total is pooled and redistributed equally among the correct predictors
-→ Weighted user multipliers (1x, 2x, 5x) — configured in a server-side map — scale both stakes and rewards proportionally
-→ Playoff escalation: base 20 points for league matches, 50 for qualifiers, 100 for the final
-→ One admin click triggers a full server-side pipeline: fetch all predictions from final_prediction → group by league → apply multipliers → compute matchWinAmount per player → write to matchdata → read previous leaderboard → compute cumulative totals → insert new leaderboard rows
-→ "No Result" edge case (rain/abandonment) handled separately — carries forward the previous leaderboard with zero points for that match, so cumulative standings remain intact
-→ A background cron job (node-cron, every 10 min) cross-checks today's fixtures against the live CricAPI — if a match hasn't started yet (rain delay, toss delay), it auto-pushes the fixture's dateutc forward by 25 minutes, extending the prediction cutoff. When the match IS detected, it marks it as started and automatically generates default predictions for anyone who didn't submit — fully automating what was previously a manual admin step
-→ A second cron job (every 30 min) auto-detects match results from CricAPI — it parses the winner from the match status string (handling "won by", super overs, no results, and abandoned matches), maps team names to shortnames via a DB lookup, then auto-triggers the full scoring pipeline and leaderboard generation. Dynamic time gate: double-header days start checking at 7 PM IST, single-match days at 11:30 PM IST. Retry every 30 minutes for pending results. The entire match lifecycle — from prediction cutoff → unbid generation → result detection → scoring — runs fully automated
-
-The dashboard features — all vibecoded:
-→ A ranked leaderboard sorted by cumulative points, with gold/silver/bronze left-border accents on the top 3, grouped independently per league (G1, G2). The logged-in user's row is highlighted so you can instantly spot yourself in the standings
-→ A "Last 5" form guide column — glowing green dots for wins, red for losses, orange for no-result (rain/abandonment) — dynamically computed by querying the 5 most recent distinct match numbers from the leaderboard table. No hardcoded match IDs, no manual config — it's a sliding window that advances automatically
-→ A detailed prediction log per match showing who picked which team after the cutoff.
-→ A detailed prediction log per player showing the list of all predictions for the match before the cutoff.
-→ A full schedule of 70+ remaining IPL 2026 matches
-
-The technical stack — all new to me, all vibecoded:
-→ React 18 + TypeScript + Vite 5 (SWC plugin) as the frontend SPA with React Router v6 for routing
-→ Tailwind CSS 3 + shadcn/ui (Radix UI primitives) + Framer Motion for a dark-mode UI with animated tab transitions, row fade-ins, and layout animations
-→ TanStack React Query v5 for declarative data fetching with queryKey caching, parallel queries, and cache invalidation after mutations
-→ Node.js (ES Modules) + Express.js backend with 12 REST endpoints, input validation on all routes, and CORS locked to the production domain
-→ Supabase (PostgreSQL) with 9 tables (including a fixtures table with matchstarted/resultprocessed flags as the single source of truth for match lifecycle) and 3 RPC stored procedures for complex server-side queries
-→ Deployed as two separate services on Render.com with a health-check keep-alive endpoint, Vite dev proxy for local development, and background cron jobs running inside the backend process
-
-What I learned about vibecoding:
-→ It's not "no-code" — you still need to understand what you're building, why a pari-mutuel model works, how cutoff enforcement should work on both client and server, why you need cache invalidation after a mutation
-→ The skill isn't writing syntax — it's decomposing problems clearly enough that AI can generate correct implementations
-→ When it breaks, you debug by describing the symptom. When you want a feature, you describe the behaviour. The feedback loop is: intent → generation → review → iterate
-→ I went from "I don't know what useEffect does" to shipping a production app with React hooks, TanStack Query, Framer Motion animations, and Express middleware — in days, not months
-
-10 years away from JavaScript. Zero modern JS experience going in. One week of vibecoding. A production app used by 30+ people every single day of IPL 2026.
-
-The barrier to building software has fundamentally shifted. You don't need to master every framework. You need the ability to think clearly about what you're building — and the tools will meet you there.
-
-If you've been away from coding and think you've "fallen behind" — you haven't. The tools have caught up to you.
-
-#Vibecoding #AI #BuildInPublic #CursorAI #Lovable #IPL2026 #React #Supabase #FullStack #SoftwareEngineering #JavaScript`;
+#Vibecoding #GenAI #SystemArchitecture #CursorAI #Lovable #IPL2026 #Integration #Supabase #FullStack #BuildInPublic #SoftwareEngineering`;
 
       navigator.clipboard.writeText(text).then(() => {
         const btn = document.querySelector('.copy-btn');
