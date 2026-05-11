@@ -25,7 +25,8 @@ interface FormEntry {
 type SortKey = "name" | "amount" | "winAmount";
 
 const LeaderboardTable = () => {
-  const activeEmail = localStorage.getItem("email")?.toLowerCase() ?? "";
+  const { email, groups } = useLoggedInUser();
+  const activeEmail = email?.toLowerCase() ?? "";
   const activeNames = new Set(
     members
       .filter((m) => m.Email.toLowerCase() === activeEmail)
@@ -83,8 +84,6 @@ const LeaderboardTable = () => {
 
 	  return [...new Set(groups)];
   });*/
-  const { groups, isLoggedIn, logout } = useLoggedInUser();
-  
   const sorted = useMemo(() => {
     return [...data].sort((a, b) => {
       const aVal = a[sortKey];
@@ -118,7 +117,7 @@ const LeaderboardTable = () => {
   }));
 
   if (isLoading) return <LoadingSpinner />;
-  if(!groups) return (
+  if (groups.length === 0) return (
   <div className="text-center mt-6">
     <p>The leaderboard will be visible once you submit your first bid</p>
   </div>

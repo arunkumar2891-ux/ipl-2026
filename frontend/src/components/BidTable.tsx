@@ -10,9 +10,8 @@ import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 
 type SortKey = "Name" | "selectedValue";
 
-const activeUser = localStorage.getItem("email");
-//console.log(`local email: ${activeUser}`);
 const BidTable = () => {
+  const { email: activeUser, groups } = useLoggedInUser();
   const activeNames = new Set(
     members
       .filter((m) => m.Email.toLowerCase() === (activeUser?.toLowerCase() ?? ""))
@@ -30,8 +29,7 @@ const BidTable = () => {
   /*const [userGroups, setUserGroups] = useState<string[]>(
   JSON.parse(localStorage.getItem("userGroups") || "[]")
   );*/
-  const { groups, isLoggedIn, logout } = useLoggedInUser();
-  console.log(`${groups} - ${isLoggedIn}`);
+  console.log(`${groups}`);
   //const analytics = useMemo(() => aggregateBids(bids), [bids]);
   
   const [sortKey, setSortKey] = useState<SortKey>("Name");

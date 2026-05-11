@@ -124,6 +124,7 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled }: PredictionFor
 	  console.log("matchId", matchId);
 	  console.log("selectedTeam", selectedTeam);*/
     localStorage.setItem("email", selectedEmail.toLowerCase());
+    window.dispatchEvent(new Event("ipl-email-updated"));
     //console.log("email", localStorage.getItem("email"));
 	const result = await Promise.all(
 	  userGroups.map((group) => {
