@@ -5,22 +5,22 @@ const LiveScoreWidget = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const scriptId = "cric-score-widget-script";
-    if (document.getElementById(scriptId)) return;
-
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.src = "https://cdorgapi.b-cdn.net/widgets/score.js";
-    script.async = true;
-    containerRef.current?.appendChild(script);
+    const widgetEl = document.getElementById("live-score-widget");
+    if (widgetEl && containerRef.current) {
+      widgetEl.style.display = "block";
+      containerRef.current.appendChild(widgetEl);
+    }
 
     return () => {
-      const existing = document.getElementById(scriptId);
-      if (existing) existing.remove();
+      const widgetEl = document.getElementById("live-score-widget");
+      if (widgetEl) {
+        widgetEl.style.display = "none";
+        document.body.appendChild(widgetEl);
+      }
     };
   }, []);
 
-  return <div ref={containerRef} className="mt-6" />;
+  return <div ref={containerRef} className="rounded-lg overflow-hidden" />;
 };
 
 const NextMatchCountdown = () => {
@@ -59,21 +59,23 @@ const NextMatchCountdown = () => {
   if (!nextMatch) return null;
 
   return (
-    <div className="card-surface p-6 text-center">
-      <h3 className="font-display font-semibold text-foreground mb-4">⏳ Next Match Countdown</h3>
-      {timeLeft.expired ? (
-        <p className="text-accent text-lg font-semibold">🎉 It's match time!</p>
-      ) : (
-        <div className="flex justify-center gap-6">
-          <TimeUnit value={timeLeft.days} label="Days" />
-          <TimeUnit value={timeLeft.hours} label="Hours" />
-          <TimeUnit value={timeLeft.minutes} label="Minutes" />
-          <TimeUnit value={timeLeft.seconds} label="Seconds" />
-        </div>
-      )}
-      <p className="text-sm text-muted-foreground mt-4">🏏 Get your jerseys ready — the action returns soon!</p>
+    <>
+      <div className="card-surface p-6 text-center">
+        <h3 className="font-display font-semibold text-foreground mb-4">⏳ Next Match Countdown</h3>
+        {timeLeft.expired ? (
+          <p className="text-accent text-lg font-semibold">🎉 It's match time!</p>
+        ) : (
+          <div className="flex justify-center gap-6">
+            <TimeUnit value={timeLeft.days} label="Days" />
+            <TimeUnit value={timeLeft.hours} label="Hours" />
+            <TimeUnit value={timeLeft.minutes} label="Minutes" />
+            <TimeUnit value={timeLeft.seconds} label="Seconds" />
+          </div>
+        )}
+        <p className="text-sm text-muted-foreground mt-4">🏏 Get your jerseys ready — the action returns soon!</p>
+      </div>
       {timeLeft.expired && <LiveScoreWidget />}
-    </div>
+    </>
   );
 };
 
