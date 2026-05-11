@@ -25,7 +25,9 @@ async function fetchCricScore() {
       console.error("[CricScore] Returned status:", json.status);
       return null;
     }
-    return json.data || [];
+    const rows = json.data || [];
+    console.log(`[CricScore] Fetch success: ${rows.length} row(s) returned.`);
+    return rows;
   } catch (err) {
     console.error("[CricScore] Fetch error:", err.message);
     return null;
@@ -92,6 +94,7 @@ function isInCheckWindow(fixture) {
 }
 
 async function markMatchStarted(fixtureId, matchnumber) {
+  console.log(`[MatchChecker] START update: marking match #${matchnumber} as started.`);
   const { error } = await supabase
     .from("fixtures")
     .update({ matchstarted: "Y" })
@@ -99,13 +102,26 @@ async function markMatchStarted(fixtureId, matchnumber) {
 
   if (error) {
     console.error(
-      `[MatchChecker] Failed to mark match ${matchnumber} as started:`,
+      `[MatchChecker] FAIL update: could not mark match #${matchnumber} as started:`,
       error
     );
-    return;
+    return false;
   }
 
-  await generateUnbids(matchnumber);
+  console.log(`[MatchChecker] SUCCESS update: match #${matchnumber} marked as started.`);
+
+  const unbidsOk = await generateUnbids(matchnumber);
+  if (!unbidsOk) {
+    console.error(
+      `[MatchChecker] FAIL post-start: unbid generation failed for match #${matchnumber}.`
+    );
+    return false;
+  }
+
+  console.log(
+    `[MatchChecker] SUCCESS post-start: unbids generated for match #${matchnumber}.`
+  );
+  return true;
 }
 
 async function generateUnbids(matchnumber) {
@@ -124,10 +140,12 @@ async function generateUnbids(matchnumber) {
       `[MatchChecker] Failed to generate unbids for match ${matchnumber}:`,
       error
     );
+    return false;
   } else {
     console.log(
       `[MatchChecker] Unbids generated successfully for match ${matchnumber}`
     );
+    return true;
   }
 }
 
@@ -152,12 +170,12 @@ async function updateFixtureTime(fixtureId, matchnumber, currentDateutc) {
 
   if (error) {
     console.error(
-      `[MatchChecker] Failed to update dateutc for match ${matchnumber}:`,
+      `[MatchChecker] FAIL postpone: could not update dateutc for match #${matchnumber}:`,
       error
     );
   } else {
     console.log(
-      `[MatchChecker] Match ${matchnumber} NOT found in API. dateutc pushed to ${newTimeISO}`
+      `[MatchChecker] SUCCESS postpone: match #${matchnumber} dateutc pushed to ${newTimeISO}`
     );
   }
 }
@@ -194,14 +212,32 @@ async function checkMatches() {
     const found = isStartedState(scoreMatch);
 
     if (found) {
-      await markMatchStarted(fixture.id, fixture.matchnumber);
+      console.log(
+        `[MatchChecker] MATCHED + STARTED: #${fixture.matchnumber} (${fixture.home} vs ${fixture.away}) ` +
+        `apiId=${scoreMatch.id || "n/a"} ms=${scoreMatch.ms || "n/a"} status="${scoreMatch.status || ""}"`
+      );
+      const marked = await markMatchStarted(fixture.id, fixture.matchnumber);
+      if (!marked) {
+        console.error(
+          `[MatchChecker] FAIL flow: start flow incomplete for match #${fixture.matchnumber}.`
+        );
+      } else {
+        console.log(
+          `[MatchChecker] SUCCESS flow: start flow completed for match #${fixture.matchnumber}.`
+        );
+      }
       console.log(
         `[MatchChecker] Match #${fixture.matchnumber} (${fixture.home} vs ${fixture.away}) FOUND in cricScore (ms=${scoreMatch.ms}) — marked as started.`
       );
     } else {
       if (scoreMatch) {
         console.log(
-          `[MatchChecker] Match #${fixture.matchnumber} matched in cricScore but not started yet (ms=${scoreMatch.ms}, status="${scoreMatch.status}").`
+          `[MatchChecker] MATCHED + NOT STARTED: #${fixture.matchnumber} (${fixture.home} vs ${fixture.away}) ` +
+          `apiId=${scoreMatch.id || "n/a"} ms=${scoreMatch.ms || "n/a"} status="${scoreMatch.status || ""}"`
+        );
+      } else {
+        console.log(
+          `[MatchChecker] NOT MATCHED: #${fixture.matchnumber} (${fixture.home} vs ${fixture.away}) not found in cricScore response.`
         );
       }
       await updateFixtureTime(fixture.id, fixture.matchnumber, fixture.dateutc);
