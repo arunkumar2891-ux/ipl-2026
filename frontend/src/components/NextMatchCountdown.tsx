@@ -1,5 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getUpcomingMatches, MatchDataItem } from "@/data/matchData";
+
+const LiveScoreWidget = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scriptId = "cric-score-widget-script";
+    if (document.getElementById(scriptId)) return;
+
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = "https://cdorgapi.b-cdn.net/widgets/score.js";
+    script.async = true;
+    containerRef.current?.appendChild(script);
+
+    return () => {
+      const existing = document.getElementById(scriptId);
+      if (existing) existing.remove();
+    };
+  }, []);
+
+  return <div ref={containerRef} className="mt-6" />;
+};
 
 const NextMatchCountdown = () => {
   const upcoming = getUpcomingMatches();
@@ -50,6 +72,7 @@ const NextMatchCountdown = () => {
         </div>
       )}
       <p className="text-sm text-muted-foreground mt-4">🏏 Get your jerseys ready — the action returns soon!</p>
+      {timeLeft.expired && <LiveScoreWidget />}
     </div>
   );
 };

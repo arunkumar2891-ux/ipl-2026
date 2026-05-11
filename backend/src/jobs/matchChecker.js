@@ -3,14 +3,49 @@ import { supabase } from "../lib/supabase.js";
 import { calculateMatchResult } from "../services/calculateMatchResult.js";
 
 const CRIC_API_KEY = process.env.CRIC_API_KEY;
-const CRIC_API_URL = `https://api.cricapi.com/v1/currentMatches?apikey=${CRIC_API_KEY}&offset=0`;
+const CRIC_SCORE_URL = `https://api.cricapi.com/v1/cricScore?apikey=${CRIC_API_KEY}`;
 
 const CHECK_WINDOW_BEFORE_MS = 10 * 60 * 1000;
 const POSTPONE_OFFSET_MS = 25 * 60 * 1000;
 const RESULT_RETRY_MS = 30 * 60 * 1000;
 
 /* ================================================================
-   PART 1 — Match-start detection (existing logic)
+   SHARED — CricScore API fetch & match lookup
+   ================================================================ */
+
+async function fetchCricScore() {
+  try {
+    const res = await fetch(CRIC_SCORE_URL);
+    if (!res.ok) {
+      console.error("[CricScore] HTTP error:", res.status);
+      return null;
+    }
+    const json = await res.json();
+    if (json.status !== "success") {
+      console.error("[CricScore] Returned status:", json.status);
+      return null;
+    }
+    return json.data || [];
+  } catch (err) {
+    console.error("[CricScore] Fetch error:", err.message);
+    return null;
+  }
+}
+
+function findMatchInCricScore(cricScoreData, homeTeam, awayTeam) {
+  const homeLower = homeTeam.toLowerCase();
+  const awayLower = awayTeam.toLowerCase();
+
+  return cricScoreData.find((m) => {
+    const t1 = (m.t1 || "").toLowerCase();
+    const t2 = (m.t2 || "").toLowerCase();
+    return (t1.includes(homeLower) && t2.includes(awayLower)) ||
+           (t1.includes(awayLower) && t2.includes(homeLower));
+  });
+}
+
+/* ================================================================
+   PART 1 — Match-start detection
    ================================================================ */
 
 async function fetchTodayFixtures() {
@@ -32,35 +67,6 @@ async function fetchTodayFixtures() {
     return [];
   }
   return data || [];
-}
-
-async function fetchCurrentMatches() {
-  try {
-    const res = await fetch(CRIC_API_URL);
-    if (!res.ok) {
-      console.error("[MatchChecker] CricAPI HTTP error:", res.status);
-      return null;
-    }
-    const json = await res.json();
-    if (json.status !== "success") {
-      console.error("[MatchChecker] CricAPI returned status:", json.status);
-      return null;
-    }
-    return json.data || [];
-  } catch (err) {
-    console.error("[MatchChecker] CricAPI fetch error:", err.message);
-    return null;
-  }
-}
-
-function isMatchInApiResponse(apiMatches, homeTeam, awayTeam) {
-  const homeLower = homeTeam.toLowerCase();
-  const awayLower = awayTeam.toLowerCase();
-
-  return apiMatches.some((m) => {
-    const name = (m.name || "").toLowerCase();
-    return name.includes(homeLower) && name.includes(awayLower);
-  });
 }
 
 function isInCheckWindow(fixture) {
@@ -161,18 +167,20 @@ async function checkMatches() {
     fixturesToCheck.map((f) => `#${f.matchnumber} ${f.home} vs ${f.away}`)
   );
 
-  const apiMatches = await fetchCurrentMatches();
-  if (apiMatches === null) {
-    console.error("[MatchChecker] Could not fetch API data, will retry next cycle.");
+  const cricScoreData = await fetchCricScore();
+  if (cricScoreData === null) {
+    console.error("[MatchChecker] Could not fetch cricScore data, will retry next cycle.");
     return;
   }
 
   for (const fixture of fixturesToCheck) {
-    const found = isMatchInApiResponse(apiMatches, fixture.home, fixture.away);
+    const scoreMatch = findMatchInCricScore(cricScoreData, fixture.home, fixture.away);
+    const found = scoreMatch != null && (scoreMatch.ms === "live" || scoreMatch.ms === "result");
+
     if (found) {
       await markMatchStarted(fixture.id, fixture.matchnumber);
       console.log(
-        `[MatchChecker] Match #${fixture.matchnumber} (${fixture.home} vs ${fixture.away}) FOUND in API — marked as started.`
+        `[MatchChecker] Match #${fixture.matchnumber} (${fixture.home} vs ${fixture.away}) FOUND in cricScore (ms=${scoreMatch.ms}) — marked as started.`
       );
     } else {
       await updateFixtureTime(fixture.id, fixture.matchnumber, fixture.dateutc);
@@ -181,7 +189,7 @@ async function checkMatches() {
 }
 
 /* ================================================================
-   PART 2 — Match-result detection (new logic)
+   PART 2 — Match-result detection
    For double-header days: starts at 13:30 UTC (7:00 PM IST)
    For single-match days:  starts at 18:00 UTC (11:30 PM IST)
    ================================================================ */
@@ -242,16 +250,6 @@ async function loadTeamsMap() {
     map[t.fullname.toLowerCase()] = t.shortname;
   });
   return map;
-}
-
-function findApiMatch(apiMatches, homeTeam, awayTeam) {
-  const homeLower = homeTeam.toLowerCase();
-  const awayLower = awayTeam.toLowerCase();
-
-  return apiMatches.find((m) => {
-    const name = (m.name || "").toLowerCase();
-    return name.includes(homeLower) && name.includes(awayLower);
-  });
 }
 
 function parseWinnerFromStatus(status, homeTeam, awayTeam, teamsMap) {
@@ -425,10 +423,10 @@ async function _checkMatchResultsInner() {
     return;
   }
 
-  const apiMatches = await fetchCurrentMatches();
-  if (apiMatches === null) {
+  const cricScoreData = await fetchCricScore();
+  if (cricScoreData === null) {
     console.error(
-      "[ResultChecker] Could not fetch API data, will retry in 30 min."
+      "[ResultChecker] Could not fetch cricScore data, will retry in 30 min."
     );
     scheduleResultRetry();
     return;
@@ -453,18 +451,26 @@ async function _checkMatchResultsInner() {
       continue;
     }
 
-    const apiMatch = findApiMatch(apiMatches, fixture.home, fixture.away);
+    const scoreMatch = findMatchInCricScore(cricScoreData, fixture.home, fixture.away);
 
-    if (!apiMatch) {
+    if (!scoreMatch) {
       console.log(
-        `[ResultChecker] Match #${fixture.matchnumber} (${fixture.home} vs ${fixture.away}) not found in API response.`
+        `[ResultChecker] Match #${fixture.matchnumber} (${fixture.home} vs ${fixture.away}) not found in cricScore.`
+      );
+      pendingResults = true;
+      continue;
+    }
+
+    if (scoreMatch.ms !== "result") {
+      console.log(
+        `[ResultChecker] Match #${fixture.matchnumber} in cricScore but ms="${scoreMatch.ms}", not a result yet. Will retry.`
       );
       pendingResults = true;
       continue;
     }
 
     const result = parseWinnerFromStatus(
-      apiMatch.status,
+      scoreMatch.status,
       fixture.home,
       fixture.away,
       teamsMap
@@ -472,7 +478,7 @@ async function _checkMatchResultsInner() {
 
     if (!result) {
       console.log(
-        `[ResultChecker] Match #${fixture.matchnumber} status not final yet: "${apiMatch.status}". Will retry.`
+        `[ResultChecker] Match #${fixture.matchnumber} status not final yet: "${scoreMatch.status}". Will retry.`
       );
       pendingResults = true;
       continue;
@@ -540,8 +546,8 @@ export function startMatchChecker() {
     );
   });
 
-  console.log("[MatchChecker] Scheduled — match-start checks every 10 minutes.");
+  console.log("[MatchChecker] Scheduled — match-start checks every 10 minutes (using cricScore).");
   console.log(
-    "[ResultChecker] Scheduled — result checks every 30 min between 13:00–23:59 UTC (dynamic gate: double-header 7 PM IST, single 11:30 PM IST)."
+    "[ResultChecker] Scheduled — result checks every 30 min between 13:00–23:59 UTC (using cricScore)."
   );
 }
