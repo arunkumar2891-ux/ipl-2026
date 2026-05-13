@@ -50,11 +50,17 @@ function isStartedState(scoreMatch) {
   if (!scoreMatch) return false;
 
   const ms = (scoreMatch.ms || "").toLowerCase();
-  if (ms === "live" || ms === "result") return true;
-
-  // CricAPI can still report ms="fixture" right after toss.
-  // Treat toss-declared status as started to avoid postponing active matches.
   const status = (scoreMatch.status || "").toLowerCase();
+
+  if (ms === "result") return true;
+
+  if (ms === "live") {
+    if (/delayed|toss delayed|start delayed|match delayed|inspection|rain/.test(status)) {
+      return false;
+    }
+    return true;
+  }
+
   if (ms === "fixture" && /opt to bat|opt to bowl|opt to field|won the toss/.test(status)) {
     return true;
   }
