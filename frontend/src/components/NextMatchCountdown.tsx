@@ -1,27 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { getUpcomingMatches, MatchDataItem } from "@/data/matchData";
-
-const LiveScoreWidget = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const widgetEl = document.getElementById("live-score-widget");
-    if (widgetEl && containerRef.current) {
-      widgetEl.style.display = "block";
-      containerRef.current.appendChild(widgetEl);
-    }
-
-    return () => {
-      const widgetEl = document.getElementById("live-score-widget");
-      if (widgetEl) {
-        widgetEl.style.display = "none";
-        document.body.appendChild(widgetEl);
-      }
-    };
-  }, []);
-
-  return <div ref={containerRef} className="rounded-lg overflow-hidden" />;
-};
 
 const NextMatchCountdown = () => {
   const upcoming = getUpcomingMatches();
@@ -59,23 +37,20 @@ const NextMatchCountdown = () => {
   if (!nextMatch) return null;
 
   return (
-    <>
-      <div className="card-surface p-6 text-center">
-        <h3 className="font-display font-semibold text-foreground mb-4">⏳ Next Match Countdown</h3>
-        {timeLeft.expired ? (
-          <p className="text-accent text-lg font-semibold">🎉 It's match time!</p>
-        ) : (
-          <div className="flex justify-center gap-6">
-            <TimeUnit value={timeLeft.days} label="Days" />
-            <TimeUnit value={timeLeft.hours} label="Hours" />
-            <TimeUnit value={timeLeft.minutes} label="Minutes" />
-            <TimeUnit value={timeLeft.seconds} label="Seconds" />
-          </div>
-        )}
-        <p className="text-sm text-muted-foreground mt-4">🏏 Get your jerseys ready — the action returns soon!</p>
-      </div>
-      {timeLeft.expired && <LiveScoreWidget />}
-    </>
+    <div className="card-surface p-6 text-center">
+      <h3 className="font-display font-semibold text-foreground mb-4">⏳ Next Match Countdown</h3>
+      {timeLeft.expired ? (
+        <p className="text-accent text-lg font-semibold">🎉 It's match time!</p>
+      ) : (
+        <div className="flex justify-center gap-6">
+          <TimeUnit value={timeLeft.days} label="Days" />
+          <TimeUnit value={timeLeft.hours} label="Hours" />
+          <TimeUnit value={timeLeft.minutes} label="Minutes" />
+          <TimeUnit value={timeLeft.seconds} label="Seconds" />
+        </div>
+      )}
+      <p className="text-sm text-muted-foreground mt-4">🏏 Get your jerseys ready — the action returns soon!</p>
+    </div>
   );
 };
 
