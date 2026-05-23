@@ -168,6 +168,35 @@ app.post("/api/prediction", authenticateToken, async (req, res) => {
 });
 
 
+/* ---------- Member bid (Supabase members.amount) ---------- */
+
+app.get("/api/members/bid", authenticateToken, async (req, res) => {
+  try {
+    const email = req.user.email;
+
+    const { data: member, error } = await supabase
+      .from("members")
+      .select("name, amount")
+      .eq("email", email)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("members/bid error:", error);
+      return res.status(500).json({ error: "Failed to fetch member bid" });
+    }
+
+    if (!member) {
+      return res.status(404).json({ error: "Member not found" });
+    }
+
+    res.json({ amount: member.amount, name: member.name });
+  } catch (err) {
+    console.error("members/bid endpoint error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 /* ---------- Leaderboard DB ---------- */
 
 app.get("/api/leaderboard", async (req, res) => {

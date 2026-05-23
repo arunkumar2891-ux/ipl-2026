@@ -22,6 +22,19 @@ export const api = {
    return res.json();
  },
 
+ getMemberBid: async () => {
+   const res = await fetch(`${API_URL}/api/members/bid`, {
+     headers: getAuthHeaders(),
+   });
+   const body = await res.json();
+   if (!res.ok) {
+     throw new Error(
+       typeof body?.error === "string" ? body.error : "Failed to fetch bid amount"
+     );
+   }
+   return body as { amount: number; name: string };
+ },
+
  getLeaderboard: async () => {
    const res = await fetch(`${API_URL}/api/leaderboard`);
    return res.json();

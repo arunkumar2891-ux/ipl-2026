@@ -1,10 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { api } from "@/api/api";
-import { validateEmail } from "@/lib/utils";
 import OtpInput from "@/components/OtpInput";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { members } from "@/data/members";
 
 interface PredictionFormProps {
@@ -37,6 +35,18 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled }: PredictionFor
   const [error, setError] = useState<string | null>(null);
 
   const teams = [homeTeam, awayTeam];
+
+  const {
+    data: memberBid,
+    isLoading: bidLoading,
+    isError: bidError,
+  } = useQuery({
+    queryKey: ["memberBid", selectedEmail],
+    queryFn: api.getMemberBid,
+    enabled: otpValidated,
+    staleTime: 5 * 60 * 1000,
+  });
+
   useEffect(() => {
 	if (otp.length === 6 && !otpValidated) {
 		handleValidateOtp();
@@ -205,6 +215,20 @@ const PredictionForm = ({ matchId, homeTeam, awayTeam, disabled }: PredictionFor
 
           {otpValidated && (
             <p className="text-xs text-green-500">✅ OTP validated. You may place your bid.</p>
+          )}
+
+          {otpValidated && bidLoading && (
+            <p className="text-sm text-muted-foreground">Loading your bid amount...</p>
+          )}
+
+          {otpValidated && bidError && (
+            <p className="text-xs text-destructive">Could not load your bid amount. Please try again.</p>
+          )}
+
+          {otpValidated && memberBid != null && (
+            <p className="text-sm font-medium text-foreground rounded-lg border border-border bg-secondary/30 px-3 py-2">
+              Your bid for today&apos;s match is ₹{memberBid.amount}
+            </p>
           )}
 
           {error && <p className="text-xs text-destructive">{error}</p>}
