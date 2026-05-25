@@ -568,6 +568,22 @@ export const matchData: MatchDataItem[] = [
     "HomeTeam": "Kolkata Knight Riders",
     "AwayTeam": "Delhi Capitals",
     "Location": "Kolkata"
+  },
+   {
+    "MatchNumber": 71,
+    "DateUtc": "2026-05-26T14:00:00Z",
+    "RoundNumber": 71,
+    "HomeTeam": "Royal Challengers Bengaluru",
+    "AwayTeam": "Gujarat Titans",
+    "Location": "Dharamshala"
+  },
+  {
+    "MatchNumber": 72,
+    "DateUtc": "2026-05-27T14:00:00Z",
+    "RoundNumber": 72,
+    "HomeTeam": "Sunrisers Hyderabad",
+    "AwayTeam": "Rajasthan Royals",
+    "Location": "New Chandigarh"
   }
 ];
 
