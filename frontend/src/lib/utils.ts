@@ -61,6 +61,16 @@ export const validateEmail = (email: string): boolean => {
   }));
 };*/
 
+/** Per-match bid unit (league vs qualifiers vs final). Must match backend scoring. */
+export function getScheduledBidForMatch(matchNumber: number): number {
+  const n = Number(matchNumber);
+  if (!Number.isFinite(n)) return 20;
+  if (n >= 1 && n <= 70) return 20;
+  if (n >= 71 && n <= 73) return 50;
+  if (n === 74) return 100;
+  return 20;
+}
+
 export const aggregateBidsByMatch = (bids: any[]) => {
   const stats: Record<
     string,
@@ -70,13 +80,15 @@ export const aggregateBidsByMatch = (bids: any[]) => {
       team: string
       count: number
       totalBid: number
+      scheduledUnitBid: number
       customMetric: number
     }
   > = {}
 
   bids.forEach(({ matchNumber, group, selectedValue, bid }) => {
     const key = `${matchNumber}|${group}|${selectedValue}`
-    const bidAmount = parseFloat(bid)
+    const bidAmount = Number(bid)
+    const safeBidAmount = Number.isFinite(bidAmount) ? bidAmount : 0
 
     if (!stats[key]) {
       stats[key] = {
@@ -85,17 +97,21 @@ export const aggregateBidsByMatch = (bids: any[]) => {
         team: selectedValue,
         count: 0,
         totalBid: 0,
+        scheduledUnitBid: getScheduledBidForMatch(matchNumber),
         customMetric: 0
       }
     }
 
     stats[key].count += 1
-    stats[key].totalBid += bidAmount
+    stats[key].totalBid += safeBidAmount
   })
 
   return Object.values(stats).map(item => ({
     ...item,
-    customMetric: parseFloat((item.totalBid / 50).toFixed(2))
+    customMetric:
+      item.scheduledUnitBid > 0
+        ? parseFloat((item.totalBid / item.scheduledUnitBid).toFixed(2))
+        : 0
   }))
 };
 

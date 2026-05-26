@@ -9,8 +9,11 @@ const USER_MULTIPLIERS = {
 const round2 = (num) => Math.round(num * 100) / 100;
 
 function getBidValue(matchNum) {
-  if (matchNum > 70 && matchNum < 74) return 50;
-  if (matchNum === 74) return 100;
+  const n = Number(matchNum);
+  if (!Number.isFinite(n)) return 20;
+  if (n >= 1 && n <= 70) return 20;
+  if (n >= 71 && n <= 73) return 50;
+  if (n === 74) return 100;
   return 20;
 }
 
