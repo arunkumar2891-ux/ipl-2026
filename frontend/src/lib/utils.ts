@@ -95,7 +95,7 @@ export const aggregateBidsByMatch = (bids: any[]) => {
 
   return Object.values(stats).map(item => ({
     ...item,
-    customMetric: parseFloat((item.totalBid / 20).toFixed(2))
+    customMetric: parseFloat((item.totalBid / 50).toFixed(2))
   }))
 };
 
