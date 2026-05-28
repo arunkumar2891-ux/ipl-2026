@@ -584,6 +584,22 @@ export const matchData: MatchDataItem[] = [
     "HomeTeam": "Sunrisers Hyderabad",
     "AwayTeam": "Rajasthan Royals",
     "Location": "New Chandigarh"
+  },
+  {
+    "MatchNumber": 73,
+    "DateUtc": "2026-05-29T14:00:00Z",
+    "RoundNumber": 73,
+    "HomeTeam": "Gujarat Titans",
+    "AwayTeam": "Rajasthan Royals",
+    "Location": "New Chandigarh"
+  },
+  {
+    "MatchNumber": 74,
+    "DateUtc": "2026-06-01T14:00:00Z",
+    "RoundNumber": 74,
+    "HomeTeam": "Royal Challengers Bengaluru",
+    "AwayTeam": "TBD",
+    "Location": "Ahmedabad"
   }
 ];
 
