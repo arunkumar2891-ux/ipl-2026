@@ -595,7 +595,7 @@ export const matchData: MatchDataItem[] = [
   },
   {
     "MatchNumber": 74,
-    "DateUtc": "2026-06-01T14:00:00Z",
+    "DateUtc": "2026-05-31T14:00:00Z",
     "RoundNumber": 74,
     "HomeTeam": "Royal Challengers Bengaluru",
     "AwayTeam": "Gujarat Titans",
